@@ -12,4 +12,9 @@ Python Client Setup
 	-cd into the folder and use - sudo python setup.py install
 
 Setup BAM
+Add the local machine ip to the file <BAM_HOME>/repository/conf/data-bridge/data-bridge-config.xml
+set carbon port to 2
+Follow the instruction on readme.xml
+
 Setup AS
+deploay the war file on Application Server

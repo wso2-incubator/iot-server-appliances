@@ -16,7 +16,7 @@
 #define MAX_DISTANCE 30
 
 
-#define BATCH_SIZE 2
+#define BATCH_SIZE 4
 #define DEBUG 0
 
 
@@ -31,3 +31,4 @@ enum IP_TYPE{
 
 
 #endif
+

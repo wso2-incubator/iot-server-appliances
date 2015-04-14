@@ -17,7 +17,7 @@ long sonar;
 //thread init
 static struct pt pt1;
 float startTime=0;
-
+bool transmit=false;
 
 void setup() {
   Serial.begin(9600);
@@ -128,7 +128,8 @@ if (Serial.available()) {
 
 void timeInit(){
   startTime=millis();
-
+  Serial.print("Time Sync - Tranmit started!");
+  transmit=true;
 }
 
 
@@ -141,10 +142,12 @@ static int protothread1(struct pt *pt, int interval) {
     *  and if false the function exits after that. */
     PT_WAIT_UNTIL(pt, millis() - timestamp > interval );
     timestamp = millis(); // take a new timestamp
-    getSonar();
-  motionSense();
-  lightSense();
-  getTemperature();
+    if(transmit){
+      getSonar();
+      motionSense();
+      lightSense();
+      getTemperature();
+    }
   }
   PT_END(pt);
 }

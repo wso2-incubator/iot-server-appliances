@@ -6,7 +6,7 @@ import datetime
 
 serverIP = "localhost"
 serverPort = "9763"
-publisherEndpoint = "/WSO2ConnectedDevices_1.0.0/connected_device/pushdata"
+publisherEndpoint = "/ConnectedDevices-1.0.0/pushdata"
 
 #"/pushdata/{ip}/{owner}/{type}/{mac}/{time}/{pin}/{value}")
 deviceIP = "/192.168.1.999"
@@ -20,22 +20,23 @@ publisherEndpoint = "http://" + serverIP + ":" + serverPort + publisherEndpoint 
 bluetoothSerial = serial.Serial( "/dev/tty.HC-06-DevB", baudrate=9600 )
 bluetoothSerial.write("6"); # simple approximate time sync-- assumed latency is negligible considering sensor information
 ts = time.time()
-print "test"
+lines = bluetoothSerial.readline()
+print lines
 while True:
 	lines = bluetoothSerial.readline()
-	print lines
+	print lines+"\n"
 	sensorData=lines.split(',')
 	for line in sensorData:
 		line = line.split(':')
 		sensor = line[0]
 		value = line[1]
-		timeInSeconds = ts+float(line[2])
-		time=datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S');
+		time = ts+float(line[2])
+		#time=datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S');
 		print sensor
 		print value
 		print time
 
-		currentResource = publisherEndpoint + time+"/"+sensor + "/" + value
+		currentResource = publisherEndpoint + str(long(round(time)))+"/"+sensor + "/" + value
 		print currentResource
 	 
 		r = requests.post(currentResource)
