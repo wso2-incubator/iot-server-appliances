@@ -4,7 +4,7 @@ int motionSense(){
     Serial.print("MOTION : ");
     Serial.println(motionDetect);
   }
-  pushSensorData("MOTION:"+ String(motionDetect));
+  pushSensorData("Motion:"+ String(motionDetect));
   return motionDetect;
 }
 
@@ -15,7 +15,7 @@ int lightSense(){
     Serial.print("LIGHT : ");
     Serial.println(lightLevel);
   }
-  pushSensorData("LIGHT:"+String(lightLevel));
+  pushSensorData("LDR:"+String(lightLevel));
   return lightLevel;
 }
 
@@ -59,7 +59,8 @@ double getTemperature(){
   Serial.println(DHT.humidity, 1);
   Serial.println("-------------------------------");
   }
-  pushSensorData("TEMPERATURE:"+String(DHT.temperature));
+  pushSensorData("Temperature:"+String(DHT.temperature));
+  pushSensorData("Humidity:"+String(DHT.humidity));
   return temperature;
 }
 
@@ -96,7 +97,7 @@ if(DEBUG){
     Serial.println(inches); 
     Serial.println("-----------------------------------");
 }
-    pushSensorData("SONAR:"+ String(sonar)); 
+    pushSensorData("Sonar:"+ String(sonar)); 
 }
 
 long microsecondsToInches(long microseconds){

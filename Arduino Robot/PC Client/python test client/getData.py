@@ -36,7 +36,7 @@ while True:
 		print value
 		print time
 
-		currentResource = publisherEndpoint + str(long(round(time)))+"/"+sensor + "/" + value
+		currentResource = publisherEndpoint + str(long(round(time*1000)))+"/"+sensor + "/" + value
 		print currentResource
 	 
 		r = requests.post(currentResource)

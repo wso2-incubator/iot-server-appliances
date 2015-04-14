@@ -16,7 +16,7 @@
 #define MAX_DISTANCE 30
 
 
-#define BATCH_SIZE 4
+#define BATCH_SIZE 5
 #define DEBUG 0
 
 

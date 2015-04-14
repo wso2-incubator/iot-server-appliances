@@ -95,7 +95,7 @@ def main():
 			time = ts+float(line[2])
 			
 
-			currentResource = publisherEndpoint + str(long(round(time)))+"/"+sensor + "/" + value
+			currentResource = publisherEndpoint + str(long(round(time*1000)))+"/"+sensor + "/" + value
 			#print currentResource
 		 
 			r = requests.post(currentResource)
