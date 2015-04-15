@@ -1,7 +1,7 @@
 Arduino Setup
-1.follow the schematics
+1. Follow the schematics
 2. Download the dHt library from https://arduino-info.wikispaces.com/DHT11-Humidity-TempSensor
-3.sketch->include libary ->upload zip.
+3. Sketch->include library ->upload zip.
 4. Download the protothread library(https://code.google.com/p/arduinode/downloads/detail?name=pt.zip) and upload the zip
 
 
@@ -17,4 +17,4 @@ set carbon port to 2
 Follow the instruction on readme.xml
 
 Setup AS
-deploay the war file on Application Server
+Deploay the war file on Application Server
