@@ -10,7 +10,8 @@ int motionSense(){
 
 
 int lightSense(){
-  int lightLevel = digitalRead(LDR_PIN);
+  
+  int lightLevel = analogRead(LDR_PIN);
   if(DEBUG){
     Serial.print("LIGHT : ");
     Serial.println(lightLevel);
@@ -87,6 +88,7 @@ int getSonar()
     noTone(BUZZER);
   }
   else {
+    pushSensorData("Sonar:"+ String(cm)); 
     tone(BUZZER, BUZZER_SOUND);
    
   }
@@ -97,7 +99,7 @@ if(DEBUG){
     Serial.println(inches); 
     Serial.println("-----------------------------------");
 }
-    pushSensorData("Sonar:"+ String(sonar)); 
+    
 }
 
 long microsecondsToInches(long microseconds){

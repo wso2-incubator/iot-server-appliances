@@ -57,6 +57,14 @@ delay(25);
 }
 
 void drive_forward(){
+digitalWrite(motor_left[0], LOW); 
+digitalWrite(motor_left[1], HIGH); 
+
+digitalWrite(motor_right[0], LOW); 
+digitalWrite(motor_right[1], HIGH);  
+}
+
+void drive_backward(){
 digitalWrite(motor_left[0], HIGH); 
 digitalWrite(motor_left[1], LOW); 
 
@@ -64,26 +72,18 @@ digitalWrite(motor_right[0], HIGH);
 digitalWrite(motor_right[1], LOW); 
 }
 
-void drive_backward(){
-digitalWrite(motor_left[0], LOW); 
-digitalWrite(motor_left[1], HIGH); 
+void turn_left(){
+motor_stop();
 
 digitalWrite(motor_right[0], LOW); 
 digitalWrite(motor_right[1], HIGH); 
-}
-
-void turn_left(){
-digitalWrite(motor_left[0], LOW); 
-digitalWrite(motor_left[1], HIGH); 
 
 //digitalWrite(motor_right[0], HIGH); 
 //digitalWrite(motor_right[1], LOW);
 }
 
 void turn_right(){
-digitalWrite(motor_left[0], HIGH); 
-digitalWrite(motor_left[1], LOW); 
-
-digitalWrite(motor_right[0], LOW); 
-digitalWrite(motor_right[1], HIGH); 
+motor_stop();
+digitalWrite(motor_left[0], LOW); 
+digitalWrite(motor_left[1], HIGH);
 }
