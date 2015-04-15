@@ -3,8 +3,8 @@ Arduino Robot
 An Arduino Robot controlled via Bluetooth communication. Multiple sensors are connected to the ArduinoUNO mounted onto the Robot. The data collected by the sensors are communicated to a python client (running on a PC) via bluetooth. This client in turn publishes this data to WSO2 CEP or BAM. 
 
 Publishing the sensor data to BAM/CEP is enabled in two different ways. 
-	1: The Python client directly publishes the sensor data to the BAM/CEP Thrift-port
-    2: The Python client publishes the sensor data to BAM/CEP by making a REST call to a service endpoint deployed in a WSO2-AS instance.
+	* The Python client directly publishes the sensor data to the BAM/CEP Thrift-port
+    * The Python client publishes the sensor data to BAM/CEP by making a REST call to a service endpoint deployed in a WSO2-AS instance.
 
 Prerequisites
 --------------
