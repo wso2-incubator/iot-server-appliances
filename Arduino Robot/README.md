@@ -1,10 +1,10 @@
-Thrift Python Client
+Arduino Robot
 ====================
-Sample python library for WSO2 CEP (Complex Event Processor) and BAM (Business Activity Monitor) using thrift protocol. Configure the "PythonClient.py" file as explained below for a quick test of this library. 
+An Arduino Robot controlled via Bluetooth communication. Multiple sensors are connected to the ArduinoUNO mounted onto the Robot. The data collected by the sensors are communicated to a python client (running on a PC) via bluetooth. This client in turn publishes this data to WSO2 CEP or BAM. 
 
-The sample was borrwed from: https://github.com/dineshbandara/thrift-python-client.
-
-Modifications were done to the original code in order to accept and publish data with complex stream definitions including metadata.
+Publishing the sensor data to BAM/CEP is enabled in two different ways. 
+	1: The Python client directly publishes the sensor data to the BAM/CEP Thrift-port
+    2: The Python client publishes the sensor data to BAM/CEP by making a REST call to a service endpoint deployed in a WSO2-AS instance.
 
 Prerequisites
 --------------
