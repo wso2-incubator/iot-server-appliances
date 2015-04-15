@@ -4,8 +4,8 @@
  
 
 //motors
-int motor_left[] = {2, 3};
-int motor_right[] = {7, 8};
+int motor_left[] = {3, 2};
+int motor_right[] = {8, 7};
 
 //sensors
 //dht DHT;

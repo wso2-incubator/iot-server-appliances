@@ -10,8 +10,8 @@ bluetoothSerial = serial.Serial( "/dev/tty.HC-06-DevB", baudrate=9600 )
 
 
 serverIP = "localhost"
-serverPort = "9763"
-publisherEndpoint = "/ConnectedDevices-1.0.0/pushdata"
+serverPort = "8080"
+publisherEndpoint = "/ConnectedDevices/pushdata"
 
 #"/pushdata/{ip}/{owner}/{type}/{mac}/{time}/{pin}/{value}")
 deviceIP = "/192.168.1.999"

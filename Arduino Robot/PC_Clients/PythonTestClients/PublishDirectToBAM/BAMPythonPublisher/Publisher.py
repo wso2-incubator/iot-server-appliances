@@ -39,19 +39,22 @@ class Publisher:
    def publish(self, metaList = [], payloadList = []):
       # Build thrift event bundle
       event = EventBundle()
+      event.clearAll();
       event.setSessionId(self.sessionId) 
       event.setEventNum(1)
       event.addLongAttribute(time.time()*1000)
       event.addStringAttribute(self.streamId)
 
-      for meta in metaList:
+      for meta in metaList[:3]:
          event.addStringAttribute(meta)
          # print meta
 
+      
+      event.addLongAttribute(metaList[3])
+
       for payload in payloadList:
          event.addStringAttribute(payload)
-         # print payload
-         
+      
       # Publish
       Publisher.client.publish(event.getEventBundle())
 
@@ -71,6 +74,17 @@ class EventBundle:
    __boolAttributeList = []
    __stringAttributeList = []
    __arbitraryDataMapMap = None
+
+   def clearAll(self):
+      self.__sessionId = ""
+      self.__eventNum = 0
+      self.__intAttributeList = []
+      self.__longAttributeList = []
+      self.__doubleAttributeList = []
+      self.__boolAttributeList = []
+      self.__stringAttributeList = []
+      self.__arbitraryDataMapMap = None      
+
 
    def setSessionId(self, sessionId):
       self.__sessionId = sessionId
