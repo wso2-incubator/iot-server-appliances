@@ -75,7 +75,7 @@ void turn_right(){
 motor_stop();
 digitalWrite(motor_left[0], LOW); 
 digitalWrite(motor_left[1], HIGH); 
-unsigned long  motorStop= millis() + 300;  
+unsigned long  motorStop= millis() + TURN_DELAY;  
 while (!(motorStop<= millis())){
 //delay 300ms
 }
@@ -88,7 +88,7 @@ motor_stop();
 
 digitalWrite(motor_right[0], LOW); 
 digitalWrite(motor_right[1], HIGH); 
-unsigned long  motorStop= millis() + 300;  
+unsigned long  motorStop= millis() + TURN_DELAY;  
 while (!(motorStop<= millis())){
 //delay 300ms
 }

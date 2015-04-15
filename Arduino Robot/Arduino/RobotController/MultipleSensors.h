@@ -19,6 +19,8 @@
 #define BATCH_SIZE 5
 #define DEBUG 0
 
+#define TURN_DELAY 100
+
 
 enum IP_TYPE{
   SERVER,
