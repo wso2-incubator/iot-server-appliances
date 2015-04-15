@@ -4,8 +4,8 @@ An Arduino Robot controlled via Bluetooth communication. Multiple sensors are co
 
 Publishing the sensor data to BAM/CEP is enabled in two different ways:
 
-	* The Python client directly publishes the sensor data to the BAM/CEP Thrift-port
-    * The Python client publishes the sensor data to BAM/CEP by making a REST call to a service endpoint deployed in a WSO2-AS instance.
+	1 The Python client directly publishes the sensor data to the BAM/CEP Thrift-port
+    2 The Python client publishes the sensor data to BAM/CEP by making a REST call to a service endpoint deployed in a WSO2-AS instance.
 
 Prerequisites
 --------------
