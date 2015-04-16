@@ -19,16 +19,16 @@ Prerequisites
 
 Folder Structure
 -----------------
-* Arduino : Arduino code for Motor-Controller + Reading Sensor Input + Schematics to connect the circuits
-* PC_Clients : Python clients to connect and motion-control the robot via bluetooth, to receive sensor data and to publish these data to WSO2 BAM 
-* RestService/ConnectedDevices : Source code for the RESTService which is called by the python client to publish sensor-data to WSO2 BAM
+* **Arduino** : Arduino code for Motor-Controller + Reading Sensor Input + Schematics to connect the circuits
+* **PC_Clients** : Python clients to connect and motion-control the robot via bluetooth, to receive sensor data and to publish these data to WSO2 BAM 
+* **RestService/ConnectedDevices** : Source code for the RESTService which is called by the python client to publish sensor-data to WSO2 BAM
 
 Configurations
 ------------------
 
 Change relevant information in the respective python client file.
 
-There are two types of python clients available in the project. Please refer the *README* file inside the **Arduino Robot/PC_Clients/+** for details about it.
+There are two types of python clients available in the project. Please refer the *README* file inside the **Arduino Robot/PC_Clients/+** folder for more ndetails about it.
 
 * ip = '192.168.1.2' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # IP address of the BAM/CEP server
 * port = 7711 &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # Thrift listen port of the BAM/CEP server
