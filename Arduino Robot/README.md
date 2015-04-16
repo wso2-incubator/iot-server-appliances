@@ -28,7 +28,7 @@ Configurations
 
 Change relevant information in the respective python client file.
 
-There are two types of python clients available in the project. Please refer the *README* file inside the **Arduino Robot/PC_Clients/+** folder for more ndetails about it.
+There are two types of python clients available in the project. Please refer the ***README*** file inside the **Arduino Robot/PC_Clients/+** folder for more ndetails about it.
 
 * ip = '192.168.1.2' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # IP address of the BAM/CEP server
 * port = 7711 &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # Thrift listen port of the BAM/CEP server
@@ -40,17 +40,29 @@ Run
 
 ###### Arduino Setup
 
-	1. Follow the schematics as shown in the **robot-motor_bb.png** and the **robot-bb.png** to setup the 
-	2. Download the dHt library from https://arduino-info.wikispaces.com/DHT11-Humidity-TempSensor
-	3. Sketch -> Include Library -> Upload zip.
-	4. Download the protothread library(https://code.google.com/p/arduinode/downloads/detail?name=pt.zip) and upload the zip as explined in step 3.
+	1. Follow the schematics as shown in the "robot-motor_bb.png" & "robot-bb.png" to setup the circuitry. 
+    		(Schematics Path: /Arduino Robot/Arduino/Schematics/)
+            
+	2. Download the "dht" library for the temperature sensor from
+    		https://arduino-info.wikispaces.com/DHT11-Humidity-TempSensor
+            
+	3. Download the "protothread" library from
+    		https://code.google.com/p/arduinode/downloads/detail?name=pt.zip
+            
+	4. Upload the arduino libraries from within the Arduino IDE: 
+    		"Sketch -> Include Library -> Upload zip".
 
 
 ###### Python Client Setup
-	1.Install PySerial
-		- Whatever your operating system, download the .tar.gz install package for PySerial 
-		- uncompress
-		- cd into the folder and use - sudo python setup.py install
+	1. Install PySerial Library 
+
+		- Download the .tar.gz for "PySerial", according to your operating system and install the package for PySerial. 
+		- Uncompress the download.
+		- Move ("cd") into the folder and use - "sudo python setup.py install" in the terminal.
+        
+    2. Install the Requests Python Library
+    	- Follow the instructions given the Installation page of the Requests library:
+        	http://docs.python-requests.org/en/latest/user/install/#install
 
 ###### Setup BAM
 Add the local machine ip to the file <BAM_HOME>/repository/conf/data-bridge/data-bridge-config.xml
