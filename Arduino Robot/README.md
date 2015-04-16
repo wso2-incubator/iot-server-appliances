@@ -26,11 +26,14 @@ Folder Structure
 Configurations
 ------------------
 
-Change relevant informations in PythonClient.py
+Change relevant information in the respective python client file.
+
+There are two types of python clients available in the project. Please refer the "README" file inside the "Arduino Robot/PC_Clients/+" for details about it.
+
 * ip = '192.168.1.2'	# IP address of the BAM/CEP server
-* port = 7711		# Thrift listen port of the BAM/CEP server
-* username = 'admin'	# username
-* password = 'admin' 	# password 
+* port = 7711			# Thrift listen port of the BAM/CEP server
+* username = 'admin'	# username to connect to the BAM/CEP
+* password = 'admin' 	# password to connect to the BAM/CEP
 
 Run
 ------------
