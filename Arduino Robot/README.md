@@ -60,6 +60,7 @@ Run
 ###### Setup BAM
 	* Add the local machine ip to the file:
     		<BAM_HOME>/repository/conf/data-bridge/data-bridge-config.xml
+            
 	* Set port offset to 2 in the "carbon.xml" file:
     		<Ports>
         		<Offset>2</Offset>
@@ -87,6 +88,7 @@ Run
 		- Move ("cd") into the folder and use - "sudo python setup.py install" in the terminal.
         
     2. Install the Requests Python Library (Only required if publishing sensor-data via call to REST Endpoint)
+    
     	- Follow the instructions given the Installation page of the Requests library:
         	http://docs.python-requests.org/en/latest/user/install/#install
  
