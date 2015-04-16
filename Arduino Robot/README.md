@@ -30,8 +30,8 @@ Change relevant information in the respective python client file.
 
 There are two types of python clients available in the project. Please refer the "README" file inside the "Arduino Robot/PC_Clients/+" for details about it.
 
-* ip = '192.168.1.2' &nbsp; &nbsp; &nbsp; # IP address of the BAM/CEP server
-* port = 7711 &nbsp; &nbsp; &nbsp; # Thrift listen port of the BAM/CEP server
+* ip = '192.168.1.2' &nbsp; &nbsp; &nbsp; &nbsp; # IP address of the BAM/CEP server
+* port = 7711 &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; # Thrift listen port of the BAM/CEP server
 * username = 'admin' &nbsp; &nbsp; &nbsp; # username to connect to the BAM/CEP
 * password = 'admin' &nbsp; &nbsp; &nbsp; # password to connect to the BAM/CEP
 
