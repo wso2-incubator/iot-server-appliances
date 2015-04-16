@@ -20,8 +20,8 @@ Prerequisites
 Folder Structure
 -----------------
 * Arduino : Arduino code for Motor-Controller + Reading Sensor Input + Schematics to connect the circuits
-* PC_Clients : Set of Python packages provided by Thrift. Can be found at [THRIFT_SOURCE]/lib/py/src
-* RestService/ConnectedDevices : Source code generated via Thrift compiler for relevent Thrift files
+* PC_Clients : Python clients to connect and motion-control the robot via bluetooth, to receive sensor data and to publish these data to WSO2 BAM 
+* RestService/ConnectedDevices : Source code for the RESTService which is called by the python client to publish sensor-data to WSO2 BAM
 
 Configurations
 ------------------
