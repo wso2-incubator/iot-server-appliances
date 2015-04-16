@@ -10,12 +10,18 @@ Publishing the sensor data to BAM/CEP is enabled in two different ways:
 Prerequisites
 --------------
 
-* Python 2.x
+* Robot Base + Gear Motors + Wheels + BatteryPack
+* Arduino-to-Motor power amplifier IC
+* ArduinoUNO 
+* Arduino Sensor Sheilds (Sonar + LDR + PIR + GAS + DHT-Temperature)
+* Arduino Bluetooth Sheild
+* Python 2.7
 
 Folder Structure
 -----------------
-* gen-py : Source code generated via Thrift compiler for relevent Thrift files
-* thrift : Set of Python packages provided by Thrift. Can be found at [THRIFT_SOURCE]/lib/py/src
+* Arduino : Arduino code for Motor-Controller + Reading Sensor Input + Schematics to connect Sensors-Arduino-IC Aplifier
+* PC_Clients : Set of Python packages provided by Thrift. Can be found at [THRIFT_SOURCE]/lib/py/src
+* RestService/ConnectedDevices : Source code generated via Thrift compiler for relevent Thrift files
 
 Configurations
 ------------------
