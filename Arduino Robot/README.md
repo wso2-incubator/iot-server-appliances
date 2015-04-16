@@ -19,7 +19,7 @@ Prerequisites
 
 Folder Structure
 -----------------
-* Arduino : Arduino code for Motor-Controller + Reading Sensor Input + Schematics to connect Sensors-Arduino-IC Aplifier
+* Arduino : Arduino code for Motor-Controller + Reading Sensor Input + Schematics to connect the circuits
 * PC_Clients : Set of Python packages provided by Thrift. Can be found at [THRIFT_SOURCE]/lib/py/src
 * RestService/ConnectedDevices : Source code generated via Thrift compiler for relevent Thrift files
 
