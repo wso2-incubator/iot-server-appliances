@@ -11,4 +11,7 @@
         
 * **Schematics** : Schematic diagrams to connect the circuitry.
 
+		- robot-motor_bb.png: Schematic diagram to connect Arduino with motor-current amplifier IC
+        
+        - robot_bb.png: Complete schematic diagram of the setup including sensors, arduino and the amplifier IC
 
