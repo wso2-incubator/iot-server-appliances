@@ -18,18 +18,17 @@ For the second scenario ofcourse a running instance of the WSO2-AS is required a
 
 ### Folder Structure
 -----------------
-* **PythonTestClients** : Seperate test clients to test each of the two main operations mentioned above:
+* **PythonTestClients** : *Seperate test clients to test each of the two main operations mentioned above:*
 	- **sendControl.py**: Test motion control of the robot according to signals sent from the keyboard.
-	- PublishDirectToBAM: Test client & required libraries to recieve and publish sensor-data (from the robot) directly to BAM
-    - PublishViaRESTEndPoint: Test client to recieve and publish sensor-data to BAM by a REST call to the service in WSO2-AS
+	- **PublishDirectToBAM**: Test client & required libraries to recieve and publish sensor-data (from the robot) directly to BAM
+    - **PublishViaRESTEndPoint**: Test client to recieve and publish sensor-data to BAM by a REST call to the service in WSO2-AS
     
-* **PythonRobotController** : Complete Arduino Sketch with the necessary files to upload to the Arduino board.
+* **PythonRobotController** : *Final python client to be run with both robot operations put together:*
 
-		- MultipleSensors.h: Header file with "Sensor-Pin" details and constants.
+		- **DirectPublishClient**: Final client with sensor-data being directly published to WSO2-BAM
         
-        - Sensors.ino: Arduino code with methods that return readings from the sensors.
-        
-        - RobotController.ino: Main arduino code with the setup() and loop() methods which receives motor controls from the python client and sends back the sensor readings.
+        - **RESTPublishClient**: Final client with sensor-data being published via a REST call to the service at WSO2-AS
+
         
 
 
