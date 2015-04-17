@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="WSO2DevicePlatform:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="WSO2DevicePlatform-1.0.0.war">
+      <element id="artifact" artifact-name="WSO2DevicePlatform:war exploded" />
+    </root>
+  </artifact>
+</component>
