@@ -33,16 +33,19 @@ For the second scenario ofcourse a running instance of the WSO2-AS is required a
 #### Configurations
 -----------------
 * **REST based client** : 
-	- *serverIP*: IP of the machine in which the WSO2-AS instance is running  
+	- *serverIP* : ip of the machine in which the WSO2-AS instance is running
     
-	- *serverPort*: WSO2-AS HTTPListener port. (default - 9763)
-    - *[OPTIONAL]*: Provide appropiate values for the following parameters:
+    			- WSO-BAM also needs to be running on the same ip. If not the source code of the REST-Endpoint needs to be changed
+    
+	- *serverPort* : WSO2-AS HTTPListener port. (default - 9763)
+    - *[OPTIONAL]* : Provide appropiate values for the following parameters:
     
     			-	deviceIP, deviceOwner, deviceType, deviceMAC
     
-* **Direct publisher client** : *Final python client to be run with both robot operations put together:*
-	- **DirectPublishClient**: Final client with sensor-data being directly published to WSO2-BAM.
-    - **RESTPublishClient**: Final client with sensor-data being published via a REST call to the service at WSO2-AS.
+* **Direct publisher client** : 
+	- *BAM_IP* : ip of the machine in which the WSO2-BAM instance is running  
+    
+	- *BAM_PORT* : WSO2-BAM Thrift Listener port. (default - 7713 with port offset set to 2)
 
 
         
