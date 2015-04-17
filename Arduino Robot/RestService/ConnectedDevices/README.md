@@ -8,7 +8,9 @@ This is JAX-RS project with a service endpoint to be called by any external clie
 Simply download the project, build it and deploy the generated *.war* file in a running instance of the WSO2-AS and make the appropiate configurations in the python client.
 
 1. *Download the project folder*
+
 2. *Navigate into it via the terminal and do a "mvn install"*
+
 3. *Deploy the generated .war file into WSO2-AS* 
 
 		- (WSO2 AS: https://docs.wso2.com/display/AS520/Deploying+JAX-WS+and+JAX-RS+Applications)
