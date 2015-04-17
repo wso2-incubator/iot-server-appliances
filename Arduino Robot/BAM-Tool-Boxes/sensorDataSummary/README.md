@@ -10,7 +10,8 @@ Get a broader understanding of configuring WSO2-BAM to publish data by reading t
 
 ### How To
 
-* Add a new datasource by the name **WSO2_IOT_DB** to the "master-datasources.xml" of WSO2-BAM found in {WSO2BAM_HOME}/repository/conf/datasources/
+* Add a new datasource by the name **WSO2_IOT_DB** to the *master-datasources.xml* of WSO2-BAM found in **{WSO2BAM_HOME}/repository/conf/datasources/**
+	- You can copy paste the **WSO2_IOT_DB** datasource definition from the file ***db_configs.xml*** given above. 
 
 * Install the toolbox "IoT_Devices_Analytics.tbox" from the WSO2-BAM Management Console UI. If not the dashboard will not appear.
 
