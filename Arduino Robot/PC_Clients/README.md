@@ -19,8 +19,8 @@ For the second scenario ofcourse a running instance of the WSO2-AS is required a
 ### Folder Structure
 -----------------
 * **PythonTestClients** : Seperate test clients to test each of the two main operations mentioned above:
-	- sendControl.py: Test motion control of the robot according to signals sent from the keyboard.
-	- PublishDirectToBAM: Test client to recieve and publish sensor-data (from the robot) directly to BAM
+	- **sendControl.py**: Test motion control of the robot according to signals sent from the keyboard.
+	- PublishDirectToBAM: Test client & required libraries to recieve and publish sensor-data (from the robot) directly to BAM
     - PublishViaRESTEndPoint: Test client to recieve and publish sensor-data to BAM by a REST call to the service in WSO2-AS
     
 * **PythonRobotController** : Complete Arduino Sketch with the necessary files to upload to the Arduino board.
