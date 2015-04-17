@@ -2,6 +2,7 @@
 -----------------
 
 These are the python clients used for the two main operations relating to the robot: 
+
 	* Motion(Motor) controlling
     * Receive sensor-data and publish to BAM.
 
