@@ -24,10 +24,9 @@ For the second scenario ofcourse a running instance of the WSO2-AS is required a
     - **PublishViaRESTEndPoint**: Test client to recieve and publish sensor-data to BAM by a REST call to the service in WSO2-AS
     
 * **PythonRobotController** : *Final python client to be run with both robot operations put together:*
-
-		- **DirectPublishClient**: Final client with sensor-data being directly published to WSO2-BAM
+	- **DirectPublishClient**: Final client with sensor-data being directly published to WSO2-BAM
         
-        - **RESTPublishClient**: Final client with sensor-data being published via a REST call to the service at WSO2-AS
+    - **RESTPublishClient**: Final client with sensor-data being published via a REST call to the service at WSO2-AS
 
         
 
