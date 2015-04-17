@@ -33,11 +33,10 @@ For the second scenario ofcourse a running instance of the WSO2-AS is required a
 #### Configurations
 -----------------
 * **REST based client** : 
-	- **serverIP**: IP of the machine in which the WSO2-AS instance is running
+	- *serverIP*: IP of the machine in which the WSO2-AS instance is running   
+	- *serverPort*: WSO2-AS HTTPListener port. (default - 9763)
+    - *[OPTIONAL]*: Provide appropiate values for the following parameters:
     
-	- **serverPort**: WSO2-AS HTTPListener port. (default - 9763)
-    
-    - **[OPTIONAL]**: Provide appropiate values for the following parameters:
     			-	deviceIP, deviceOwner, deviceType, deviceMAC
     
 * **Direct publisher client** : *Final python client to be run with both robot operations put together:*
