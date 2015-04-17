@@ -1,7 +1,0 @@
-How to:
---------
-
-1) Add the datasource WSO2_IOT_DB to the master-datasources.xml of BAM
-2) Be sure to install the toolbox from the UI. Otherwise the dashboard won't appear.
-4) Open the attached Client WSO2DevicePlatform-2.0.0.zip with IDE and run it, to propergate the sample data.
-5) Go to the portal section under gadgets to view the dashboard
