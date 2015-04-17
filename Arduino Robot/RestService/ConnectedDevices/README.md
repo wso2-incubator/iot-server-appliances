@@ -10,6 +10,7 @@ Simply download the project, build it and deploy the generated *.war* file in a 
 1. *Download the project folder*
 2. *Navigate into it via the terminal and do a "mvn install"*
 3. *Deploy the generated .war file into WSO2-AS* 
+
 		- (WSO2 AS: https://docs.wso2.com/display/AS520/Deploying+JAX-WS+and+JAX-RS+Applications)
 
 
