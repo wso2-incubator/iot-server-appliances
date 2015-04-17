@@ -20,13 +20,14 @@ For the second scenario ofcourse a running instance of the WSO2-AS is required a
 -----------------
 * **PythonTestClients** : *Seperate test clients to test each of the two main operations mentioned above:*
 	- **sendControl.py**: Test motion control of the robot according to signals sent from the keyboard.
-	- **PublishDirectToBAM**: Test client & required libraries to recieve and publish sensor-data (from the robot) directly to BAM
-    - **PublishViaRESTEndPoint**: Test client to recieve and publish sensor-data to BAM by a REST call to the service in WSO2-AS
+    
+	- **PublishDirectToBAM**: Test client & required libraries to recieve and publish sensor-data (from the robot) directly to BAM.
+    
+    - **PublishViaRESTEndPoint**: Test client to recieve and publish sensor-data to BAM by a REST call to the service in WSO2-AS.
     
 * **PythonRobotController** : *Final python client to be run with both robot operations put together:*
-	- **DirectPublishClient**: Final client with sensor-data being directly published to WSO2-BAM
-        
-    - **RESTPublishClient**: Final client with sensor-data being published via a REST call to the service at WSO2-AS
+	- **DirectPublishClient**: Final client with sensor-data being directly published to WSO2-BAM.
+    - **RESTPublishClient**: Final client with sensor-data being published via a REST call to the service at WSO2-AS.
 
         
 
