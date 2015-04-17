@@ -15,7 +15,7 @@ Simply download the project, build it and deploy the generated *.war* file in a 
 
 		- (WSO2 AS: https://docs.wso2.com/display/AS520/Deploying+JAX-WS+and+JAX-RS+Applications)
 
-$. *Configure the python client with the appropiate network parameters* 
+4. *Configure the python client with the appropiate network parameters* 
 
 
 
