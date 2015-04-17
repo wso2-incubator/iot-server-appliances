@@ -3,9 +3,10 @@
 
 This page provides the necessary utilities to setup WSO2 BAM to generate statistics from the sensor-data published to its datastore via the python client.
 
-Get a broader understanding of configuring WSO2-BAM to publish data by reading the documentation in the following link:
+Get a broader understanding of configuring WSO2-BAM to publish data by reading the documentation in the following links:
 
-		- [(The link provides the configurations for WSO2-APIM with WSO2-BAM to receive and view APIM data)] https://docs.wso2.com/display/AM180/Publishing+API+Runtime+Statistics
+		- The link provides the configurations for WSO2-APIM with WSO2-BAM to receive and view APIM data
+		https://docs.wso2.com/display/AM180/Publishing+API+Runtime+Statistics
 
 ### Configurations
 -----------------
