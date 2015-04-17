@@ -5,8 +5,8 @@ This page provides the necessary utilities to setup WSO2 BAM to generate statist
 
 Get a broader understanding of configuring WSO2-BAM to publish data by reading the documentation in the following links:
 
-		- The link provides the configurations for WSO2-APIM with WSO2-BAM to receive and view APIM data
-		https://docs.wso2.com/display/AM180/Publishing+API+Runtime+Statistics
+		- This link provides the configurations for WSO2-APIM with WSO2-BAM to receive and view APIM data
+			https://docs.wso2.com/display/AM180/Publishing+API+Runtime+Statistics
 
 ### Configurations
 -----------------
