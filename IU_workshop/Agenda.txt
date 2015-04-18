@@ -57,26 +57,9 @@ Competition Time
 Wrap up
 -       Recap of workshop
 -       Possible extensions
-o   Alternatives to Bluetooth
-o   More use of WSO2 Platform
-§  Message Mediation
-§  APIs
-§  Security
-o   Different Types of Robots
--       Welcome to Sri Lanka
-o   Airbnb
--       Internship selection criteria
--       Awards
-
-
-
-
-ToDo
--       MSc Student NuwanD interviewed. Tell he/she we are only considering undergrads for internships
--       Get a list of preferred candidates for internship
--       Everyone present from WSO2 (Ruwan, Nuwan, Nipun, Pramila, Maryam) to have a chat with everyone applied (give a rating 1 to 5)
--       Check Internet connectivity for all participants
--       Monitor & drive social media participation
--       Short videos on workshop feedback & WSO2
--       Prepare packages to distribute
--       Solder motor pins
+-       Alternatives to Bluetooth
+-       More use of WSO2 Platform
+-       Message Mediation
+-       APIs
+-       Security
+-       Different Types of Robots
