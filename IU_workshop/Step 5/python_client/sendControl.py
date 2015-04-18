@@ -1,7 +1,7 @@
 #! /usr/bin/python
 import serial
 import time
-bluetoothSerial = serial.Serial( "/dev/ttyACM1", baudrate=9600 )
+bluetoothSerial = serial.Serial( "/dev/ttyACM0", baudrate=9600 )
 
 
 import termios, fcntl, sys, os
