@@ -16,6 +16,7 @@ Get a broader understanding of configuring WSO2-BAM to publish data by reading t
 * Install the toolbox **IoT_Devices_Analytics.tbox** from the WSO2-BAM Management Console UI. If not the dashboard will not appear.
 
 * ***[For testing purposes where there are no real sensor data published to BAM yet]***
-	-	Open the attached Client **WSO2DevicePlatform-2.0.0.zip** with IDE and run it, to propergate and publish some sample data to BAM.
+	- Extract attached Client **WSO2DevicePlatform-2.0.0.zip** 
+	- execute "java -jar target/WSO2DevicePlatform-1.0.0-jar-with-dependencies.jar" in side /device-cloud-appliances/WSO2DevicePlatform-1.0.0
 
 * Go to the portal section under gadgets to view the dashboard.
