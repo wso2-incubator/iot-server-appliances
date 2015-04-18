@@ -11,11 +11,11 @@ import serial
 import time
 import datetime
 
-BAM_IP = '10.100.7.37'					# IP address of the BAM/CEP server
+BAM_IP = 'localhost'					# IP address of the BAM/CEP server
 BAM_PORT = 7713							# Thrift listen port of the server
 BAM_UNAME = 'admin'						# Username to connect to server
 BAM_PASSWRD = 'admin' 					# Passowrd to connect to server
-BT_PORT = "/dev/tty.HC-06-DevB"			# Port to which the Bluetooth Device is bound
+BT_PORT = "/dev/rfcomm1"			# Port to which the Bluetooth Device is bound
 
 
 publisher = Publisher()

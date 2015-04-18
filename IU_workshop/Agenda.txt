@@ -1,0 +1,82 @@
+Agenda
+Welcome
+-       What we are going to do
+-       Introduce WSO2 Team
+-       Get to know IU team
+-       WSO2 – Brief Introduction
+Step 1: Introduction to Arduino Family
+-       Uno Board
+-       Install Arduino Studio
+Step 2: Simple project
+-       On board LED blink
+-       External LED blink
+-       PIR and Buzzer
+ 
+Step 3 : Assemble robot chassis
+-       Introduction to parts
+-       Power up and run (MotorTest)
+ 
+Step 4 : Control robot
+-       Introduce motor drivers & L293D
+-       Assemble motor driver
+-       Write Arduino sketch
+-       Smoke Test (test for control signals going out of Arduino)
+-       Connect to circuit
+ 
+Step 5 :Controlling Robot via Bluetooth
+-       Bluetooth shield
+-       Configuring laptops for Bluetooth
+ 
+Step 6 :Sensors
+-       Introduction
+-       Configuring LDR
+-       Configuring PIR
+ 
+Step 7 :WSO2 Platform
+-       Overview
+-       Business Activity Monitor (BAM) – Introduction
+-       Complex Event Processor (CEP) – Introduction
+-       Pushing sensor data to BAM
+-       Analyzing and Visualizing
+ 
+Step 8 :Sensors – continued
+-       Sonar
+-       Buzzer
+-       What’s missing?
+-       Pushing sensor data to BAM
+-       Analyzing and Visualizing
+ 
+Competition Time
+-       Best visualization
+-       Fastest robot build up
+-       Robot race
+-       Robot dance
+-       Best looking robot
+
+
+Wrap up
+-       Recap of workshop
+-       Possible extensions
+o   Alternatives to Bluetooth
+o   More use of WSO2 Platform
+§  Message Mediation
+§  APIs
+§  Security
+o   Different Types of Robots
+-       Welcome to Sri Lanka
+o   Airbnb
+-       Internship selection criteria
+-       Awards
+
+
+
+
+ToDo
+-       MSc Student NuwanD interviewed. Tell he/she we are only considering undergrads for internships
+-       Get a list of preferred candidates for internship
+-       Everyone present from WSO2 (Ruwan, Nuwan, Nipun, Pramila, Maryam) to have a chat with everyone applied (give a rating 1 to 5)
+-       Check Internet connectivity for all participants
+-       Monitor & drive social media participation
+-       Short videos on workshop feedback & WSO2
+-       Prepare packages to distribute
+-       Solder motor pins

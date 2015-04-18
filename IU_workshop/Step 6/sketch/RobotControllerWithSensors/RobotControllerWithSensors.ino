@@ -145,9 +145,9 @@ static int protothread1(struct pt *pt, int interval) {
     timestamp = millis(); // take a new timestamp
     if(transmit){
       getSonar();
-      motionSense();
-      lightSense();
-      getTemperature();
+//      motionSense();
+//      lightSense();
+//      getTemperature();
     }
   }
   PT_END(pt);

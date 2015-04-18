@@ -18,7 +18,7 @@ BAM_IP = 'localhost'					# IP address of the BAM/CEP server
 BAM_PORT = 7713							# Thrift listen port of the server
 BAM_UNAME = 'admin'						# Username to connect to server
 BAM_PASSWRD = 'admin' 					# Passowrd to connect to server
-BT_PORT = "/dev/rfcomm1"			# Port to which the Bluetooth Device is bound
+BT_PORT = "/dev/ttyACM1"			# Port to which the Bluetooth Device is bound
 
 
 bluetoothSerial = serial.Serial( BT_PORT, baudrate=9600 )
@@ -85,12 +85,13 @@ def getControl( threadName, delay):
 
 
 def main():
-
+	print "Main Started";
 	bluetoothSerial.write("6"); # simple approximate time sync-- assumed latency is negligible considering sensor information
 	global time
-	ts = time.time()
-	lines = bluetoothSerial.readline()
-	print lines
+	ts = time.time();
+	print "Reached 1";
+#	lines = bluetoothSerial.readline()
+#	print lines
 	try:
 		print "Started waiting for time sync"
 		thread.start_new_thread( getControl, ("Thread", 2, ) )

@@ -1,30 +1,12 @@
-#include "MultipleSensors.h"
-#include <dht.h>
-#include <pt.h> 
 #define TURN_DELAY 100
- 
 
-//motors
+//Motor Pin configurations
 int motor_left[] = {3, 2};
 int motor_right[] = {8, 7};
 
-//sensors
-//dht DHT;
-int motionDetect, lightLevel, gasValue;
-double temperature;
-long sonar;
-
-
-//thread init
-static struct pt pt1;
-float startTime=0;
-bool transmit=false;
-
 void setup() {
-  Serial.begin(9600);
-    pinMode(PIR_PIN, INPUT);
-  PT_INIT(&pt1);
-  int i;
+Serial.begin(9600);
+int i;
 for(i = 0; i < 2; i++){
 pinMode(motor_left[i], OUTPUT);
 pinMode(motor_right[i], OUTPUT);
@@ -32,10 +14,10 @@ pinMode(motor_right[i], OUTPUT);
 }
 
 void loop() { 
-  
+//  if (Serial.available()) {
+//    Serial.write("Serial is available!!!!");
+//  }
   drive();
-  protothread1(&pt1, 1000);
-  
 }
 
 
@@ -99,58 +81,27 @@ motor_stop();
 void drive(){
 if (Serial.available()) {
           int motion = Serial.parseInt();
+
           
           switch(motion){
              case 1 : 
+                      Serial.write(" GOING FORWARD ");
                       drive_forward();
-                      
                        break;
              case 2 : drive_backward();
-                      
+                     Serial.write(" GOING BACK ");
                        break;
              case 3 : turn_left();
-                      
+                      Serial.write(" GOING LEFT");
                        break;
              case 4 : turn_right();
-                  
+                      Serial.write(" GOING RIGHT");
                        break;
-             case 6 : timeInit();
-                  
-                       break;
-                       
              default : 
                       motor_stop();
-                       break;
-          
+                       break;     
           }
     }
-
-}
-
-void timeInit(){
-  startTime=millis();
-  Serial.print("Time Sync - Tranmit started!");
-  transmit=true;
-}
-
-
-static int protothread1(struct pt *pt, int interval) {
-  static unsigned long timestamp = 0;
-  PT_BEGIN(pt);
-  while(1) { // never stop 
-    /* each time the function is called the second boolean
-    *  argument "millis() - timestamp > interval" is re-evaluated
-    *  and if false the function exits after that. */
-    PT_WAIT_UNTIL(pt, millis() - timestamp > interval );
-    timestamp = millis(); // take a new timestamp
-    if(transmit){
-      getSonar();
-      motionSense();
-      lightSense();
-      getTemperature();
-    }
-  }
-  PT_END(pt);
 }
 
 
