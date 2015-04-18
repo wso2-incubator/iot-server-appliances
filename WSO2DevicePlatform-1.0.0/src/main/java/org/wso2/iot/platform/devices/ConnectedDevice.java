@@ -35,7 +35,7 @@ public class ConnectedDevice {
 
     // static final String mqttEndpoint = "tcp://localhost:1883";
 //	static final String mqttEndpoint = "tcp://192.168.1.216:1883";
-    static final String dataStoreEndpoint = "tcp://172.16.3.212:7613";
+    static final String dataStoreEndpoint = "tcp://"+System.getProperty("machine.ip")+":7613";
     static final String dataStoreUsername = "admin";
     static final String dataStorePassword = "admin";
 
@@ -306,7 +306,7 @@ public class ConnectedDevice {
                         TestObject.pushData("localhost", "arduino", "smean", "123456", sensorData[i], System.currentTimeMillis(),
                                             String.valueOf(randomInt),
                                             ""));
-                System.out.println("test");
+                System.out.println(dataStoreEndpoint);
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
