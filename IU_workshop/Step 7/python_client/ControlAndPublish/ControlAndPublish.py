@@ -23,6 +23,10 @@ BT_PORT = "/dev/ttyACM1"			# Port to which the Bluetooth Device is bound
 
 bluetoothSerial = serial.Serial( BT_PORT, baudrate=9600 )
 
+#while True:
+#	print bluetoothSerial.readline()
+
+
 publisher = Publisher()
 
 # Initialize publisher with ip and port of server
@@ -85,13 +89,15 @@ def getControl( threadName, delay):
 
 
 def main():
-	print "Main Started";
+#	print "Main Started";
 	bluetoothSerial.write("6"); # simple approximate time sync-- assumed latency is negligible considering sensor information
 	global time
 	ts = time.time();
-	print "Reached 1";
-#	lines = bluetoothSerial.readline()
-#	print lines
+#	print "Reached 1";
+
+	lines = bluetoothSerial.readline()
+	print "Time Sync--"
+	lines =""
 	try:
 		print "Started waiting for time sync"
 		thread.start_new_thread( getControl, ("Thread", 2, ) )
@@ -101,9 +107,12 @@ def main():
 	print "Robot Motion [Use Arrow Keys, Brake- Any other except arrows]"
 	while True:
 		lines = bluetoothSerial.readline()
-		print lines+"\n"
+#		print lines+"\n"
 		sensorData=lines.split(',')
 		for line in sensorData:
+#			print line
+#			if not(line.find("Time")):
+#			print line
 			line = line.split(':')
 			sensor = line[0]
 			value = line[1]
@@ -111,10 +120,10 @@ def main():
 			
 
 			myPublisher.setPublishStream(time, sensor, value)
-			# print myPublisher.metaData
-			# print myPublisher.payloadData
-		 
-			# Publish message
+		# print myPublisher.metaData
+		# print myPublisher.payloadData
+	 
+		# Publish message
 			publisher.publish(myPublisher.metaData, myPublisher.payloadData)
 	
 	# Disconnect
