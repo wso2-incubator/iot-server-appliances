@@ -32,7 +32,12 @@ import time
 from threading import Timer
 import sys
 from ddbrowser import *
+import modules.kernel_utils as kernel_utils
 import logging
+import colorstreamhandler
+
+logging.basicConfig(level=logging.DEBUG)
+LOGGER = logging.getLogger('org.wso2.iot.dd.raspi.resource_types')
 
 """
 This method returns implementing class for specific browserTypes.
@@ -59,15 +64,15 @@ def _open_browser(url_, webbrowser_, path_=""):
 	return browser_instance.open(url_)
 
 def _start_server(_path, port = "8000"):
-	httpd = subprocess.Popen(["python",  os.path.join(os.getcwd(),"modules", "httpserver.py"), _path, port], close_fds=True, preexec_fn=_get_sid())
+	httpd = subprocess.Popen(["python",  os.path.join(kernel_utils.modules_path, "httpserver.py"), _path, port], close_fds=True, preexec_fn=_get_sid())
 	return httpd
 
 def _kill_process(process, time_=None):
 	if not (time_):
-		logging.debug("killing :" + str(process.pid))
+		LOGGER.debug("killing :" + str(process.pid))
 		process.kill()
 	else:
-		logging.debug("killing sheduled")
+		LOGGER.debug("killing sheduled")
 		t = Timer(time_, _kill_process, [process])
 		t.start()
 
@@ -116,16 +121,17 @@ class ResourceTypeFolder(ResourceTypeBase):
 			elif arg[0] == "@path":
 				self.path = arg[1]
 	def run(self, args):
-		logging.debug("folder: run()")
+		LOGGER.debug("folder: run()")
 		webbrowser_ = args['browser']
 		port = args['port']
 		bpath_ = args['bpath']
 		self.server = _start_server(self.path, port)
+		LOGGER.debug("opening: http://localhost:"+port)
 		self.browser = _open_browser("http://localhost:"+port, webbrowser_, bpath_)
 	def stop(self, args):
-		logging.debug("folder: stop()")
+		LOGGER.debug("folder: stop()")
 		self.server.kill()
-		_kill_process(self.browser, 5)
+		_kill_process(self.browser, 10)
 
 """
 Implementation class for `Page` resource type.
@@ -139,13 +145,14 @@ class ResourceTypePage(ResourceTypeBase):
 			elif arg[0] == "@path":
 				self.path = arg[1]
 	def run(self, args):
-		logging.debug("page: run()")
+		LOGGER.debug("page: run()")
 		webbrowser_ = args['browser']
 		bpath_ = args['bpath']
+		LOGGER.debug("opening: "+self.path)
 		self.browser =_open_browser(self.path, webbrowser_, bpath_)
 	def stop(self, args):
-		logging.debug("page: stop()")
-		_kill_process(self.browser, 5)
+		LOGGER.debug("page: stop()")
+		_kill_process(self.browser, 10)
 
 """
 Implementation class for `URL` resource type.
@@ -160,14 +167,15 @@ class ResourceTypeUrl(ResourceTypeBase):
 				self.url = arg[1]
 
 	def run(self, args):
-		logging.debug("url: run()")
+		LOGGER.debug("url: run()")
 		webbrowser_ = args['browser']
 		bpath_ = args['bpath']
+		LOGGER.debug("opening: "+self.url)
 		self.browser =_open_browser(self.url, webbrowser_, bpath_)
 
 	def stop(self, args):
-		logging.debug("url: stop()")
-		_kill_process(self.browser, 5)
+		LOGGER.debug("url: stop()")
+		_kill_process(self.browser, 10)
 
 """
 Implementation class for `IFrame` resource type.
@@ -181,9 +189,6 @@ class ResourceTypeIFrame(ResourceTypeBase):
 			elif arg[0] == "@url":
 				self.url = arg[1]
 	def run(self, args):
-		logging.debug("iframe: run()")
+		LOGGER.debug("iframe: run()")
 	def stop(self, args):
-		logging.debug("iframe: stop()")
-		
-#print 'Subclass:', issubclass(ResourceTypeIFrame, ResourceTypeBase)
-#print 'Instance:', isinstance(ResourceTypeIFrame(), ResourceTypeBase)
+		LOGGER.debug("iframe: stop()")

@@ -20,8 +20,26 @@
 import os
 import SimpleHTTPServer
 import SocketServer
-import logging
+import socket
+import errno
+import kernel_utils as kernel_utils
 import sys
+import logging
+import colorstreamhandler
+import subprocess
+
+logging.basicConfig(level=logging.DEBUG)
+LOGGER = logging.getLogger('org.wso2.iot.dd.raspi.httpserver')
+
+class DDHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_my_headers()
+        SimpleHTTPServer.SimpleHTTPRequestHandler.end_headers(self)
+
+    def send_my_headers(self):
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
 
 """
 This module is intended to run through python commandline.
@@ -35,16 +53,29 @@ if(arg_length>=2):
 if(arg_length>=3):
 	port = int(sys.argv[2])
 
+LOGGER.debug("path:" + sys.argv[1])
+LOGGER.debug("port:" + sys.argv[2])
+
 if(path):
-	logging.info("Changing path to "+path)
+	LOGGER.debug("Changing path to: "+path)
 	try:
+		os.chdir(kernel_utils.content_path)
 		os.chdir(path)
 	except OSError, e:
 		if e.errno == 2:
-			logging.warning("File/Folder does not exist...!")
+			LOGGER.warning("`" + kernel_utils.content_path + os.sep + path + "` does not exist...!")
 
-SocketServer.TCPServer.allow_reuse_address = True
-Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-httpd = SocketServer.TCPServer(("", port), Handler)
-logging.info("Serving at port" + str(port))
-httpd.serve_forever()
+def start_server():
+	SocketServer.TCPServer.allow_reuse_address = True
+	Handler = DDHTTPRequestHandler
+	httpd = SocketServer.TCPServer(("", port), Handler)
+	LOGGER.info("Serving at port" + str(port))
+	httpd.serve_forever()
+
+try:
+	start_server()
+except socket.error as e:
+	print e.errno
+	if e.errno == errno.EADDRINUSE:
+		subprocess.Popen("ps aux | grep '[h]ttpserver.py' | awk '{print $2}' | xargs kill", shell=True)
+		start_server()

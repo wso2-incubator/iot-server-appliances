@@ -21,42 +21,22 @@
 from modules.xmltodict import *
 import sys
 from modules.resource_types import *
-import re
 import time
 import webbrowser
+import modules.version_control as version_control
+import modules.kernel_utils as kernel_utils
+import os
+from threading import Thread
 import logging
+import modules.colorstreamhandler
+
+logging.basicConfig(level=logging.DEBUG)
+LOGGER = logging.getLogger('org.wso2.iot.dd.raspi.server')
+
+##########################Read the Configurations##########################
 
 class ConfigError(Exception):
     pass
-
-def get_seconds(str_):
-	#re.findall('[0-9]*[dhms]\\b',"1d 2h 3m 4s")
-	sec = 0
-	splitted_list = re.findall('[0-9]*[dhms]\\b', str_)
-	for stime in splitted_list:
-		if stime.endswith("d"):
-			sec = sec + (int(stime[:-1])*24*60*60)
-		elif stime.endswith("h"):
-			sec = sec + (int(stime[:-1])*60*60)
-		elif stime.endswith("m"):
-			sec = sec + (int(stime[:-1])*60)
-		elif stime.endswith("s"):
-			sec = sec + int(stime[:-1])
-	return sec
-
-"""
-This method returns implementing class for specific resourceTypes.
-@return resourceType
-@throws NotImplementedError when resourceType is Unknown
-"""
-resource_types = vars()['ResourceTypeBase'].__subclasses__()#get all subclasses implementing ResourceTypeBase
-def get_resource_type(type_):
-	try:
-		resource_type = [cls for cls in resource_types if cls.__dict__['name']==type_][0]
-	except IndexError:
-		raise NotImplementedError("Unknown ResourceType found: `"+type_+"`")
-	return resource_type
-
 
 """
 This method will read the configuration from a specific xml file.
@@ -73,26 +53,33 @@ def read_config():
 	    with open('conf/digital_display.xml') as fd:
 	 		conf = xmlToDict.parse(fd.read())
 	except IOError as e:
-	    logging.warning("***Input/Output Error occured while reading the configuration file...!")
+	    LOGGER.warning("***Input/Output Error occured while reading the configuration file...!")
 	    raise
 	except:
-	    logging.warning("***Unexpected error while reading config file:", sys.exc_info()[0])
-	    raise
+	    LOGGER.warning("***Unexpected error while reading config file:", sys.exc_info()[0])
+	    raisedd
 
-	#print conf['DigitalDisplay']['Name']
-	#print conf['DigitalDisplay']['ServerKey']
-	#print conf['DigitalDisplay']['Version']
-	#print conf['DigitalDisplay']['ResourcesTypes']
-	#print conf['DigitalDisplay']['DisplaySequence']
+##########################Running the Sequence##########################
+"""
+This method returns implementing class for specific resourceTypes.
+@return resourceType
+@throws NotImplementedError when resourceType is Unknown
+"""
+resource_types = vars()['ResourceTypeBase'].__subclasses__()#get all subclasses implementing ResourceTypeBase
+def get_resource_type(type_):
+	try:
+		resource_type = [cls for cls in resource_types if cls.__dict__['name']==type_][0]
+	except IndexError:
+		raise NotImplementedError("Unknown ResourceType found: `"+type_+"`")
+	return resource_type
 
-#############Check for Content Updates#############
 
 """
 This method will return a new sequence queue.
 @return sequence_queue
 @throws ConfigError
 """
-def make_sequence():
+def init_sequence():
 	try:
 		resources = conf['DigitalDisplay']['DisplaySequence']['Resource']
 	except KeyError:
@@ -105,28 +92,56 @@ def make_sequence():
 		sequence_queue.append(instance)
 	return sequence_queue
 
+current_phase_resource = None
 def run_sequence(sequence):
+	global current_phase_resource
+	webbrowser_conf = conf['DigitalDisplay']['WebBrowser']
 	while(True):
 		for resource in sequence:
-			#b = webbrowser.get('epiphany')
-			args = {'browser':conf['DigitalDisplay']['WebBrowser']['Name'], 
-					'port': conf['DigitalDisplay']['WebBrowser']['Port'],
-					'bpath': conf['DigitalDisplay']['WebBrowser']['Path']}
+			current_phase_resource = resource
+			args = {'browser':webbrowser_conf['Name'], 
+					'port': webbrowser_conf['Port'],
+					'bpath': webbrowser_conf['Path']}
 			show_up_time = resource.time
 			resource.run(args)
-			time.sleep(get_seconds(show_up_time))
+			time.sleep(kernel_utils.get_seconds(show_up_time))
 			resource.stop(args)
 
+LOGGER.info("Server Starting...")
 read_config()
-main_sequence_queue = make_sequence()
-run_sequence(main_sequence_queue)
-#print get_seconds("1h 1s")
+main_sequence_queue = init_sequence()
+thread = Thread(target = run_sequence, args = [main_sequence_queue])
+thread.start()
 
-#print 'Instance:', isinstance(RegisteredImplementation(), PluginBase)
-#print([cls.__name__ for cls in vars()['ResourceTypeBase'].__subclasses__() if cls.__name__ == "ResourceTypeIFrame"])
-#print ResourceTypeBase.__dict__
-#print([cls.__name__ for cls in vars()['ResourceTypeBase'].__subclasses__())
-#print([cls for cls in vars()['ResourceTypeBase'].__subclasses__()])
-#print 'Instance:', isinstance(ResourceTypeIFrame(), ResourceTypeBase)
+##########################Check for Content Updates##########################
 
+def safe_exit_handler():
+	LOGGER.debug("Exiting...")
+	current_phase_resource.stop(None)
 
+try:
+	kernel_conf = conf['DigitalDisplay']['UpdatePolicy']['Kernel']
+	repo_handler = kernel_conf['Repository']['VCSHandler']
+	handlers = conf['DigitalDisplay']['VCSHandlers']['Handler']
+	repo_conf = [handler for handler in handlers if handler['@name']==repo_handler]
+	if len(repo_conf)==0: raise ConfigError("Repo Handler "+repo_handler+" is not defined in VCSHandlers!")
+	version_control.update_kernel(kernel_conf, repo_conf[0], safe_exit_handler)
+except KeyError:
+	#no update policy
+	#ignore error
+	LOGGER.debug("No update policy found for Kernel, skipping update...!")
+	pass
+
+try:
+	content_conf = conf['DigitalDisplay']['UpdatePolicy']['Content']
+	repo_handler = content_conf['Repository']['VCSHandler']
+	repo_conf = [handler for handler in handlers if handler['@name']==repo_handler]
+	if len(repo_conf)==0: raise ConfigError("Repo Handler "+repo_handler+" is not defined in VCSHandlers!")
+	version_control.update_content(content_conf, repo_conf[0], safe_exit_handler)
+except KeyError:
+	#no update policy
+	#ignore error
+	LOGGER.debug("No update policy found for Content, skipping update...!")
+	pass
+	
+	

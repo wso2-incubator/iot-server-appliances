@@ -39,14 +39,14 @@
        Webbrowser
     -->
     <WebBrowser>
-      <Name>midori</Name>
-      <Path></Path>
+      <Name>default</Name>
+      <Path>open</Path>
       <Port>8000</Port>
     </WebBrowser>
 
     <!--WebBrowser>
-      <Name>default</Name>
-      <Path>open</Path>
+      <Name>midori</Name>
+      <Path>midori</Path>
       <Port>8000</Port>
     </WebBrowser-->
 
@@ -54,10 +54,73 @@
       Sequence for display events
     -->
     <DisplaySequence>
-      <Resource type="folder" time="15s" path="../Content/1" />
-      <Resource type="url" time="15s" url="http://www.github.com" />
-      <Resource type="folder" time="15s" path="../Content/2" />
-      <Resource type="url" time="15s" url="http://www.wso2.com" />
+      <Resource type="folder" time="15s" path="Folder_Sample1" />
+      <Resource type="folder" time="15s" path="Folder_Sample2" />
     </DisplaySequence>
+
+    <!--
+      Update polict for Kernel and/or Content
+    -->
+    <!--UpdatePolicy>
+      <Kernel>
+        <PollingInterval>30s</PollingInterval>
+        <Repository>
+          <Name>dd-kernel</Name>
+          <Url>path/to/your/dd-kernel.git</Url>
+          <VCSHandler>git</VCSHandler>
+        </Repository>
+      </Kernel>
+      <Content>
+        <PollingInterval>30s</PollingInterval>
+        <Repository>
+          <Name>dd-webcontent</Name>
+          <Url>path/to/your/dd-webcontent.git</Url>
+          <VCSHandler>git</VCSHandler>
+        </Repository>
+      </Content>
+    </UpdatePolicy-->
+
+    <!--
+    Version Control System Handlers for Repositories
+    -->
+    <VCSHandlers>
+      <!--
+      Git Handler for repositories
+      -->
+      <Handler name="git">
+        <!--
+        Commands that will be executed in shell.
+        -->
+        <Commands>
+          <!-- command for creating repository -->
+          <Init>git clone $url</Init>
+          <!-- command for update / pull -->
+          <Update>git pull origin master</Update>
+          <!-- command for local revision -->
+          <LocalRevision>git rev-parse HEAD</LocalRevision>
+          <!-- command for remote revision -->
+          <RemoteRevision>git ls-remote $url | head -1 | sed "s/HEAD//"</RemoteRevision>
+        </Commands>
+      </Handler>
+
+      <!--
+      SVN Handler for repositories
+      -->
+      <Handler name="svn">
+        <!--
+        Commands that will be executed in shell.
+        -->
+        <Commands>
+          <!-- command for creating repository -->
+          <Init>svn checkout $url</Init>
+          <!-- command for update / pull -->
+          <Update>svn up</Update>
+          <!-- command for local revision -->
+          <LocalRevision>svn info | grep "Revision" | awk '{print $2}'</LocalRevision>
+          <!-- command for remote revision -->
+          <RemoteRevision>svn info $url| grep "Revision" | awk '{print $2}'</RemoteRevision>
+        </Commands>
+      </Handler>
+    </VCSHandlers>
 
 </DigitalDisplay>

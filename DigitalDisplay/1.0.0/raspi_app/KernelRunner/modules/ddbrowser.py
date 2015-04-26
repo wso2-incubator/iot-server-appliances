@@ -21,6 +21,11 @@ import subprocess
 import os
 import sys
 import logging
+import colorstreamhandler
+
+logging.basicConfig(level=logging.DEBUG)
+LOGGER = logging.getLogger('org.wso2.iot.dd.raspi.ddbrowser')
+
 
 class BaseBrowser(object):
     """Parent class for all browsers. Do not use directly."""
@@ -42,10 +47,11 @@ class BaseBrowser(object):
 	    # keyboard interrupts don't affect browser as well as Python
 	    try:
 	    	pargs = [self.path] + [arg.replace("%s", url_) for arg in self.args]
+	    	LOGGER.debug(pargs)
 	    	p = subprocess.Popen(pargs, close_fds=True, preexec_fn=self._get_sid())
 	    except OSError, e:
 	    	if e.errno == 2:
-	    		logging.warning("Webbrowser `"+ self.name +"` at `"+ self.path +"` not found...!")
+	    		LOGGER.warning("Webbrowser `"+ self.name +"` at `"+ self.path +"` not found...!")
 	    	else:
 	    		raise
 	    	sys.exit(0)
@@ -54,7 +60,8 @@ class BaseBrowser(object):
 class MidoriBrowser(BaseBrowser):
 	
 	name = "midori"
-	args = ["-e","Fullscreen", "-a", "%s"]
+	#args = ["-e","Fullscreen", "-a", "%s"]
+	args = ["-a", "%s"]
 	
 class ChromeBrowser(BaseBrowser):
 	
