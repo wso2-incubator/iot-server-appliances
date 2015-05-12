@@ -54,14 +54,14 @@
       <!--
         Update polict for KernelRunner
       -->
-      <UpdatePolicy>
+      <!--UpdatePolicy>
         <PollingInterval>30s</PollingInterval>
         <Repository>
           <Name>dd-kernel</Name>
           <Url>git@bitbucket.org:rasika90/dd-kernel.git</Url>
           <VCSHandler>git</VCSHandler>
         </Repository>
-      </UpdatePolicy>
+      </UpdatePolicy-->
 
       <!--
       Version Control System Handlers for Repositories

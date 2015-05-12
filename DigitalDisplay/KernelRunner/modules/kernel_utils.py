@@ -18,46 +18,52 @@
 **/
 """
 import re
-import subprocess
 import os
 import logging
 
 LOGGER = logging.getLogger('wso2server.kernel_utils')
 
-#change os current path to script base folder
+KERNEL_FOLDER = "KernelRunner"
+TEMP_FOLDER = "tmp"
+CONTENT_FOLDER = "Content"
+WWW_FOLDER = "www"
+
+# change os current path to script base folder
 os.chdir(os.path.normpath(os.path.dirname(os.path.abspath(__file__))))
-base_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+ os.sep + os.pardir + os.sep + os.pardir)
-kernel_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+ os.sep + os.pardir)
+base_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + os.sep + os.pardir + os.sep + os.pardir)
+kernel_path = os.path.normpath(base_path + os.sep + KERNEL_FOLDER)
 modules_path = os.path.dirname(os.path.abspath(__file__))
-temp_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+ os.sep + os.pardir + os.sep + os.pardir + os.sep + "tmp")
-content_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+ os.sep + os.pardir + os.sep + os.pardir + os.sep + "Content")
-web_content_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+ os.sep + os.pardir + os.sep + os.pardir + os.sep + "Content" + os.sep + "www")
+temp_path = os.path.normpath(base_path + os.sep + TEMP_FOLDER)
+content_path = os.path.normpath(base_path + os.sep + CONTENT_FOLDER)
+web_content_path = os.path.normpath(content_path + os.sep + WWW_FOLDER)
+
 
 def get_seconds(str_):
-	#re.findall('[0-9]*[dhms]\\b',"1d 2h 3m 4s")
-	sec = 0
-	splitted_list = re.findall('[0-9]*[dhms]\\b', str_)
-	for stime in splitted_list:
-		if stime.endswith("d"):
-			sec = sec + (int(stime[:-1])*24*60*60)
-		elif stime.endswith("h"):
-			sec = sec + (int(stime[:-1])*60*60)
-		elif stime.endswith("m"):
-			sec = sec + (int(stime[:-1])*60)
-		elif stime.endswith("s"):
-			sec = sec + int(stime[:-1])
-	return sec
+    # re.findall('[0-9]*[dhms]\\b',"1d 2h 3m 4s")
+    sec = 0
+    splitted_list = re.findall('[0-9]*[dhms]\\b', str_)
+    for stime in splitted_list:
+        if stime.endswith("d"):
+            sec += int(stime[:-1]) * 24 * 60 * 60
+        elif stime.endswith("h"):
+            sec += int(stime[:-1]) * 60 * 60
+        elif stime.endswith("m"):
+            sec += int(stime[:-1]) * 60
+        elif stime.endswith("s"):
+            sec += int(stime[:-1])
+    return sec
+
 
 def check_process(process):
-  import re
-  import subprocess
+    import re
+    import subprocess
 
-  returnprocess = False
-  s = subprocess.Popen(["ps", "ax"],stdout=subprocess.PIPE)
-  for x in s.stdout:
-      if re.search(process, x):
-          returnprocess = True
+    process_exists = False
+    s = subprocess.Popen(["ps", "ax"], stdout=subprocess.PIPE)
+    for x in s.stdout:
+        if re.search(process, x):
+            process_exists = True
 
-  return returnprocess
+    return process_exists
 
 

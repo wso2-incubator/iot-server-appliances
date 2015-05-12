@@ -28,6 +28,7 @@ import subprocess
 
 LOGGER = logging.getLogger('wso2server.httpserver')
 
+
 class DDHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def end_headers(self):
         self.send_my_headers()
@@ -38,6 +39,7 @@ class DDHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.send_header("Pragma", "no-cache")
         self.send_header("Expires", "0")
 
+
 """
 This module is intended to run through python commandline.
 python httpserver.py {path} {port}
@@ -45,33 +47,39 @@ python httpserver.py {path} {port}
 path = ""
 port = 8000
 arg_length = len(sys.argv)
-if(arg_length>=2):
-	path = sys.argv[1]
-if(arg_length>=3):
-	port = int(sys.argv[2])
+
+if arg_length >= 2:
+    path = sys.argv[1]
+if arg_length >= 3:
+    port = int(sys.argv[2])
 
 LOGGER.debug("path:" + sys.argv[1])
 LOGGER.debug("port:" + sys.argv[2])
 
-if(path):
-	LOGGER.debug("Changing path to: "+path)
-	try:
-		os.chdir(path)
-	except OSError, e:
-		if e.errno == 2:
-			LOGGER.warning("`" + path + "` does not exist...!")
+if path:
+    LOGGER.debug("Changing path to: " + path)
+    try:
+        os.chdir(path)
+    except OSError, e:
+        if e.errno == 2:
+            LOGGER.warning("`" + path + "` does not exist...!")
+
 
 def start_server():
-	SocketServer.TCPServer.allow_reuse_address = True
-	Handler = DDHTTPRequestHandler
-	httpd = SocketServer.TCPServer(("", port), Handler)
-	LOGGER.info("Serving at port" + str(port))
-	httpd.serve_forever()
+    SocketServer.TCPServer.allow_reuse_address = True
+    handler = DDHTTPRequestHandler
+    httpd = SocketServer.TCPServer(("", port), handler)
+    LOGGER.info("Serving @port" + str(port) + "...")
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        LOGGER.info("Stopping server...")
+        httpd.shutdown()
 
 try:
-	start_server()
+    start_server()
 except socket.error as e:
-	print e.errno
-	if e.errno == errno.EADDRINUSE:
-		subprocess.Popen("ps aux | grep 'httpserver.py' | awk '{print $2}' | xargs kill -9", shell=True)
-		start_server()
+    print e.errno
+    if e.errno == errno.EADDRINUSE:
+        subprocess.Popen("ps aux | grep 'httpserver.py' | awk '{print $2}' | xargs kill -9", shell=True)
+        start_server()

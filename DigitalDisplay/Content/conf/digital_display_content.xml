@@ -54,6 +54,7 @@
           <VCSHandler>git</VCSHandler>
         </Repository>
       </UpdatePolicy-->
+
     </Content>
 
 </DigitalDisplay>
