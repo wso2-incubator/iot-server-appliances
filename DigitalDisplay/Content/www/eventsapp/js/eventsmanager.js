@@ -120,8 +120,7 @@ EventsManager.prototype = {
                 //caching events ids
                 var newEventsIdsArray=[[]];
                 for (var i = 0; i < resp.items.length; i++) {
-                        newEventsIdsArray[i][0] = resp.items[i].id;
-                        newEventsIdsArray[i][1] = resp.items[i].updated;
+                        newEventsIdsArray[i] = resp.items[i].id;
                 }
                 if(this.eventsIdsArray){
                     console.log(newEventsIdsArray);
@@ -131,7 +130,7 @@ EventsManager.prototype = {
                         //do nothing, let it go
                     }else{
                         for (var i = 0; i < this.eventsIdsArray.length; i++) {
-                            if(newEventsIdsArray[i][0] != this.eventsIdsArray[i][0] || newEventsIdsArray[i][1] != this.eventsIdsArray[i][1]){
+                            if(newEventsIdsArray[i] != this.eventsIdsArray[i]){
                                 console.log("ids or updated not equal");
                                 break;//new events exits, let it go
                             }
