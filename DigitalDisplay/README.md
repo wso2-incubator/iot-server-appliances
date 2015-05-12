@@ -5,6 +5,7 @@ A browser based digital display device manager for Raspberry Pi based implementa
 Prerequisites
 --------------
 * Raspberry Pi
+* HDMI supported Digital Display
 * Python 2.7
 
 Folder Structure
