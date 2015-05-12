@@ -39,29 +39,29 @@
       <!--
        Webbrowser
       -->
-      <!--WebBrowser>
+      <WebBrowser>
         <Name>default</Name>
         <Path>open</Path>
         <Port>8000</Port>
-      </WebBrowser-->
+      </WebBrowser>
 
-      <WebBrowser>
+      <!--WebBrowser>
         <Name>midori</Name>
         <Path>midori</Path>
         <Port>8000</Port>
-      </WebBrowser>
+      </WebBrowser-->
       
       <!--
         Update polict for KernelRunner
       -->
-      <!--UpdatePolicy>
+      <UpdatePolicy>
         <PollingInterval>30s</PollingInterval>
         <Repository>
           <Name>dd-kernel</Name>
-          <Url>git@bitbucket.org:username/dd-kernel.git</Url>
+          <Url>git@bitbucket.org:rasika90/dd-kernel.git</Url>
           <VCSHandler>git</VCSHandler>
         </Repository>
-      </UpdatePolicy-->
+      </UpdatePolicy>
 
       <!--
       Version Control System Handlers for Repositories

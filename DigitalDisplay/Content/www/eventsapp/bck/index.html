@@ -1,0 +1,536 @@
+<!--
+* Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+* WSO2 Inc. licenses this file to you under the Apache License,
+* Version 2.0 (the "License"); you may not use this file except
+* in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied. See the License for the
+* specific language governing permissions and limitations
+* under the License.
+-->
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WSO2 Events Manager</title>
+
+    <link rel="icon" href="favicon.png" type="image/x-icon" />
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/custom-common.css" rel="stylesheet">    
+    <link href="css/custom-desktop.css" rel="stylesheet">
+    <link href="css/custom-theme.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+	<script src="js/html5shiv.min.js"></script>
+	<script src="js/respond.min.js"></script>
+	<![endif]-->
+
+    <script>
+    var currentLocation="palmgrove";//[trace,palmgrove,us] @see isCurrentLocation()
+    var currentLocationHashTags="#palmgrove #lk";//define current location identifier hashtags seperated with spaces.
+    var userTimeZone = "Colombo"; //example "Rome" "Los_Angeles" ecc...
+    var maxRows = 10; //events to shown
+
+    var debugMode = false; 
+    var clientId = '5156395218-e9cvuffph0v5r1kenhqvacofgn22t741.apps.googleusercontent.com'; //choose web app client Id, redirect URI and Javascript origin set to http://localhost
+    var apiKey = 'AIzaSyCITKcDp56pt2ovXliicx8lTP5yAfChUkU'; //choose public apiKey, any IP allowed (leave blank the allowed IP boxes in Google Dev Console)
+    var userEmail = "wso2.com_f6060q1msig0ocoa4k3v2rf2mg@group.calendar.google.com"; //your calendar Id
+    
+    var calName = "WSO2 Calendar"; //name of calendar (write what you want, doesn't matter)
+        
+    var scopes = 'https://www.googleapis.com/auth/calendar';
+
+    /**
+    * Possible Locations
+    * ==================
+    * LK 1st Floor Meeting Room Ext:1005150
+    * LK Ground Floor Lobby Area
+    * US 787 Castro Board Room Ext:1014160
+    * US Palo Alto Conference Room Ext:1014160
+    * LK Trace Mezzanine Floor Meeting Room - Gondor Ext:1036212
+    * LK Trace Mezzanine Floor Meeting Room - Isengard Ext:1036215
+    * LK Trace Mezzanine Floor Meeting Room - Mount Doom Ext:1036210
+    * LK Trace Mezzanine Floor Board Room - Mordor Ext:1036211
+    * LK Trace Mezzanine Floor Board Room - Shire Ext:1036213
+    * LK Trace Ground Floor Training Room - Rivendell
+    * LK Trace Ground Floor Meeting Room - Moria Ext:1036214
+    * LK 7th Floor Training Room - Area 51
+    * LK 7th Floor Meeting Room - Banksy Ext:1005750
+    * LK 7th Floor Meeting Room - Pixnit Ext:1005760
+    * LK 6th Floor Meeting Room - Dijkstra Ext:1005650
+    * LK 6th Floor Meeting Room - Turing Ext:1005660
+    * LK 5th Floor Meeting Room - Garage Ext:1005550
+    * LK 4th Floor Meeting Room - Hanthana Ext:1005450
+    * LK 4th Floor Meeting Room - Yala Ext:1005460
+    * LK 3rd Floor Training Room - Boiler Room
+    * LK 3rd Floor Meeting Room - Kernel Ext:1005350
+    * LK 3rd Floor Meeting Room - Tungsten Ext:1005360
+    * LK 3rd Floor Meeting Room - Kernel Ext:1005350
+    * LK 3rd Floor Meeting Room - Tungsten Ext:1005360
+    * LK 2nd Floor Meeting Room - Rama Ext:1005250
+    * LK 2nd Floor Meeting Room - Supernova Ext:1005260
+    **/
+
+    //matching regex patterns for @param location
+    function isCurrentLocation(location){
+        if(!location) return false;//if null return false
+
+        if(currentLocation==="palmgrove"){
+            return checkPalmGrovePattern(location);
+        }else if(currentLocation==="trace"){
+            return checkTracePattern(location);
+        }else if(currentLocation==="us"){
+            return checkUSPattern(location);
+        }
+        return false;
+    }
+
+    //matching current location hashtags with regex with @param locationHashTag
+    function isCurrentLocationHashTag(locationHashTag){
+        //for events names you can use hashtags, eg. LK Event #palmgrove #trace #lk
+        var regex = new RegExp("("+locationHashTag+")\\b"+"|"+"\\b("+locationHashTag+")$");
+        return regex.test(currentLocationHashTags);
+    }
+
+    //matching regex. for palmgrove
+    function checkPalmGrovePattern(text){
+        regex= /^(LK)\s[0-9][a-z]{2}\s(Floor)/.test(text);
+        if(!regex){
+            regex = /(PalmGrove)/i.test(text);//case insensitive
+        }
+        if(!regex){
+            regex = /(Palm Grove)/i.test(text);//case insensitive
+        }
+        return regex;
+    }
+
+    //matching regex. for trace
+    function checkTracePattern(text){
+        regex = /^(LK)\s(Trace)/.test(text);
+        if(!regex){
+            regex = /(Trace)/i.test(text);//case insensitive
+        }
+        return regex;
+    }
+
+    //matching regex. for us
+    function checkUSPattern(text){
+        regex = /^(US)\s/.test(text);
+        return regex;
+    }
+
+    /**
+    * There is currently a 25-token limit per Google user account. If a user account has 25 valid tokens, 
+    * the next authentication request succeeds, but quietly invalidates the oldest outstanding token without 
+    * any user-visible warning.
+    * more info: https://developers.google.com/accounts/docs/OAuth2
+    **/
+
+    function handleClientLoad() {
+        gapi.client.setApiKey(apiKey);
+        window.setTimeout(checkAuth,1);
+    }
+
+    function checkAuth() {
+        //immediate: true -> the token is refreshed behind the scenes, and no UI is shown to the user.
+        gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: true}, handleAuthResult);
+    }
+
+    function handleAuthResult(authResult) {
+        //console.log("authResult:");
+        //console.log(authResult);
+        var authorizeButton = document.getElementById('btn-login');
+        if (authResult && !authResult.error) {
+          //hide login and do the API call
+          $('#btn-login').hide();
+          //makeApiCall()
+          var readEvents=setInterval(function () {makeApiCall()}, 5000);
+          var refreshToken = setInterval(function () {makeApiCall()}, 3600 * 1000);
+        } else {
+          //show login
+          $('#btn-login').show();
+          authorizeButton.onclick = handleAuthClick;
+        }
+    }
+
+    function handleAuthClick(event) {
+        gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
+        return false;
+      }
+   
+    function makeApiCall() {
+        var today = new Date(); //today date
+        gapi.client.load('calendar', 'v3', function () {
+            var request = gapi.client.calendar.events.list({
+                'calendarId' : userEmail,
+                'timeZone' : userTimeZone, 
+                'singleEvents': true, 
+                'timeMin': today.toISOString(), //gathers only events not happened yet
+                'maxResults': maxRows, 
+                'orderBy': 'startTime'});
+        request.execute(function (resp) {
+                if(!resp.items) return;
+
+                clearTables();
+                console.log(resp);
+
+                var count=0;
+                var currentTableCount = 0;
+                var otherTableCount= 0;
+                
+                if(debugMode)console.log(resp.items.length+" events received");
+                for (var i = 0; i < resp.items.length; i++) {
+                    var item = resp.items[i];
+                    var classes = [];
+                    var allDay = item.start.date? true : false;
+                    var startDT = allDay ? item.start.date : item.start.dateTime;
+                    var startDateTime = startDT.split("T"); //split date from time
+                    //
+                    var endDT = allDay ? item.end.date : item.end.dateTime;
+                    var endDateTime = endDT.split("T"); //split date from time
+                    //
+                    var date = startDateTime[0].split("-"); //split yyyy mm dd
+                    var startYear = date[0];
+                    var startMonth = monthString(date[1]);
+                    var startDay = date[2];
+                    var startDateISO = new Date(startMonth + " " + startDay + ", " + startYear + " 00:00:00");
+                    var startDayWeek = dayString(startDateISO.getDay());
+                    startDay = ordinal_suffix_of(startDay); //adding st, nd, rd, th
+                    var currentTable;
+                    //
+                    //console.log("===item"+item)
+                    if(debugMode)console.log("==="+item.summary);
+                    var hasTagMatched = false;
+                    if(item.location){
+                        hashtags= item.location.match(/#[a-z0-9]*\b|\b#[a-z0-9]*$/g);//get all hashtags
+                        if(hashtags){
+                            if(debugMode)console.log("hastags found "+hashtags);
+                            for(var k=0;k < hashtags.length;k++){
+                                if(isCurrentLocationHashTag(hashtags[k])){
+                                    hasTagMatched = true;
+                                    if(debugMode)console.log("matched "+hashtags[k]+" !!!");
+                                }
+                            }
+                        }
+                    }
+                    if(hasTagMatched || isCurrentLocation(item.location)){
+                        currentTable=true;
+                        currentTableCount +=1;
+                        count = currentTableCount;
+                        if(debugMode)console.log(item.summary + ": showing on current table");
+                    }else{
+                        currentTable=false;
+                        otherTableCount +=1;
+                        count = otherTableCount;
+                        if(debugMode)console.log(item.summary + ": showing on other table");
+                    }
+                    //
+                    var location = item.location;
+                    if( allDay == true){ //change this to match your needs
+                        var concatStr='';
+                        if(!currentTable){
+                            concatStr = getLocationStr(item.location) + "</td><td>";
+                        }
+                        var str = [
+                        '<th scope="row">',
+                            count, '</th><td>',
+                            item.summary , '</td><td>',
+                            concatStr, startDay,' ', startMonth,' ', startYear, ' (',startDayWeek,')', '</td><td>',
+                            'All Day', '</td><td>',
+                            'All Day', '</td><td>'
+                        ];
+                    }
+                    else{
+                        var stime = startDateTime[1].split(":"); //split hh ss etc...
+                        var startTime = AmPm(stime[0],stime[1]);
+                        //
+                        var etime = endDateTime[1].split(":"); //split hh ss etc...
+                        var endTime = AmPm(etime[0],etime[1]);
+
+                        var concatStr = '';
+                        if(!currentTable){
+                            concatStr = getLocationStr(item.location) + "</td><td>";
+                        }
+                        var str = [ //change this to match your needs
+                            '<th scope="row">',
+                            count, '</th><td>',
+                            item.summary , '</td><td>',
+                            concatStr, startDay,' ', startMonth,' ', startYear, ' (',startDayWeek,')', '</td><td>',
+                            startTime, '</td><td>',
+                            endTime, '</td><td>'
+                            ];
+                    }
+                    var tdStr = str.join('');
+                    if(currentTable){
+                        $('#currentLocTable').append('<tr>'+tdStr+'</tr>');
+                    }else{
+                        $('#otherLocTable').append('<tr>'+tdStr+'</tr>');
+                    }
+                }
+            document.getElementById('updated').innerHTML = "updated " + today;
+            //document.getElementById('calendar').innerHTML = calName;
+            });
+        });
+    }
+
+    function clearTables(){
+        var new_tbody = document.createElement('tbody');
+
+        var elmTable = document.getElementById("currentLocTable");
+        var elmTBody = elmTable.getElementsByTagName('tbody')[0];
+        elmTBody.parentNode.replaceChild(new_tbody, elmTBody)
+        //
+        elmTable = document.getElementById("otherLocTable");
+        elmTBody = elmTable.getElementsByTagName('tbody')[0];
+        elmTBody.parentNode.replaceChild(new_tbody, elmTBody)
+    }
+
+    function getLocationStr(location){
+        if(!location){
+            return "N/A";
+        }else{
+            return location;
+        }
+    }
+
+    function padNum(num) {
+        if (num <= 9 && num==0) {
+            return "0" + num;
+        }
+        return num;
+    }
+
+    function AmPm(hour, min) {
+        if (hour <= 12) { return hour+":"+min + "a.m."; }
+        return padNum(hour - 12) + ":" + min + "p.m.";
+    }
+
+    function monthString(num) {
+             if (num === "01") { return "January"; } 
+        else if (num === "02") { return "February"; } 
+        else if (num === "03") { return "March"; } 
+        else if (num === "04") { return "April"; } 
+        else if (num === "05") { return "May"; } 
+        else if (num === "06") { return "June"; } 
+        else if (num === "07") { return "July"; } 
+        else if (num === "08") { return "August"; } 
+        else if (num === "09") { return "September"; } 
+        else if (num === "10") { return "October"; } 
+        else if (num === "11") { return "November"; } 
+        else if (num === "12") { return "December"; }
+    }
+
+    function dayString(num){
+             if (num == "1") { return "Monday" }
+        else if (num == "2") { return "Tuesday" }
+        else if (num == "3") { return "Wednesday" }
+        else if (num == "4") { return "Thursday" }
+        else if (num == "5") { return "Friday" }
+        else if (num == "6") { return "Saturday" }
+        else if (num == "0") { return "Sunday" }
+    }
+
+    function ordinal_suffix_of(i) {
+        var j = i % 10, k = i % 100;
+        if (j == 1 && k != 11) { return i + "st"; }
+        if (j == 2 && k != 12) { return i + "nd"; }
+        if (j == 3 && k != 13) { return i + "rd"; }
+        return i + "th";
+    }
+
+    function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i<ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1);
+            if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+        }
+        return "";
+    }
+
+    function setCookie(cname, cvalue, extime) {
+        var d = new Date();
+        d.setTime(d.getTime() + extime);
+        var expires = "expires="+d.toUTCString();
+        //document.cookie = cname + "=" + cvalue + "; " + expires;
+
+        if(document.domain === 'localhost') {
+            document.cookie = cname + "=" + cvalue + "; " + expires + ';path=/;' ;
+        } else {
+            document.cookie = cname + "=" + cvalue + "; " + expires + ';domain=.' + document.domain + ';path=/;';
+        }
+    }
+
+    </script>
+    <script src='https://apis.google.com/js/client.js?onload=handleClientLoad'></script>
+
+</head>
+
+<body>
+
+<div class="wr-modelpopup">
+    <div class="modelpopup-content"><!-- dynamic content --></div>
+    <div class="modelpopup-bg"></div>
+</div>
+
+<div class="container col-lg-12 col-md-12 col-sm-12">
+
+<!-- header -->
+<header>
+<div class="row wr-global-header">
+    <div class="col-xs-6 col-sm-7 col-lg-8 app-logo">
+        <a href="home.html"><img src="images/logo.png" /><h2 class="app-title">What's Happening Now @WSO2</h2></a>
+    </div>
+	<div class="col-xs-6 col-sm-5 col-lg-4 wr-auth-container">
+        <div class="wr-auth pull-right">
+            <div class="right padding-none">
+                <ul class="nav nav-pills float-right" role="tablist">
+                    <li class="uppercase white ">
+                        <p id='updated' style="color:grey;  padding: 10px 15px;">updating . . . . .</p>
+                    </li>
+                    <li id="btn-login" class="uppercase white" style="display:none"><a class="login" href="#" ><span class="ro-text">Login</span></a></li>
+                </ul>
+            </div>
+        </div>
+	</div>
+</div>
+</header>
+<!-- /header -->
+<!-- content/body -->
+<div class="row">
+	<div class="col-md-12">
+		<!-- content -->
+		<div class="container-fluid col-centered wr-content">
+
+			<!-- form content placeholder -->
+            <div class="section-top-margin"></div>
+			<div id="ast-container" class="ast-container ">
+                <div class="container-fluid ">
+                    <div class="title">Here @PalmGrove...</div><!--title-->
+                    <div class="float-right"><a class="more" href="#">See More</a></div>
+                    <hr>
+                </div>
+            </div>
+			<section >
+                <table class="table" style="font-size:24px" id="currentLocTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Event</th>
+                    <th>Date</th>
+                    <th>From</th>
+                    <th>To</th>
+                  </tr>
+                </thead>
+                <tbody >
+                    <tr></tr>
+                </tbody>
+              </table>
+			</section>
+            </div><!--section-top-margin-->
+            <!-- Site details are here-->
+            <div id="ast-container" class="ast-container">
+                <div class="container-fluid section-top-margin">
+                    <div class="title">Happening at other places...</div><!--title-->
+                    <div class="float-right"><a class="more" href="#">See More</a></div>
+                    <hr>
+                </div>
+            </div>
+            <section  >
+                <table class="table" style="font-size:24px" id="otherLocTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Event</th>
+                    <th>Venue</th>
+                    <th>Date</th>
+                    <th>From</th>
+                    <th>To</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr></tr>
+                </tbody>
+              </table>
+            </section>
+            <!-- site details end here-->
+		</div>
+		<!-- /content -->
+
+
+	</div>
+</div>
+<!-- /content/body -->
+
+</div>
+
+<div id="content-filter-types" style="display: none">
+    <div class="sort-title">Sort By</div>
+    <div class="sort-options">
+    	<a href="#">Device Name<span class="ico-sort-asc"></span></a>
+    	<a href="#">OS</a>
+    	<a href="#">User</a>
+    	<a href="#">Model</a>   
+    </div>
+</div>  
+
+<!-- 
+<footer class="footer">
+        <p>&copy; 2015 WSO2 Inc. All Rights Reserved</p>
+</footer>
+-->
+
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/assetmenu.js"></script>
+<script src="js/operationsmenu.js"></script>
+
+<script type="text/javascript">
+
+$( document ).ready(function() {
+
+    $('[data-toggle="tooltip"]').tooltip();   
+
+    $("[data-toggle=popover]").popover();
+
+    $(".ctrl-filter-type-switcher").popover({
+        html : true, 
+        content: function() {
+          return $('#content-filter-types').html();
+        }
+    });    
+
+	$('#nav').affix({
+	      offset: {
+	        top: $('header').height()
+	      }
+	});	 
+});
+
+function changeDeviceView(view, selection){
+    $('.view-toggle').each(function() {
+        $(this).removeClass('selected');
+    });
+    $(selection).addClass('selected');
+
+    if(view == 'list'){
+        $('#ast-container').addClass('list-view');
+    }
+    else {
+        $('#ast-container').removeClass('list-view');
+    }
+}
+
+</script>
+
+</body>
+</html>

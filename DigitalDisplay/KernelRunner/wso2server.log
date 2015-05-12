@@ -1,0 +1,19 @@
+2015-05-12 15:06:33,054 - INFO: wso2server.resource_types.<module>()@146: Server  Starting...::
+2015-05-12 15:06:33,103 - WARNING: wso2server.ddbrowser.__init__()@72: Webbrowser -TabCloseOther
+2015-05-12 15:07:01,449 - INFO: wso2server.resource_types.<module>()@146: Server  Starting...::
+2015-05-12 15:07:15,165 - INFO: wso2server.resource_types.<module>()@146: Server  Starting...::
+2015-05-12 15:07:40,457 - INFO: wso2server.resource_types.<module>()@146: Server  Starting...::
+2015-05-12 15:07:50,463 - DEBUG: wso2server.resource_types.<module>()@172: No update policy found for Kernel, skipping update...!
+2015-05-12 15:07:50,463 - DEBUG: wso2server.resource_types.<module>()@184: No update policy found for Content, skipping update...!
+2015-05-12 15:17:47,994 - INFO: wso2server.resource_types.<module>()@146: Server  Starting...::
+2015-05-12 15:17:48,044 - WARNING: wso2server.ddbrowser.__init__()@72: Webbrowser -TabCloseOther
+2015-05-12 15:18:25,805 - INFO: wso2server.resource_types.<module>()@146: Server  Starting...::
+2015-05-12 15:18:43,279 - INFO: wso2server.resource_types.<module>()@146: Server  Starting...::
+2015-05-12 15:19:01,952 - INFO: wso2server.resource_types.<module>()@146: Server  Starting...::
+2015-05-12 15:19:22,192 - INFO: wso2server.resource_types.<module>()@146: Server  Starting...::
+2015-05-12 15:19:31,530 - INFO: wso2server.resource_types.<module>()@146: Server  Starting...::
+2015-05-12 15:19:41,537 - DEBUG: wso2server.version_control.init_local_repo()@50: Creating local repo dd-kernel...
+2015-05-12 15:19:41,538 - DEBUG: wso2server.version_control.init_local_repo()@53: Running process...
+2015-05-12 15:19:41,585 - DEBUG: wso2server.resource_types.run()@110: folder: run()
+2015-05-12 15:19:41,585 - DEBUG: wso2server.resource_types.run()@115: opening: http://localhost:8000/eventsapp
+2015-05-12 15:19:41,585 - DEBUG: wso2server.ddbrowser.open()@49: open http://localhost:8000/eventsapp

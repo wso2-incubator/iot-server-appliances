@@ -40,8 +40,7 @@
         Sequence for display events
       -->
       <DisplaySequence>
-        <Resource type="folder" time="5m" path="Folder_Sample1" />
-        <Resource type="folder" time="5m" path="Folder_Sample2" />
+        <Resource type="folder" time="5m" path="eventsapp" />
       </DisplaySequence>
 
       <!--

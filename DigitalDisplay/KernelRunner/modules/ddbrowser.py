@@ -32,7 +32,7 @@ class BaseBrowser(object):
     name = "undefined"
     args = ['%s']
 
-    def __init__(self, path_=""):
+    def __init__(self, path_="", exists=False):
         self.path = path_
 
     def _get_sid(self):
