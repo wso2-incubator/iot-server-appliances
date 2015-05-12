@@ -21,11 +21,10 @@ import subprocess
 import os
 import sys
 import logging
-import colorstreamhandler
+import time
+import kernel_utils as kernel_utils
 
-logging.basicConfig(level=logging.DEBUG)
-LOGGER = logging.getLogger('org.wso2.iot.dd.raspi.ddbrowser')
-
+LOGGER = logging.getLogger('wso2server.ddbrowser')
 
 class BaseBrowser(object):
     """Parent class for all browsers. Do not use directly."""
@@ -47,8 +46,9 @@ class BaseBrowser(object):
 	    # keyboard interrupts don't affect browser as well as Python
 	    try:
 	    	pargs = [self.path] + [arg.replace("%s", url_) for arg in self.args]
-	    	LOGGER.debug(pargs)
-	    	p = subprocess.Popen(pargs, close_fds=True, preexec_fn=self._get_sid())
+	    	LOGGER.debug(" ".join(pargs))
+	    	p = subprocess.Popen(" ".join(pargs), close_fds=True, preexec_fn=self._get_sid(), shell=True)
+
 	    except OSError, e:
 	    	if e.errno == 2:
 	    		LOGGER.warning("Webbrowser `"+ self.name +"` at `"+ self.path +"` not found...!")
@@ -60,11 +60,47 @@ class BaseBrowser(object):
 class MidoriBrowser(BaseBrowser):
 	
 	name = "midori"
-	#args = ["-e","Fullscreen", "-a", "%s"]
-	args = ["-a", "%s"]
+	args = ["%s"]
+	#args = ["-a", "%s"]
+
+	def __init__(self, path_="", exists=False):
+		BaseBrowser.__init__(self, path_)
+		if(exists):
+			p = subprocess.Popen("killall midori", shell=True)
+			p.wait()
+			time.sleep(2)
+		LOGGER.warning("Webbrowser -TabCloseOther")
+		subprocess.Popen(path_+' -e TabCloseOther', shell=True)
+		time.sleep(10)
+		LOGGER.warning("Webbrowser -Fullscreen")
+		subprocess.Popen(path_+' -e Fullscreen', shell=True)
+		time.sleep(2)
 	
 class ChromeBrowser(BaseBrowser):
 	
 	name = "chrome"
 	args = ["--app", "%s"]
-	
+
+"""
+This method returns implementing class for specific browserTypes.
+@return browserType
+@throws NotImplementedError when browserType is Unknown
+"""
+browser_types = vars()['BaseBrowser'].__subclasses__()#get all subclasses implementing BaseBrowser
+def get_browser_type(type_):
+	try:
+		browser_type = [cls for cls in browser_types if cls.__dict__['name']==type_][0]
+	except IndexError:
+		return BaseBrowser
+	return browser_type
+
+ddwebbrowser = None
+def kill():
+	ddwebbrowser.kill() 
+
+def start(webbrowser_conf):
+	global ddwebbrowser
+	browser_class = get_browser_type(webbrowser_conf['Name'])
+	exists_=kernel_utils.check_process(webbrowser_conf['Path'])
+	ddwebbrowser = browser_class(webbrowser_conf['Path'], exists=exists_)
+	return ddwebbrowser

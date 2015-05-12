@@ -23,10 +23,10 @@ import sys
 import threading
 import kernel_utils as kernel_utils
 import logging
-import colorstreamhandler
+import errno
+import time
 
-logging.basicConfig(level=logging.DEBUG)
-LOGGER = logging.getLogger('org.wso2.iot.dd.raspi.version_control')
+LOGGER = logging.getLogger('wso2server.version_control')
 
 class VersionError(Exception):
     pass
@@ -50,21 +50,23 @@ class Repository(object):
 		LOGGER.debug("Creating local repo "+ self.repo_name +"...")
 		os.chdir(self.local_repo_base_path)
 		command = self.replace_params(self.repo_commands["Init"])
+		LOGGER.debug("Running process...")
 		try:
-			p = subprocess.check_call(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, shell=True)
+			p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, shell=True)
 		except OSError, e:
 			if e.errno==2:
-				LOGGER.warning("Command Not found...!")
+				LOGGER.debug("Command Not found...!")
 				sys.exit(1)
 		except:
-			LOGGER.warning("Error occured on init_local_repo()")	
+			LOGGER.debug("Error occured on init_local_repo()")	
 
 	def update_local_repo(self):
 		LOGGER.debug("Updating local repo "+ self.repo_name +"...")
 		os.chdir(self.local_repo_path)
 		command = self.replace_params(self.repo_commands["Update"])
 		try:
-			p = subprocess.check_call(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, shell=True)
+			p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, shell=True)
+			p.wait()
 		except OSError, e:
 			if e.errno==2:
 				LOGGER.warning("Command Not found...!")
@@ -77,24 +79,25 @@ class Repository(object):
 		
 		command = self.replace_params(self.repo_commands["LocalRevision"])
 		try:
-			p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-			local_rev = p.stdout.readline().strip()
-			p.wait()
+			local_rev = subprocess.check_output(command, stderr=subprocess.PIPE, shell=True)
+			local_rev = local_rev.strip()
 		except:
-			LOGGER.warning("Error occured on check_remote_changes()")	
+			LOGGER.warning("Error occured on check_remote_changes():local" + str(sys.exc_info()[1]))	
+			return False
 
 		command = self.replace_params(self.repo_commands["RemoteRevision"])
 		try:
-			p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-			remote_rev = p.stdout.readline().strip()
-			p.wait()
+			remote_rev = subprocess.check_output(command, stderr=subprocess.PIPE, shell=True)
+			remote_rev = remote_rev.strip()
 		except OSError, e:
 			if e.errno==2:
 				LOGGER.warning("Command Not found...!")
-				sys.exit(1)
+				sys.exit(1) # no need to continue
 		except:
-			LOGGER.warning("Error occured on init_local_repo()")	
+			LOGGER.warning("Error occured on check_remote_changes():remote" + str(sys.exc_info()[1]))	
+			return False
 
+		LOGGER.debug(self.repo_name)
 		LOGGER.debug("local rev: '" + local_rev + "'")
 		LOGGER.debug("remote_rev: '" + remote_rev + "'")
 
@@ -116,12 +119,14 @@ class Repository(object):
 if not (os.path.exists(kernel_utils.temp_path)):
 	os.mkdir(kernel_utils.temp_path)
 
-def restart_kernel():
+def copy_kernel():
 	os.chdir(os.path.normpath(os.path.dirname(os.path.abspath(__file__))))
-	LOGGER.debug("current pid:"+str(os.getpid()))
-	subprocess.Popen("sh copy_kernel.sh " + kernel_utils.base_path, shell=True)
+	os.system("sh copy_kernel.sh " + kernel_utils.base_path)
+	LOGGER.debug("running copy_kernel.sh")
 
-def update_kernel(kernel_conf, repo_conf, function):
+lock = threading.Lock()
+def update_kernel(kernel_conf, repo_conf, safe_exit_handler):
+	lock.acquire()
 	global dd_kernel_last_revision
 	dd_kernel_folder = kernel_utils.temp_path
 	
@@ -130,17 +135,26 @@ def update_kernel(kernel_conf, repo_conf, function):
 		dd_kernel_repo_url = kernel_conf['Repository']['Url']
 		dd_kernel_poll_int = kernel_conf['PollingInterval']
 	except KeyError:
+		lock.release()
 		raise VersionError("Error in reading UpdatePolicy for Kernel...!")
 
 	git = Repository(dd_kernel_repo_name, dd_kernel_repo_url, dd_kernel_folder, repo_conf)
 	if(git.check_remote_changes()): 
 		git.update_local_repo()
-		function()
-		restart_kernel()
-	threading.Timer(kernel_utils.get_seconds(dd_kernel_poll_int), update_kernel, [kernel_conf,repo_conf,function]).start()
+		safe_exit_handler()
+		lock.release()
+		copy_kernel()
+	lock.release()
+	threading.Timer(kernel_utils.get_seconds(dd_kernel_poll_int), update_kernel, [kernel_conf,repo_conf,safe_exit_handler]).start()
 
+def copy_content():
+	LOGGER.debug("running copy script...")
+	os.chdir(os.path.normpath(os.path.dirname(os.path.abspath(__file__))))
+	os.system("sh copy_content.sh "+kernel_utils.base_path)
+	LOGGER.debug("running copy_kernel.sh")
 
-def update_content(content_conf, repo_conf, function):
+def update_content(content_conf, repo_conf, safe_exit_handler):
+	lock.acquire()
 	dd_content_folder = kernel_utils.temp_path
 	
 	try:
@@ -148,11 +162,15 @@ def update_content(content_conf, repo_conf, function):
 		dd_content_repo_url = content_conf['Repository']['Url']
 		dd_content_poll_int = content_conf['PollingInterval']
 	except KeyError:
+		lock.release()
 		raise VersionError("Error in reading UpdatePolicy for Content...!")
-	
+
 	git = Repository(dd_content_repo_name, dd_content_repo_url, dd_content_folder, repo_conf)
 	if(git.check_remote_changes()): 
 		git.update_local_repo()
-		os.chdir(os.path.normpath(os.path.dirname(os.path.abspath(__file__))))
-		subprocess.Popen("sh copy_content.sh "+kernel_utils.base_path, shell=True)
-	threading.Timer(kernel_utils.get_seconds(dd_content_poll_int), update_content, [content_conf,repo_conf,function]).start()
+		safe_exit_handler()
+		lock.release()
+		copy_content()
+	lock.release()
+	threading.Timer(kernel_utils.get_seconds(dd_content_poll_int), update_content, [content_conf,repo_conf,safe_exit_handler]).start()
+

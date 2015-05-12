@@ -22,14 +22,11 @@ import SimpleHTTPServer
 import SocketServer
 import socket
 import errno
-import kernel_utils as kernel_utils
 import sys
 import logging
-import colorstreamhandler
 import subprocess
 
-logging.basicConfig(level=logging.DEBUG)
-LOGGER = logging.getLogger('org.wso2.iot.dd.raspi.httpserver')
+LOGGER = logging.getLogger('wso2server.httpserver')
 
 class DDHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -59,11 +56,10 @@ LOGGER.debug("port:" + sys.argv[2])
 if(path):
 	LOGGER.debug("Changing path to: "+path)
 	try:
-		os.chdir(kernel_utils.content_path)
 		os.chdir(path)
 	except OSError, e:
 		if e.errno == 2:
-			LOGGER.warning("`" + kernel_utils.content_path + os.sep + path + "` does not exist...!")
+			LOGGER.warning("`" + path + "` does not exist...!")
 
 def start_server():
 	SocketServer.TCPServer.allow_reuse_address = True
@@ -77,5 +73,5 @@ try:
 except socket.error as e:
 	print e.errno
 	if e.errno == errno.EADDRINUSE:
-		subprocess.Popen("ps aux | grep '[h]ttpserver.py' | awk '{print $2}' | xargs kill", shell=True)
+		subprocess.Popen("ps aux | grep 'httpserver.py' | awk '{print $2}' | xargs kill -9", shell=True)
 		start_server()

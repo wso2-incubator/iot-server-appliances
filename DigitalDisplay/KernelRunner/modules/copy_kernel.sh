@@ -11,16 +11,18 @@ cp -rf "$1/tmp/dd-kernel/" "$1/KernelRunner/"
 rm -rf "$1/KernelRunner/.git"
 rm -rf "$1/KernelRunner/.svn"
 echo "killing wso2server.py"
-ps aux | grep '[w]so2server.py' | awk '{print $2}' | xargs kill
+ps aux | grep 'wso2server.py' | awk '{print $2}' | xargs kill -9
+echo "killing httpserver.py"
+ps aux | grep 'httpserver.py' | awk '{print $2}' | xargs kill -9
 echo "running server..."
 cd "$1/KernelRunner/"
-python wso2server.py
+python wso2server.py &
 if [ "$?" -eq "1" ]; then
     echo "Error running Kernel, rolling to prev..."
     echo "killing httpserver.py"
-    ps aux | grep '[h]ttpserver.py' | awk '{print $2}' | xargs kill
+    ps aux | grep 'httpserver.py' | awk '{print $2}' | xargs kill -9
     echo "killing wso2server.py"
-	ps aux | grep '[w]so2server.py' | awk '{print $2}' | xargs kill
+	ps aux | grep 'wso2server.py' | awk '{print $2}' | xargs kill -9
 	cd "$1"
 	echo "replacing files..."
 	rm -rf "$1/KernelRunner"
@@ -28,7 +30,7 @@ if [ "$?" -eq "1" ]; then
 	cd "$1/KernelRunner"
 	pwd
 	echo "starting up..."
-	python wso2server.py
+	python wso2server.py &
 else
 	echo "$? returned..."
 fi

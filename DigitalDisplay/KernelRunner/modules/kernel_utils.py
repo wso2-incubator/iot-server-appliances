@@ -21,17 +21,17 @@ import re
 import subprocess
 import os
 import logging
-import colorstreamhandler
 
-logging.basicConfig(level=logging.DEBUG)
-LOGGER = logging.getLogger('org.wso2.iot.dd.raspi.kernel_utils')
+LOGGER = logging.getLogger('wso2server.kernel_utils')
 
 #change os current path to script base folder
+os.chdir(os.path.normpath(os.path.dirname(os.path.abspath(__file__))))
 base_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+ os.sep + os.pardir + os.sep + os.pardir)
 kernel_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+ os.sep + os.pardir)
 modules_path = os.path.dirname(os.path.abspath(__file__))
 temp_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+ os.sep + os.pardir + os.sep + os.pardir + os.sep + "tmp")
 content_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+ os.sep + os.pardir + os.sep + os.pardir + os.sep + "Content")
+web_content_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__))+ os.sep + os.pardir + os.sep + os.pardir + os.sep + "Content" + os.sep + "www")
 
 def get_seconds(str_):
 	#re.findall('[0-9]*[dhms]\\b',"1d 2h 3m 4s")
@@ -47,5 +47,17 @@ def get_seconds(str_):
 		elif stime.endswith("s"):
 			sec = sec + int(stime[:-1])
 	return sec
+
+def check_process(process):
+  import re
+  import subprocess
+
+  returnprocess = False
+  s = subprocess.Popen(["ps", "ax"],stdout=subprocess.PIPE)
+  for x in s.stdout:
+      if re.search(process, x):
+          returnprocess = True
+
+  return returnprocess
 
 

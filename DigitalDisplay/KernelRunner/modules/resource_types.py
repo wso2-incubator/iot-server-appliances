@@ -32,25 +32,11 @@ import time
 from threading import Timer
 import sys
 from ddbrowser import *
-import modules.kernel_utils as kernel_utils
+import kernel_utils as kernel_utils
+import ddbrowser as ddbrowser
 import logging
-import colorstreamhandler
 
-logging.basicConfig(level=logging.DEBUG)
-LOGGER = logging.getLogger('org.wso2.iot.dd.raspi.resource_types')
-
-"""
-This method returns implementing class for specific browserTypes.
-@return browserType
-@throws NotImplementedError when browserType is Unknown
-"""
-browser_types = vars()['BaseBrowser'].__subclasses__()#get all subclasses implementing BaseBrowser
-def _get_browser_type(type_):
-	try:
-		browser_type = [cls for cls in browser_types if cls.__dict__['name']==type_][0]
-	except IndexError:
-		return BaseBrowser
-	return browser_type
+LOGGER = logging.getLogger('wso2server.resource_types')
 
 def _get_sid():
 	setsid = getattr(os, 'setsid', None)
@@ -59,7 +45,7 @@ def _get_sid():
 	return setsid
 
 def _open_browser(url_, webbrowser_, path_=""):
-	rv = _get_browser_type(webbrowser_)
+	rv = ddbrowser.get_browser_type(webbrowser_)
 	browser_instance = rv(path_)
 	return browser_instance.open(url_)
 
@@ -125,13 +111,13 @@ class ResourceTypeFolder(ResourceTypeBase):
 		webbrowser_ = args['browser']
 		port = args['port']
 		bpath_ = args['bpath']
-		self.server = _start_server(self.path, port)
-		LOGGER.debug("opening: http://localhost:"+port)
-		self.browser = _open_browser("http://localhost:"+port, webbrowser_, bpath_)
+		#self.server = _start_server(self.path, port)
+		LOGGER.debug("opening: http://localhost:"+port+"/"+self.path)
+		webbrowser_.open("http://localhost:"+port+"/"+self.path)
 	def stop(self, args):
 		LOGGER.debug("folder: stop()")
-		self.server.kill()
-		_kill_process(self.browser, 10)
+		#self.server.kill()
+		#_kill_process(self.browser, int(args['delay']))
 
 """
 Implementation class for `Page` resource type.
@@ -149,10 +135,10 @@ class ResourceTypePage(ResourceTypeBase):
 		webbrowser_ = args['browser']
 		bpath_ = args['bpath']
 		LOGGER.debug("opening: "+self.path)
-		self.browser =_open_browser(self.path, webbrowser_, bpath_)
+		webbrowser_.open(self.path)
 	def stop(self, args):
 		LOGGER.debug("page: stop()")
-		_kill_process(self.browser, 10)
+		#_kill_process(self.browser, int(args['delay']))
 
 """
 Implementation class for `URL` resource type.
@@ -171,11 +157,11 @@ class ResourceTypeUrl(ResourceTypeBase):
 		webbrowser_ = args['browser']
 		bpath_ = args['bpath']
 		LOGGER.debug("opening: "+self.url)
-		self.browser =_open_browser(self.url, webbrowser_, bpath_)
+		webbrowser_.open(self.url)
 
 	def stop(self, args):
 		LOGGER.debug("url: stop()")
-		_kill_process(self.browser, 10)
+		#_kill_process(self.browser, int(args['delay']))
 
 """
 Implementation class for `IFrame` resource type.
@@ -192,3 +178,6 @@ class ResourceTypeIFrame(ResourceTypeBase):
 		LOGGER.debug("iframe: run()")
 	def stop(self, args):
 		LOGGER.debug("iframe: stop()")
+
+
+_start_server(kernel_utils.web_content_path)
