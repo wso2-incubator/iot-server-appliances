@@ -1,15 +1,33 @@
 #include <pt.h> 
+#include <avr/wdt.h>
+#include <Adafruit_CC3000.h>
+#include <SPI.h>
+#include "utility/debug.h"
+#include "utility/socket.h"
+#include "ctype.h"
+
+// These are the interrupt and control pins
+#define ADAFRUIT_CC3000_IRQ   3  // MUST be an interrupt pin!
+// These can be any two pins
+#define ADAFRUIT_CC3000_VBAT  5
+#define ADAFRUIT_CC3000_CS    10
+// Use hardware SPI for the remaining pins
+// On an UNO, SCK = 13, MISO = 12, and MOSI = 11
+
+Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ, ADAFRUIT_CC3000_VBAT,
+                                         SPI_CLOCK_DIVIDER); // you can change this clock speed
+
 #define TURN_DELAY 100
 
 int motion_global = 0;
 
 //motors
-int motor_right[] = {9, 11};
-int motor_left[] = {7, 8};
+int motor_left[] = {9, 11};
+int motor_right[] = {7, 8};
 
 int enA=12;
 int enB=13;
-
+//byte mac[6] = { 0xC0, 0x4A, 0x00, 0x1A, 0x03, 0xF8 };
 
 //thread init
 static struct pt pt2;
@@ -17,8 +35,8 @@ static struct pt pt2;
 
 void setup() {
   Serial.begin(115200);
-  PT_INIT(&pt2);
-  
+//  PT_INIT(&pt2);
+//  
   int i;
   for(i = 0; i < 2; i++){
     pinMode(motor_left[i], OUTPUT);
@@ -26,20 +44,28 @@ void setup() {
   }
   pinMode(enA, OUTPUT);
   pinMode(enB, OUTPUT);
-  digitalWrite(enA, 200);
-  digitalWrite(enB, 200);
+  digitalWrite(enA, 100);
+  digitalWrite(enB, 100);
   
-  motor_stop();
+  //motor_stop();
   initializeServer();
-
+ 
+ //watchdog
+  wdt_enable(WDTO_4S);
 }
 
 void loop() {  
  listen();
-// protothread2(&pt2, 1000);
+ wdt_reset();
+  
+  // Check connection
+  if(!cc3000.checkConnected()){while(1){}}
+  wdt_reset(); 
+  
+// delay(100);
  drive();
- //drive_forward();
- //Serial.println("sdf"+String(motion_global));
+//  wdt_reset(); 
+
 }
 
 
@@ -62,7 +88,7 @@ digitalWrite(motor_left[0], LOW);
 digitalWrite(motor_left[1], HIGH); 
 
 digitalWrite(motor_right[0], LOW); 
-digitalWrite(motor_right[1], HIGH); 
+digitalWrite(motor_right[1], HIGH);
 }
 
 void drive_forward(){
@@ -72,7 +98,9 @@ digitalWrite(motor_left[0], HIGH);
 digitalWrite(motor_left[1], LOW); 
 
 digitalWrite(motor_right[0], HIGH); 
-digitalWrite(motor_right[1], LOW); 
+digitalWrite(motor_right[1], LOW);
+
+
 }
 
 void turn_right(){
@@ -83,6 +111,7 @@ unsigned long  motorStop= millis() + TURN_DELAY;
 while (!(motorStop<= millis())){
 //delay 300ms
 }
+updateDirectionVariable(0);
 motor_stop();
 
 }
@@ -96,6 +125,7 @@ unsigned long  motorStop= millis() + TURN_DELAY;
 while (!(motorStop<= millis())){
 //delay 300ms
 }
+updateDirectionVariable(0);
 motor_stop();
 }
 
@@ -104,7 +134,7 @@ void drive(){
           
           switch(motion_global){
             
-              Serial.println("########"+String(motion_global));
+              //Serial.println("########"+String(motion_global));
              case 1 : drive_forward();
                       
                        break;
@@ -130,23 +160,11 @@ void drive(){
 
 }
 
-static int protothread2(struct pt *pt, int interval) {
-  static unsigned long timestamp = 0;
-  PT_BEGIN(pt);
-  while(1) { // never stop 
-    /* each time the function is called the second boolean
-    *  argument "millis() - timestamp > interval" is re-evaluated
-    *  and if false the function exits after that. */
-    PT_WAIT_UNTIL(pt, millis() - timestamp > interval );
-    timestamp = millis(); // take a new timestamp
-    
-    PT_END(pt);
-  }
-}
 
 void updateDirectionVariable(int direction){
   motion_global = direction;
 }
+
 
 
 

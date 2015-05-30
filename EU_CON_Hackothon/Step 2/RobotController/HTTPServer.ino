@@ -1,22 +1,9 @@
-#include <Adafruit_CC3000.h>
-#include <SPI.h>
-#include "utility/debug.h"
-#include "utility/socket.h"
-#include "ctype.h"
 
-// These are the interrupt and control pins
-#define ADAFRUIT_CC3000_IRQ   3  // MUST be an interrupt pin!
-// These can be any two pins
-#define ADAFRUIT_CC3000_VBAT  5
-#define ADAFRUIT_CC3000_CS    10
-// Use hardware SPI for the remaining pins
-// On an UNO, SCK = 13, MISO = 12, and MOSI = 11
+#define WLAN_SSID       "AndroidAP"           // cannot be longer than 32 characters!
+#define WLAN_PASS       "1234567890"
 
-Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ, ADAFRUIT_CC3000_VBAT,
-                                         SPI_CLOCK_DIVIDER); // you can change this clock speed
-
-#define WLAN_SSID       "WSO2-Restricted"           // cannot be longer than 32 characters!
-#define WLAN_PASS       "LKvene8xIOT"
+//#define WLAN_SSID       "WSO2-Restricted"           // cannot be longer than 32 characters!
+//#define WLAN_PASS       "LKvene8xIOT"
 // Security can be WLAN_SEC_UNSEC, WLAN_SEC_WEP, WLAN_SEC_WPA or WLAN_SEC_WPA2
 #define WLAN_SECURITY   WLAN_SEC_WPA2
 
@@ -54,7 +41,7 @@ void initializeServer(void)
     Serial.println(F("Couldn't begin()! Check your wiring?"));
     while(1);
   }
-  
+  // cc3000.setMacAddress(mac);
  
   if (!cc3000.connectToAP(WLAN_SSID, WLAN_PASS, WLAN_SECURITY)) {
     Serial.println(F("Failed!"));
@@ -112,15 +99,15 @@ void listen()
 
     // Handle the request if it was parsed.
     if (parsed) {
-      Serial.println(F("Processing request"));
-      Serial.print(F("Action: ")); Serial.println(action);
+//      Serial.println(F("Processing request"));
+//      Serial.print(F("Action: ")); Serial.println(action);
       Serial.print(F("Path: ")); Serial.println(path);
       // Check the action to see if it was a GET request.
       if (strcmp(action, "GET") == 0) {
               String urlPath = path;
               urlPath.replace("/move/","");
               urlPath.replace("/","");
-//              client.fastrprint(F("You accessed path: ")); 
+//              client.fastrprint(F("Command Received")); 
               if(urlPath.endsWith("L")){
                 
                 updateDirectionVariable(3);
@@ -134,7 +121,7 @@ void listen()
                 updateDirectionVariable(2);
   
               }else if(urlPath.endsWith("F")){
-                
+                //Serial.println("test");
                 updateDirectionVariable(1);
 
               }else if(urlPath.endsWith("S")){
@@ -143,11 +130,11 @@ void listen()
 
               }
       }
-      else {
-        // Unsupported action, respond with an HTTP 405 method not allowed error.
-        client.fastrprintln(F("HTTP/1.1 405 Method Not Allowed"));
-        client.fastrprintln(F(""));
-      }
+//      else {
+//        // Unsupported action, respond with an HTTP 405 method not allowed error.
+//        //client.fastrprintln(F("HTTP/1.1 405 Method Not Allowed"));
+//        //client.fastrprintln(F(""));
+//      }
     }
 
     // Wait a short period to make sure the response had time to send before
@@ -198,10 +185,10 @@ bool displayConnectionDetails(void)
   else
   {
     Serial.print(F("\nIP Addr: ")); cc3000.printIPdotsRev(ipAddress);
-    Serial.print(F("\nNetmask: ")); cc3000.printIPdotsRev(netmask);
-    Serial.print(F("\nGateway: ")); cc3000.printIPdotsRev(gateway);
-    Serial.print(F("\nDHCPsrv: ")); cc3000.printIPdotsRev(dhcpserv);
-    Serial.print(F("\nDNSserv: ")); cc3000.printIPdotsRev(dnsserv);
+//    Serial.print(F("\nNetmask: ")); cc3000.printIPdotsRev(netmask);
+//    Serial.print(F("\nGateway: ")); cc3000.printIPdotsRev(gateway);
+//    Serial.print(F("\nDHCPsrv: ")); cc3000.printIPdotsRev(dhcpserv);
+//    Serial.print(F("\nDNSserv: ")); cc3000.printIPdotsRev(dnsserv);
     Serial.println();
     return true;
   }
