@@ -21,7 +21,7 @@ void pushData(){
   payLoad += "\"}";
 
   pushClient.fastrprint(F("POST "));     
-  pushClient.fastrprint(SERVICE_EPOINT); pushClient.fastrprint(F("pushalarmdata"));  
+  pushClient.fastrprint(SERVICE_EPOINT); pushClient.fastrprint(F("pushsensordata"));  
   pushClient.fastrprint(F(" HTTP/1.1")); pushClient.fastrprint(F("\n"));
   pushClient.fastrprint(host.c_str()); pushClient.fastrprint(F("\n"));    
   pushClient.fastrprint(F("Content-Type: application/json")); pushClient.fastrprint(F("\n"));   
@@ -34,7 +34,7 @@ void pushData(){
        
   if(DEBUG) {
     Serial.print("POST ");
-    Serial.print(SERVICE_EPOINT); Serial.print("pushalarmdata");
+    Serial.print(SERVICE_EPOINT); Serial.print("pushsensordata");
     Serial.print(" HTTP/1.1"); Serial.println();
     Serial.print(host); Serial.println();
     Serial.print("Content-Type: application/json"); Serial.println();
