@@ -24,12 +24,9 @@ void setup() {
   digitalWrite(enA, 200);
   digitalWrite(enB,200);
   
-  
-
 }
 
 void loop() {  
-
   drive();  
 }
 
@@ -94,13 +91,10 @@ motor_stop();
 }
 
 void drive(){
-  //String s="resr"+String(motion_global);
-//Serial.println(s);
-  
+
 if (Serial.available()) {
     
       motion_global=Serial.parseInt();
-      
           switch(motion_global){
              case 1 : drive_forward();
                       

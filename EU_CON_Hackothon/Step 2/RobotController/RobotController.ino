@@ -61,10 +61,9 @@ void loop() {
   // Check connection
   if(!cc3000.checkConnected()){while(1){}}
   wdt_reset(); 
-  
-// delay(100);
+
  drive();
-//  wdt_reset(); 
+ 
 
 }
 
