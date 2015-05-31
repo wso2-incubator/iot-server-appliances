@@ -1,4 +1,3 @@
-#include <pt.h> 
 #include <avr/wdt.h>
 #include <Adafruit_CC3000.h>
 #include <SPI.h>
@@ -29,14 +28,11 @@ int enA=12;
 int enB=13;
 //byte mac[6] = { 0xC0, 0x4A, 0x00, 0x1A, 0x03, 0xF8 };
 
-//thread init
-static struct pt pt2;
 
 
 void setup() {
   Serial.begin(115200);
-//  PT_INIT(&pt2);
-//  
+
   int i;
   for(i = 0; i < 2; i++){
     pinMode(motor_left[i], OUTPUT);
