@@ -11,12 +11,12 @@ void pushData(){
  
   int temperature =  (uint8_t)getTemperature();
   payLoad += temperature;
-  payLoad += "-"; 
+  payLoad += ":"; 
   payLoad += digitalRead(PIR_PIN);
-  payLoad += "-"; 
+  payLoad += ":"; 
   payLoad += getSonar();   // returns distance if < MAX_DISTANCE else returns -1, 
                            // Pushed accordingly inside JAX-RS
-  payLoad += "-"; 
+  payLoad += ":"; 
   payLoad += analogRead(LDR_PIN);
   payLoad += "\"}";
 

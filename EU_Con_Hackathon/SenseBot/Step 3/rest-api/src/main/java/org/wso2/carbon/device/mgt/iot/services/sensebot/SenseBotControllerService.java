@@ -103,28 +103,25 @@ public class SenseBotControllerService {
         String sensorValues = dataMsg.value;                            //TEMP-PIR-SONAR-LDR
         log.info("Recieved Sensor Data Values: " + sensorValues);
 
-        int delimiterOne = sensorValues.indexOf("-");
+        String sensors[]=sensorValues.split(":");
+        String temperature;
+        String motion;
+        String sonar;
+        String light;
 
-        if (delimiterOne == -1) {
+        if(sensors.length==4){
+            temperature = sensors[0];
+            motion=sensors[1];
+            sonar=sensors[2];
+            light=sensors[3];
 
-            result = DeviceControllerService
-                    .pushData(dataMsg.owner, "SenseBot", dataMsg.deviceId, System.currentTimeMillis(), "DeviceData",
-                            dataMsg.value, dataMsg.reply, response);
+        }else{
 
-        } else {
-            String temperature = sensorValues.substring(0, delimiterOne);
 
-            int delimiterTwo = sensorValues.indexOf("-", delimiterOne + 1);
-            String motion = sensorValues.substring(delimiterOne + 1, delimiterTwo);
+            return "Invalid Format";
+        }
 
-            int delimiterThree = sensorValues.indexOf("-", delimiterTwo + 1);
-            String sonar = sensorValues.substring(delimiterTwo + 1, delimiterThree);
 
-            if (sonar.equals("500")) {
-                sonar = "No Object";
-            }
-
-            String light = sensorValues.substring(delimiterThree + 1, sensorValues.length());
 
             sensorValues =
                     "Temperature:" + temperature + "C\t\tMotion:" + motion + "\tSonar:" + sonar + "\tLight:" + light;
@@ -146,7 +143,7 @@ public class SenseBotControllerService {
                 return result;
             }
 
-            if (!sonar.equals("No Object")) {
+            if (!sonar.equals("-1")) {
                 result = DeviceControllerService
                         .pushData(dataMsg.owner, "SenseBot", dataMsg.deviceId, System.currentTimeMillis(), "DeviceData",
                                 sonar, "SONAR", response);
@@ -160,7 +157,7 @@ public class SenseBotControllerService {
                     .pushData(dataMsg.owner, "SenseBot", dataMsg.deviceId, System.currentTimeMillis(), "DeviceData",
                             light, "LIGHT", response);
 
-        }
+
         return result;
     }
 
