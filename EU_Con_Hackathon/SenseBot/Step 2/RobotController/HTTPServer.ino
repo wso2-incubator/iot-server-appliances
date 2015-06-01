@@ -1,9 +1,7 @@
 
-#define WLAN_SSID       "AndroidAP"           // cannot be longer than 32 characters!
-#define WLAN_PASS       "1234567890"
+#define WLAN_SSID       "YourAccessPointSSID"           // cannot be longer than 32 characters!
+#define WLAN_PASS       "APPassword"
 
-//#define WLAN_SSID       "WSO2-Restricted"           // cannot be longer than 32 characters!
-//#define WLAN_PASS       "LKvene8xIOT"
 // Security can be WLAN_SEC_UNSEC, WLAN_SEC_WEP, WLAN_SEC_WPA or WLAN_SEC_WPA2
 #define WLAN_SECURITY   WLAN_SEC_WPA2
 
