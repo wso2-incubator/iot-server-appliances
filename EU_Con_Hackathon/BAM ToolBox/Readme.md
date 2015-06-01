@@ -37,10 +37,31 @@ Get a broader understanding of configuring WSO2-BAM to publish data by reading t
 ```
 * Install the toolbox **IOT_Analytics.tbox** from the WSO2-BAM Management Console UI. If not the dashboard will not appear.
 
-<!---
-* ***[For testing purposes where there are no real sensor data published to BAM yet]***
-	- Extract attached Client **WSO2DevicePlatform-2.0.0.zip** 
-	- execute "java -jar -Dmachine.ip=172.16.3.212 target/WSO2DevicePlatform-1.0.0-jar-with-dependencies.jar" in side /device-cloud-appliances/WSO2DevicePlatform-1.0.0
+------------------
 
-* Go to the portal section under gadgets to view the dashboard.
--->
+#### View summarized data
+
+* The data written to the Cassandra DB in WSO2-BAM is summarized via the hive script found inside the **IOT_Analytics.tbox**. This summarized information is then written to an H2 database. It can be viewed as follows:
+	* enable H2 database configuration in the **carbon.xml** file found inside ***<WSO2-BAM-HOME>/repository/conf/.*** folder by uncommenting the section shown below.
+	* access the db console via **localhost:8082** in your browser. 
+	* give the **url**, **username** and **password** for login according to the datasource definition above.
+	
+```xml
+<H2DatabaseConfiguration>
+	<property name="web" />
+	<property name="webPort">8082</property>
+	<property name="webAllowOthers" />
+<!-- commented part 
+	<property name="webSSL" />
+	<property name="tcp" />
+	<property name="tcpPort">9092</property>
+	<property name="tcpAllowOthers" />
+	<property name="tcpSSL" />
+	<property name="pg" />
+	<property name="pgPort">5435</property>
+	<property name="pgAllowOthers" />
+	<property name="trace" />
+	<property name="baseDir">${carbon.home}</property> 
+		comment ends here	-->
+</H2DatabaseConfiguration>
+```
