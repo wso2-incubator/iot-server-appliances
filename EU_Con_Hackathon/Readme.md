@@ -1,11 +1,12 @@
 ## Folder Structure
 
 * ActiveMQ sample config	-	a sample MQTT enabled **activemq.xml** file
-* ArduinoAgents	-	the arduino sketeches for *Wifi/Ethernet* sheilds for the firealarm demo
+* FireAlarm/ArduinoAgents	-	the arduino sketeches for *Wifi/Ethernet* sheilds for the firealarm demo
 * BAM ToolBox - the analytics toolbox for deployment into the **WSO2-BAM**
 * DC Config Files	-	Device-Cloud configuration folder (**/iot**) and the config files
 * Dependant JARS	-	dependancies from ([carbon-device-mgt] (https://github.com/wso2/carbon-device-mgt.git "The WSO2 connected devices management framework on top our carbon") *&* [device-mgt] (https://github.com/wso2-dev/device-cloud/tree/master/components/device-mgt "A component of the WSO2 device cloud")) other repos that the firealarm JAX-RS relies on
 * JAX-RS Service	-	The **.war** file of the *REST* service and the src code of the service which contains both the **FireAlarm** and **SenseBotRobot**
+* SenseBot - The SenseBot hackathon step by step guide
 
 ***********
 #### Building the **device-cloud** iteratively from:
