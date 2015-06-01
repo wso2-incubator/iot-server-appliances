@@ -1,6 +1,6 @@
 
   /**********************************************************************************************  
-    This method will traverse the array of digital pins and batch the data from the those pins together.
+    This method reads all the required pins to get sensor data.
     It makes a single call to the server and sends all pin values as a batch.
     Server dis-assembles it accordingly and makes multiple publish calls for each sensor type.
    ***********************************************************************************************/

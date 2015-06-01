@@ -20,8 +20,8 @@
                            // Security can be WLAN_SEC_UNSEC, WLAN_SEC_WEP, WLAN_SEC_WPA or WLAN_SEC_WPA2
 #define IDLE_TIMEOUT_MS  3000      
 
-#define DEVICE_OWNER "Test" //"${DEVICE_OWNER}"          
-#define DEVICE_ID "Test" //"${DEVICE_ID}"             
+#define DEVICE_OWNER "Test" 			//"${DEVICE_OWNER}"    used by the template engine 
+#define DEVICE_ID "Test" 		        //"${DEVICE_ID}"         when these args are auto      
 
 
 
@@ -45,7 +45,7 @@
 
 #define POLL_INTERVAL 1000
 #define DEBUG false
-#define CON_DEBUG false
+#define CON_DEBUG true
 
 #endif
 
