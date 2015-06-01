@@ -17,11 +17,25 @@ will enable the JAX-RS service to work fine without any further changes. The sta
 
 The configurations for connecting to the **WSO2 BAM** and **ActiveMQ** need to be set accordingly in the device-cloud's configs *'xml'* file found at  ***repository/conf/iot/devicecloud-config.xml***
 
-MQTT transport has to be enabled in the **"activemq.xml"** file found at ***<ACTIVE_MQ_HOME>/libexec/conf*** folder. It is set as: 
+MQTT transport has to be enabled in the **"activemq.xml"** file found at ***\<ACTIVE_MQ_HOME\>/libexec/conf*** folder. It is set as: 
 ```xml
 <transportConnectors>
   <transportConnector name="mqtt" uri="mqtt://0.0.0.0:1883?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600&amp;transport.defaultKeepAlive=60000"/>
 </transportConnectors>
 ```
+
+
+##### If wanting to deploy the JAX_RS in some other server (ex: WSO2_AS) it can be done by the following steps:
+
+1. Copy the **"iotdevices.war"** *(found inside the 'JAX-RS Service' folder)* into **repository/deployment/server/webapps/** folder
+
+2. Make a folder named **"iot"** inside **repository/conf/** and copy into it the *"devicecloud-config.xml"* and *"iot-config.xml"* *(found inside the 'DC Config Files/iot' folder)*.
+
+3. Copy the *.jar* dependancies *(found inside the 'Dependant JARS' folder)* into **repository/components/lib** 
+
+4. Finally edit the **"devicecloud-config.xml"** file inside the iot folder *(that was copied earlier)* to set the appropiate configurations for the **WSO2 BAM** and **MQTT (ActiveMQ)** endpoints 
+
+
+
 
 
