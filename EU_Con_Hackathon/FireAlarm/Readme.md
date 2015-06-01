@@ -30,13 +30,15 @@ The IP can be left to *localhost(0.0.0.0)* if ActiveMQ is running on the same ma
 
 ##### If wanting to deploy the JAX_RS in some other server (ex: WSO2_AS) it can be done by the following steps:
 
-1. Copy the **"iotdevices.war"** *(found inside the 'JAX-RS Service' folder)* into **repository/deployment/server/webapps/** folder
+1. Rename the **"iotdevices-war"** *(found inside the 'JAX-RS Service' folder)* into **"iotdevices.war"**
 
-2. Make a folder named **"iot"** inside **repository/conf/** and copy into it the *"devicecloud-config.xml"* and *"iot-config.xml"* *(found inside the 'DC Config Files/iot' folder)*.
+2. Copy that **"iotdevices.war"** into **repository/deployment/server/webapps/** folder
 
-3. Copy the *.jar* dependancies *(found inside the 'Dependant JARS' folder)* into **repository/components/lib** 
+3. Make a folder named **"iot"** inside **repository/conf/** and copy into it the *"devicecloud-config.xml"* and *"iot-config.xml"* *(found inside the 'DC Config Files/iot' folder)*.
 
-4. Finally edit the **"devicecloud-config.xml"** file inside the iot folder *(that was copied earlier)* to set the appropiate configurations for the **WSO2 BAM** and **MQTT (ActiveMQ)** endpoints 
+4. Copy the *.jar* dependancies *(found inside the 'Dependant JARS' folder)* into **repository/components/lib** 
+
+5. Finally edit the **"devicecloud-config.xml"** file inside the iot folder *(that was copied earlier)* to set the appropiate configurations for the **WSO2 BAM** and **MQTT (ActiveMQ)** endpoints 
 
 
 
