@@ -157,6 +157,70 @@ public class SenseBotControllerService {
         return result;
     }
 
+    @Path("/pushtempdata") @POST @Consumes(MediaType.APPLICATION_JSON) public String pushTempData(
+            final DeviceJSON dataMsg, @Context HttpServletResponse response) {
+        String result = null;
+
+        String temperature = dataMsg.value;                            //TEMP-PIR-SONAR-LDR
+        log.info("Recieved Tenperature Data Value: " + temperature + " degrees C");
+
+        result = DeviceControllerService
+                .pushData(dataMsg.owner, "SenseBot", dataMsg.deviceId, System.currentTimeMillis(), "DeviceData",
+                        temperature, "TEMP", response);
+
+        return result;
+    }
+
+    @Path("/pushpirdata") @POST @Consumes(MediaType.APPLICATION_JSON) public String pushPIRData(
+            final DeviceJSON dataMsg, @Context HttpServletResponse response) {
+        String result = null;
+
+        String motion = dataMsg.value;                            //TEMP-PIR-SONAR-LDR
+        log.info("Recieved PIR (Motion) Sensor Data Value: " + motion);
+
+        result = DeviceControllerService
+                .pushData(dataMsg.owner, "SenseBot", dataMsg.deviceId, System.currentTimeMillis(), "DeviceData", motion,
+                        "MOTION", response);
+
+        return result;
+    }
+
+    @Path("/pushsonardata") @POST @Consumes(MediaType.APPLICATION_JSON) public String pushSonarData(
+            final DeviceJSON dataMsg, @Context HttpServletResponse response) {
+        String result = null;
+
+        String sonar = dataMsg.value;                            //TEMP-PIR-SONAR-LDR
+
+        if (sonar.equals("-1")) {
+            log.info("Recieved a 'No Obstacle' Sonar value. (Means there are no abstacles within 30cm)");
+        } else {
+            log.info("Recieved Sonar Sensor Data Value: " + sonar + " cm");
+
+            result = DeviceControllerService
+                    .pushData(dataMsg.owner, "SenseBot", dataMsg.deviceId, System.currentTimeMillis(), "DeviceData",
+                            sonar, "SONAR", response);
+
+            if (response.getStatus() != HttpStatus.SC_ACCEPTED) {
+                return result;
+            }
+        }
+
+        return result;
+    }
+
+    @Path("/pushlightdata") @POST @Consumes(MediaType.APPLICATION_JSON) public String pushlightData(
+            final DeviceJSON dataMsg, @Context HttpServletResponse response) {
+        String result = null;
+
+        String light = dataMsg.value;                            //TEMP-PIR-SONAR-LDR
+        log.info("Recieved LDR (Light) Sensor Data Value: " + light);
+
+        result = DeviceControllerService
+                .pushData(dataMsg.owner, "SenseBot", dataMsg.deviceId, System.currentTimeMillis(), "DeviceData", light,
+                        "LIGHT", response);
+
+        return result;
+    }
 
     private String sendCommand(String deviceIp, int deviceServerPort, String motionType) {
 
@@ -179,7 +243,7 @@ public class SenseBotControllerService {
         try {
             httpConn = (HttpURLConnection) url.openConnection();
         } catch (IOException e) {
-            log.error("Error Connectiong to HTTP Endpoint at: " + urlString);
+            log.error("Error Connecting to HTTP Endpoint at: " + urlString);
         }
 
         try {

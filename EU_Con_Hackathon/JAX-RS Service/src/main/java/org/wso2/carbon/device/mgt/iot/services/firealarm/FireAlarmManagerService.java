@@ -22,7 +22,7 @@ import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.iot.arduino.firealarm.constants.FireAlarmConstants;
-import org.wso2.carbon.device.mgt.iot.services.common.DevicesManager;
+import org.wso2.carbon.device.mgt.iot.services.common.DevicesManagerService;
 import org.wso2.carbon.device.mgt.iot.web.register.DeviceManagement;
 
 import javax.ws.rs.*;
@@ -160,10 +160,10 @@ public class FireAlarmManagerService {
 							+ " owner:" + owner).build();
 		}
 
-		DevicesManager devicesManager = new DevicesManager();
+		DevicesManagerService devicesManagerService = new DevicesManagerService();
 		File zipFile = null;
 		try {
-			zipFile = devicesManager.downloadSketch(owner, sketchType, deviceId,
+			zipFile = devicesManagerService.downloadSketch(owner, sketchType, deviceId,
 													token);
 		} catch (DeviceManagementException ex) {
 			return Response.status(500).entity("Error occurred while creating zip file").build();

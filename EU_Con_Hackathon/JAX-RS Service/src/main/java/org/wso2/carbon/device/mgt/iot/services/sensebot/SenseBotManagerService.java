@@ -26,12 +26,14 @@ import org.wso2.carbon.device.mgt.common.spi.DeviceMgtService;
 import org.wso2.carbon.device.mgt.iot.arduino.firealarm.constants.FireAlarmConstants;
 import org.wso2.carbon.device.mgt.iot.arduino.firealarm.constants.SenseBotConstants;
 import org.wso2.carbon.device.mgt.iot.arduino.firealarm.impl.FireAlarmManager;
+import org.wso2.carbon.device.mgt.iot.services.common.DevicesManagerService;
 import org.wso2.carbon.device.mgt.iot.web.register.DeviceManagement;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -131,45 +133,55 @@ public class SenseBotManagerService {
 
 
 		Device device = deviceManagement.getDevice(deviceIdentifier);
-
-
 		return device;
 	}
 
 	@Path("/downloadSketch")
 	@GET
 	@Produces("application/octet-stream")
-	public Response downloadSketch(@QueryParam("owner") String owner,
-			@QueryParam("type") String type)
-			throws DeviceManagementException {
+	public Response downloadSketch(@QueryParam("owner") String owner, @QueryParam("type") String
+			sketchType) {
 
-		if (owner == null || type == null) {
+		if (owner == null) {
 			return Response.status(400).build();//bad request
 		}
 
-		String a = SenseBotConstants.DEVICE_TYPE;
-		/* create new device id */
-		String deviceId = UUID.randomUUID().toString();
+		//create new device id
+		String deviceId = shortUUID();
 
-		String sep = File.separator;
-		String sketchFolder = "repository" + sep + "resources" + sep + "sketches";
-		String archivesPath = CarbonUtils.getCarbonHome() + sep + sketchFolder + sep + "archives"
-				+ sep + deviceId;
-		String templateSketchPath = sketchFolder + sep + type;
+		//create token
+		String token = UUID.randomUUID().toString();
 
-		Map<String, String> contextParams = new HashMap<String, String>();
-		contextParams.put("DEVICE_OWNER", owner);
-		contextParams.put("DEVICE_ID", deviceId);
+		//adding registering data
+		try {
+			register(deviceId,
+					 owner + "s_" + sketchType + "_" + deviceId.substring(0, 3),
+					 owner);
+		} catch (DeviceManagementException ex) {
+			return Response.status(500).entity(
+					"Error occurred while registering the device with " + "id: " + deviceId
+							+ " owner:" + owner).build();
+		}
 
-		DeviceManagement deviceManagement = new DeviceManagement();
-		File zipFile = deviceManagement.getSketchArchive(archivesPath, templateSketchPath,
-				contextParams);
+		DevicesManagerService devicesManagerService = new DevicesManagerService();
+		File zipFile = null;
+		try {
+			zipFile = devicesManagerService.downloadSketch(owner, sketchType, deviceId,
+														   token);
+		} catch (DeviceManagementException ex) {
+			return Response.status(500).entity("Error occurred while creating zip file").build();
+		}
 
 		Response.ResponseBuilder rb = Response.ok((Object) zipFile);
 		rb.header("Content-Disposition", "attachment; filename=\"SenseBotAgent.zip\"");
 		return rb.build();
 	}
 
+	private static String shortUUID() {
+		UUID uuid = UUID.randomUUID();
+		long l = ByteBuffer.wrap(uuid.toString().getBytes()).getLong();
+		return Long.toString(l, Character.MAX_RADIX);
+	}
 
 
 }

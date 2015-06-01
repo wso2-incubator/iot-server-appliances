@@ -26,7 +26,7 @@ import java.util.UUID;
 /**
  * Created by ayyoobhamza on 5/29/15.
  */
-public class DevicesManager {
+public class DevicesManagerService {
 
 	@Path("/getDevices")
 	@GET
@@ -38,6 +38,20 @@ public class DevicesManager {
 		DeviceManagement deviceManagement = new DeviceManagement();
 
 		List<Device> devices = deviceManagement.getDevices(username);
+
+		return devices.toArray(new Device[]{});
+	}
+
+	@Path("/getDevices")
+	@GET
+	@Consumes("application/json")
+	@Produces("application/json")
+	public Device[] getDevicesByType(@QueryParam("type") String deviceType)
+			throws DeviceManagementException {
+
+		DeviceManagement deviceManagement = new DeviceManagement();
+
+		List<Device> devices = deviceManagement.getDevicesByType(deviceType);
 
 		return devices.toArray(new Device[]{});
 	}
