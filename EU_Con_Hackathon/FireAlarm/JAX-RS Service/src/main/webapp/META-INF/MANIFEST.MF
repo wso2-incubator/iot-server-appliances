@@ -1,0 +1,40 @@
+Manifest-Version: 1.0
+Class-Path: cxf-rt-frontend-jaxrs-2.7.3.jar cxf-api-2.7.3.jar woodstox
+ -core-asl-4.1.4.jar stax2-api-3.1.1.jar xmlschema-core-2.0.3.jar gero
+ nimo-javamail_1.4_spec-1.7.1.jar wsdl4j-1.6.2.jar cxf-rt-core-2.7.3.j
+ ar jaxb-impl-2.2.6.jar javax.ws.rs-api-2.0-m10.jar cxf-rt-bindings-xm
+ l-2.7.3.jar cxf-rt-transports-http-2.7.3.jar jackson-core-asl-1.8.6.j
+ ar jackson-mapper-asl-1.8.6.jar jackson-jaxrs-1.8.6.jar spring-web-3.
+ 0.7.RELEASE.jar aopalliance-1.0.jar spring-beans-3.0.7.RELEASE.jar sp
+ ring-core-3.0.7.RELEASE.jar spring-asm-3.0.7.RELEASE.jar commons-logg
+ ing-1.1.1.jar spring-context-3.0.7.RELEASE.jar spring-aop-3.0.7.RELEA
+ SE.jar spring-expression-3.0.7.RELEASE.jar json-20140107.jar mysql-co
+ nnector-java-5.1.6.jar mqtt-client-0.4.0.jar slf4j-log4j12-1.6.2.jar 
+ slf4j-api-1.6.2.jar log4j-1.2.16.jar gson-2.1.jar commons-pool-1.5.6.
+ jar org.wso2.carbon.databridge.agent.thrift-4.0.0.jar org.eclipse.osg
+ i-3.5.0.v20090520.jar org.eclipse.osgi.services-3.2.0.v20090520-1800.
+ jar org.wso2.carbon.databridge.commons-4.0.0.jar org.wso2.carbon.logg
+ ing-4.0.0.jar org.apache.log4j-1.2.13.v200706111418.jar json-2.0.0.ws
+ o2v1.jar org.wso2.carbon.databridge.commons.thrift-4.0.0.jar libthrif
+ t-0.7.wso2v1.jar slf4j-1.5.10.wso2v1.jar org.wso2.carbon.core.common-
+ 4.0.0.jar org.wso2.carbon.utils-4.0.0.jar jsr107cache-1.1.0-wso2v2.ja
+ r org.wso2.carbon.queuing-4.0.0.jar org.wso2.carbon.base-4.0.0.jar ax
+ iom-1.2.11.wso2v2.jar org.wso2.securevault-1.0.0-wso2v2.jar axiom-api
+ -1.2.11.jar geronimo-activation_1.1_spec-1.0.2.jar jaxen-1.1.1.jar ge
+ ronimo-stax-api_1.0_spec-1.0.1.jar axiom-impl-1.2.11.jar wstx-asl-3.2
+ .9.jar jline-0.9.94.jar junit-3.8.1.jar commons-cli-1.0.jar commons-l
+ ang-2.5.jar commons-io-2.0.jar commons-codec-1.2.jar org.wso2.carbon.
+ securevault-4.0.0.jar servlet-api-2.5.jar org.wso2.carbon.caching.cor
+ e-4.0.0.jar infinispan-core-5.1.2.wso2v1.jar marshalling-1.3.6.wso2v1
+ .jar jboss-marshalling-1.3.6.GA.jar jboss-marshalling-river-1.3.6.GA.
+ jar jboss-logging-3.1.0.wso2v1.jar jboss-logging-3.1.0.CR2.jar jgroup
+ s-3.0.6.wso2v1.jar jgroups-3.0.6.Final.jar org.wso2.carbon.user.api-4
+ .0.0.jar axis2-1.6.1.wso2v5.jar smack-3.0.4.wso2v1.jar smackx-3.0.4.w
+ so2v1.jar dom4j-1.6.1.jar jdom-1.0.jar xml-apis-1.3.02.jar xercesImpl
+ -2.6.2.jar xom-1.0.jar xmlParserAPIs-2.6.2.jar xalan-2.6.0.jar icu4j-
+ 2.6.1.jar commons-fileupload-1.2.0.wso2v1.jar commons-fileupload-1.2.
+ jar ant-1.7.0.wso2v1.jar ant-1.7.0.jar ant-launcher-1.7.0.jar commons
+ -httpclient-3.1.0.wso2v2.jar commons-httpclient-3.1.jar not-yet-commo
+ ns-ssl-0.3.9.jar commons-pool-1.5.0.wso2v1.jar libthrift-0.7.0.jar co
+ mmons-dbcp2-2.0.jar commons-pool2-2.2.jar
+

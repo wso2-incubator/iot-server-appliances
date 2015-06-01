@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<IoTDeviceController>
+
+	<DeviceController>
+		<DeviceDataStore>WSO2-BAM</DeviceDataStore>
+		<DeviceControlQueue>MQTT</DeviceControlQueue>
+	</DeviceController>
+
+	<DataStores>
+		<DataStore>
+			<class type="WSO2-BAM">
+				org.wso2.carbon.device.mgt.iot.devicecontroller.impl.BAMDataStore
+			</class>
+			<!-- <endpoint>tcp://127.0.0.1</endpoint>  -->
+			  <endpoint> tcp://192.168.1.216 </endpoint>  
+		 	<!-- <endpoint>tcp://10.100.7.38</endpoint>  -->
+			<port>7613</port>
+			<username>admin</username>
+			<password>admin</password>
+		</DataStore>
+
+		<DataStore>
+			<class type="WSO2-CEP">
+				org.wso2.carbon.device.mgt.iot.devicecontroller.impl.CEPDataStore
+			</class>
+			<endpoint>[CEP_ENDPOINT]</endpoint>
+			<port>[CEP_PORT]</port>
+			<username>admin</username>
+			<password>admin</password>
+		</DataStore>
+	</DataStores>
+
+	<ControlQueues>
+		<ControlQueue>
+			<class type="MQTT">
+				org.wso2.carbon.device.mgt.iot.devicecontroller.impl.MQTTControlQueue
+			</class>
+			<protocol>MQTT</protocol>
+			<endpoint>tcp://localhost</endpoint>
+			<port>1883</port>
+			<username> . </username>
+			<password> . </password>
+		</ControlQueue>
+	</ControlQueues>
+
+	<Security>
+		<client>client-truststore.jks</client>
+		<password>wso2carbon</password>
+	</Security>
+
+</IoTDeviceController>
