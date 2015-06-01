@@ -63,7 +63,7 @@ public class BAMStreamDefinitions {
             "{"
                     + "     'name':'org_wso2_iot_devices_motion',"
                     + "     'version':'1.0.0',"
-                    + "     'nickName': 'MOTION Data',"
+                    + "     'nickName': 'Motion Data',"
                     + "     'description': 'Motion data received from the Device',"
                     + "     'tags': ['iot', 'motion'],"
                     + "     'metaData': ["

@@ -63,7 +63,7 @@
     <jaxrs:server id="DevicesManager" address="/DevicesManager">
         <jaxrs:serviceBeans>
             <bean id="DevicesManagerService"
-                  class="org.wso2.carbon.device.mgt.iot.services.common.DevicesManager"/>
+                  class="org.wso2.carbon.device.mgt.iot.services.common.DevicesManagerService"/>
         </jaxrs:serviceBeans>
     </jaxrs:server>
 
