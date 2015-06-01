@@ -31,10 +31,15 @@
                                         // readcontrols/{owner}/{deviceId}
                                         // reply - application/json - {"owner":"","deviceId":"","replyMessage":""}
 
-
+#define SONAR_TRIG  2
+#define SONAR_ECHO  4
+#define PIR_PIN  13
+#define LDR_PIN  A1
 #define TEMP_PIN 12
 
-
+#define BUZZER 6
+#define BUZZER_SOUND 100
+#define MAX_DISTANCE 30
 
 #define TURN_DELAY 100
 

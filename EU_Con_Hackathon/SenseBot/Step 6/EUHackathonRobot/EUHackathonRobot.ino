@@ -12,9 +12,6 @@ Adafruit_CC3000_Client pushClient;
 
 static struct pt pushThread;
 
-int motor_right[] = {9, 11};
-int motor_left[] = {7, 8};
-
     /**********************************************************************************************  
         0. Check with a sample Wifi code of the Adafruit_CC3000 library to ensure that the sheild is working
         1. Set the ip of the server(byte array below) where the Web-Rest API for the FireAlarm is running
@@ -30,149 +27,45 @@ byte server[4] = { 192, 168, 43, 234 };
 String host, jsonPayLoad;
 
 void setup() {
-  motor_stop();
-  Serial.begin(115200);
- 
-   int i;
-  for(i = 0; i < 2; i++){
-    pinMode(motor_left[i], OUTPUT);
-    pinMode(motor_right[i], OUTPUT);
-  }
-  
+  if(true) Serial.begin(115200); 
   pinMode(PIR_PIN, INPUT);
 
-  PT_INIT(&pushThread);
+//  PT_INIT(&pushThread);
   
   connectHttp();
   setupResource();
-  
 }
 
-int motion_global=0;
-static unsigned long previous = 0;
-static int gap=0;
 void loop() {
   
-  
-  protothread1(&pushThread, 1000);
-  
- 
-  if(millis() - previous > gap){
-    if(motion_global==0){
-      motion_global=1;
-      drive_forward();
-      gap=10000;
+  // USE A DELAY with millis when using this code with motor controlling or simply use the thread block
+  if (pushClient.connected()) {   
+    pushData();                    // batches all the required pin values together and pushes once
+//    protothread1(&pushThread, 1000);      // Pushes data and waits for control signals to be received
+    delay(POLL_INTERVAL);
+    
+  } else {
+    if(DEBUG) {
+      Serial.println("client not found...");
+      Serial.println("disconnecting.");
     }
-    
-    
-    
-    else if(motion_global==1){
-      motion_global=2;
-      motor_stop();
-      gap=5000;
-    }
-    
-    else if(motion_global==2){
-      motion_global=0;
-      drive_backward();
-      gap=5000;
-    }
-    
-    
-    previous=millis();
-    
-  }
+    pushClient.close();
+    cc3000.disconnect();  
    
-
-   
-}
-
-
-
-
-
-void motor_stop(){
-digitalWrite(motor_left[0], LOW); 
-digitalWrite(motor_left[1], LOW); 
-
-digitalWrite(motor_right[0], LOW); 
-digitalWrite(motor_right[1], LOW);
-unsigned long  motorStop= millis() + 25;  
-while (!(motorStop<= millis())){
-//delay 25ms
-}
-}
-
-void drive_backward(){
-motor_stop();
-digitalWrite(motor_left[0], LOW); 
-digitalWrite(motor_left[1], HIGH); 
-
-digitalWrite(motor_right[0], LOW); 
-digitalWrite(motor_right[1], HIGH); 
-}
-
-void drive_forward(){
-//motor_stop();
-
-
-digitalWrite(motor_left[0], HIGH); 
-digitalWrite(motor_left[1], LOW); 
-
-digitalWrite(motor_right[0], HIGH); 
-digitalWrite(motor_right[1], LOW); 
-}
-
-void turn_right(){
-motor_stop();
-digitalWrite(motor_left[0], LOW); 
-digitalWrite(motor_left[1], HIGH); 
-unsigned long  motorStop= millis() + TURN_DELAY;  
-while (!(motorStop<= millis())){
-//delay 300ms
-}
-motor_stop();
-
-}
-
-void turn_left(){
-motor_stop();
-
-digitalWrite(motor_right[0], LOW); 
-digitalWrite(motor_right[1], HIGH); 
-unsigned long  motorStop= millis() + TURN_DELAY;  
-while (!(motorStop<= millis())){
-//delay 300ms
-}
-motor_stop();
-}
-
-
-
-
-
-
-static int protothread1(struct pt *pt, int interval) {
-  static unsigned long timestamp = 0;
-  PT_BEGIN(pt);
-  while(1) { // never stop 
-    /* each time the function is called the second boolean
-    *  argument "millis() - timestamp > interval" is re-evaluated
-    *  and if false the function exits after that. */
-    PT_WAIT_UNTIL(pt, millis() - timestamp > interval );
     connectHttp();
-    timestamp = millis(); // take a new timestamp
-    if (pushClient.connected()) {   
-                       // batches all the required pin values together and pushes once
-         // Pushes data in 1 second interval
-
-    pushData();
-   
-   pushClient.close();
-    cc3000.disconnect(); 
-  } 
-     
-    
-  }
-  PT_END(pt);
+  }  
 }
+
+
+//static int protothread1(struct pt *pt, int interval) {
+//  static unsigned long timestamp = 0;
+//  PT_BEGIN(pt);
+//  while(1) { // never stop 
+//    /* each time the function it is checked whether any control signals are sent
+//    *  if so exit this proto thread
+//    */
+////    PT_WAIT_UNTIL(pt, readControls() );
+////   pushData();
+//  }
+//  PT_END(pt);
+//}

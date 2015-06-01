@@ -27,10 +27,8 @@ byte server[4] = { 192, 168, 43, 234 };
 String host, jsonPayLoad;
 
 void setup() {
-  if(true) Serial.begin(115200); 
-  pinMode(PIR_PIN, INPUT);
+  Serial.begin(115200); 
 
-//  PT_INIT(&pushThread);
   
   connectHttp();
   setupResource();
