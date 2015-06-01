@@ -2,6 +2,7 @@
 
 * ActiveMQ sample config	-	a sample MQTT enabled **activemq.xml** file
 * ArduinoAgents	-	the arduino sketeches for *Wifi/Ethernet* sheilds for the firealarm demo
+* BAM ToolBox - the analytics toolbox for deployment into the **WSO2-BAM**
 * DC Config Files	-	Device-Cloud configuration folder (**/iot**) and the config files
 * Dependant JARS	-	dependancies from ([carbon-device-mgt] (https://github.com/wso2/carbon-device-mgt.git "The WSO2 connected devices management framework on top our carbon") *&* [device-mgt] (https://github.com/wso2-dev/device-cloud/tree/master/components/device-mgt "A component of the WSO2 device cloud")) other repos that the firealarm JAX-RS relies on
 * JAX-RS Service	-	The **.war** file of the *REST* service and the src code of the service which contains both the **FireAlarm** and **SenseBotRobot**
@@ -25,6 +26,8 @@ MQTT transport has to be enabled in the **"activemq.xml"** file found at ***\<AC
 ```
 
 The IP can be left to *localhost(0.0.0.0)* if ActiveMQ is running on the same machine as the JAX-RS service. If not the IP of the machine has to be set. Accordingly this has to be updated in the **devicecloud-config.xml** configuration file. 
+
+Read the 'Readme' inside the "BAM ToolBox" folder for details on deploying it into **WSO2 BAM**
 
 ***********
 
