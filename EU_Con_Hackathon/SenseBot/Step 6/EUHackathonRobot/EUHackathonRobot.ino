@@ -22,7 +22,7 @@ static struct pt pushThread;
     ***********************************************************************************************/
 
 uint32_t sserver;
-byte server[4] = { 10, 100, 7, 38 };
+byte server[4] = { XX, XX, XX, XX };
 
 String host, jsonPayLoad;
 dht DHT;
