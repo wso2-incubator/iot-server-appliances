@@ -20,8 +20,8 @@
                            // Security can be WLAN_SEC_UNSEC, WLAN_SEC_WEP, WLAN_SEC_WPA or WLAN_SEC_WPA2
 #define IDLE_TIMEOUT_MS  3000      
 
-#define DEVICE_OWNER "${DEVICE_OWNER}"          
-#define DEVICE_ID "${DEVICE_ID}"             
+#define DEVICE_OWNER "Test" //"${DEVICE_OWNER}"          
+#define DEVICE_ID "Test" //"${DEVICE_ID}"             
 
 
 
