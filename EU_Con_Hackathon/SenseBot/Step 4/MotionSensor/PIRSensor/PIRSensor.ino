@@ -1,7 +1,7 @@
-#define LOOP_DELAY  5000
+#define LOOP_DELAY  4000
 
 #define PIR_PIN  A3
-#define LED_PIN  8
+#define LED_PIN  4
 
 int motionDetect;
 
@@ -27,13 +27,3 @@ void loop() {
   }
 }
 
-
-
-//int motionSense(){
-//  int motionDetect = digitalRead(PIR_PIN);
-//  
-//  Serial.print("MOTION : ");
-//  Serial.println(motionDetect);
-//  
-//  return motionDetect;
-//}

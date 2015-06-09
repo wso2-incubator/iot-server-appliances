@@ -14,14 +14,14 @@ Adafruit_CC3000_Server httpServer(LISTEN_PORT);
 
 static struct pt pushThread;
 
-int motor_right[] = {9, 11};
 int motor_left[] = {7, 8};
 int enA = 12;
-int enB = 13;
 
+int motor_right[] = {4, 6};
+int enB = 11;
+
+ 
 int motion_global = 0;
-static unsigned long previous = 0;
-static int gap = 0;
 
     /**********************************************************************************************  
         0. Check with a sample Wifi code of the Adafruit_CC3000 library to ensure that the sheild is working
@@ -33,7 +33,7 @@ static int gap = 0;
     ***********************************************************************************************/
 
 uint32_t sserver;
-byte server[4] = { 10, 100, 7, 38 };
+byte server[4] = { XX, XX, XX, XX };
 
 String host, jsonPayLoad;
 dht DHT;
@@ -48,13 +48,12 @@ void setup() {
     pinMode(motor_left[i], OUTPUT);
     pinMode(motor_right[i], OUTPUT);
   }
-  
-  motor_stop();
-  
+   
   pinMode(enA, OUTPUT);
   pinMode(enB, OUTPUT);
   digitalWrite(enA, 100);
   digitalWrite(enB, 100);
+  motor_stop();
   
   PT_INIT(&pushThread);
   
@@ -69,43 +68,21 @@ void loop() {
   
   protothread1(&pushThread, 1000);
   
-//  listen();
-  wdt_reset();
-  
-  // Check connection
+  listen();
+//  wdt_reset();
+                      // Check connection
   if( !cc3000.checkConnected() ){
     while(1){
     }
   }
   
   wdt_reset(); 
-
-  drive();
+  drive();    
   
-  
-  
-  
-//  if (millis() - previous > gap) {
-//    if(motion_global==0){
-//      motion_global=1;
-//      drive_forward();
-//      gap=10000;
-//    } else if (motion_global==1) {
-//      motion_global=2;
-//      motor_stop();
-//      gap=5000;
-//    } else if (motion_global==2) {
-//      motion_global=0;
-//      drive_backward();
-//      gap=5000;
-//    }
-//   
-//    previous=millis(); 
-//  }   
 }
 
 
-void drive(){   
+void drive(){
   switch(motion_global){           
      case 1 : drive_forward();                     
                break;
@@ -129,7 +106,6 @@ void updateDirectionVariable(int motionDir){
 
 
 static int protothread1(struct pt *pt, int interval) {
-  static unsigned long timestamp = 0;
   PT_BEGIN(pt);
   while(1) { // never stop 
     /* each time the function is called the second boolean
@@ -152,60 +128,7 @@ static int protothread1(struct pt *pt, int interval) {
 }
 
 
-void motor_stop(){
-  digitalWrite(motor_left[0], LOW); 
-  digitalWrite(motor_left[1], LOW); 
-  
-  digitalWrite(motor_right[0], LOW); 
-  digitalWrite(motor_right[1], LOW);
-  unsigned long  motorStop= millis() + 25;  
-  while (!(motorStop<= millis())){
-  //delay 25ms
-  }
-}
 
-void drive_backward(){
-  //motor_stop();
-  digitalWrite(motor_left[0], LOW); 
-  digitalWrite(motor_left[1], HIGH); 
-  
-  digitalWrite(motor_right[0], LOW); 
-  digitalWrite(motor_right[1], HIGH); 
-}
-
-void drive_forward(){
-  //motor_stop();
-  digitalWrite(motor_left[0], HIGH); 
-  digitalWrite(motor_left[1], LOW); 
-  
-  digitalWrite(motor_right[0], HIGH); 
-  digitalWrite(motor_right[1], LOW); 
-}
-
-
-void turn_right(){
-  motor_stop();
-  digitalWrite(motor_left[0], LOW); 
-  digitalWrite(motor_left[1], HIGH); 
-  unsigned long  motorStop= millis() + TURN_DELAY;  
-  while (!(motorStop<= millis())){
-  //delay 300ms
-  }
-  updateDirectionVariable(0);
-  motor_stop();
-}
-
-void turn_left(){
-  motor_stop();
-  digitalWrite(motor_right[0], LOW); 
-  digitalWrite(motor_right[1], HIGH); 
-  unsigned long  motorStop= millis() + TURN_DELAY;  
-  while (!(motorStop<= millis())){
-  //delay 300ms
-  }
-  updateDirectionVariable(0);
-  motor_stop();
-}
 
 
 

@@ -47,9 +47,9 @@ double getTemperature(){
   }
     // DISPLAY DATA
   Serial.print("\t");
-  Serial.print(DHT.temperature, 1);
+  Serial.print(DHT.humidity, 1);
   Serial.print(",\t\t");
-  Serial.println(DHT.humidity, 1);
+  Serial.println(DHT.temperature, 1);
   Serial.println("-------------------------------");
   return DHT.temperature;
 }

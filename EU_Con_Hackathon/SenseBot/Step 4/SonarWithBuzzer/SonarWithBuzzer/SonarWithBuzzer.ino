@@ -1,11 +1,11 @@
 #define LOOP_DELAY  5000
 
-#define BUZZER 6
+#define BUZZER A0
 #define BUZZER_SOUND 100
 #define MAX_DISTANCE 30
 
-#define SONAR_TRIG  2
-#define SONAR_ECHO  4
+#define SONAR_TRIG  A4
+#define SONAR_ECHO  A5
 
 int obstacleDistance;
 

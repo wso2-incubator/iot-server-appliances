@@ -13,8 +13,8 @@
 #define ADAFRUIT_CC3000_VBAT  5
 #define ADAFRUIT_CC3000_CS    10
 
-#define WLAN_SSID       "WSO2-Restricted"           // cannot be longer than 32 characters!
-#define WLAN_PASS       "LKvene8xIOT"
+#define WLAN_SSID       "YourAccessPointSSID"           // cannot be longer than 32 characters!
+#define WLAN_PASS       "APPassword"
 
 #define WLAN_SECURITY   WLAN_SEC_WPA2
                            // Security can be WLAN_SEC_UNSEC, WLAN_SEC_WEP, WLAN_SEC_WPA or WLAN_SEC_WPA2

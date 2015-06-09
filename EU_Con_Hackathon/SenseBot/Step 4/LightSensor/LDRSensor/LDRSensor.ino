@@ -1,10 +1,9 @@
 #define LDR_PIN  A1
-#define LDR_D_PIN   0
-#define LOOP_DELAY  3000
+#define LOOP_DELAY  2000
 
 void setup() {
   Serial.begin(9600);
-  pinMode(LDR_D_PIN, OUTPUT);
+  pinMode(LDR_PIN, OUTPUT);
 }
 
 void loop() {

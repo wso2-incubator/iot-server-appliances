@@ -1,7 +1,7 @@
 #define LOOP_DELAY  3000
 
-#define SONAR_TRIG  2
-#define SONAR_ECHO  4
+#define SONAR_TRIG  A4
+#define SONAR_ECHO  A5
 
 int obstacleDistance;
 

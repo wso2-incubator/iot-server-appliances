@@ -33,46 +33,30 @@ boolean listen()
       parsed = parseRequest(buffer, bufindex, action, path);
     }
 
-    // Handle the request if it was parsed.
     if (parsed) {
-//      Serial.println(F("Processing request"));
-//      Serial.print(F("Action: ")); Serial.println(action);
-      Serial.print(F("Path: ")); Serial.println(path);
-      // Check the action to see if it was a GET request.
+//      Serial.print(F("Path: ")); Serial.println(path);
+
       if (strcmp(action, "GET") == 0) {
-              String urlPath = path;
-              urlPath.replace("/move/","");
-              urlPath.replace("/","");
-//              client.fastrprint(F("Command Received")); 
-              if(urlPath.endsWith("L")){
-                
-                updateDirectionVariable(3);
- 
-              }else if(urlPath.endsWith("R")){
-               
-                updateDirectionVariable(4);
- 
-              }else if(urlPath.endsWith("B")){
-               
-                updateDirectionVariable(2);
-  
-              }else if(urlPath.endsWith("F")){
-                //Serial.println("test");
-                updateDirectionVariable(1);
+          String urlPath = path;
+          urlPath.replace("/move/","");
+          urlPath.replace("/","");
 
-              }else if(urlPath.endsWith("S")){
-               
-                updateDirectionVariable(5);
-
-              }
-             
-      }
-//      else {
-//        // Unsupported action, respond with an HTTP 405 method not allowed error.
-//        //client.fastrprintln(F("HTTP/1.1 405 Method Not Allowed"));
-//        //client.fastrprintln(F(""));
-//      }
+          if(urlPath.endsWith("F")){
+            updateDirectionVariable(1);
             
+          }else if(urlPath.endsWith("B")){    
+            updateDirectionVariable(2);
+            
+          }else if(urlPath.endsWith("L")){      
+            updateDirectionVariable(3);
+            
+          }else if(urlPath.endsWith("R")){         
+            updateDirectionVariable(4);
+            
+          }else if(urlPath.endsWith("S")){      
+            updateDirectionVariable(5);
+          }    
+      }  
     } 
 
     // Wait a short period to make sure the response had time to send before
@@ -82,8 +66,7 @@ boolean listen()
     // Close the connection when done.
     Serial.println(F("Client disconnected"));
     client.close();
-    //return direction;
-     return false;
+    return false;
   } else {
     return true;
   }

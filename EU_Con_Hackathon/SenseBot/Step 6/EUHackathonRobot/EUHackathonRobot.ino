@@ -9,9 +9,6 @@ Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ
                                          SPI_CLOCK_DIVIDER); // you can change this clock speed
 
 Adafruit_CC3000_Client pushClient;
-
-static struct pt pushThread;
-
     /**********************************************************************************************  
         0. Check with a sample Wifi code of the Adafruit_CC3000 library to ensure that the sheild is working
         1. Set the ip of the server(byte array below) where the Web-Rest API for the FireAlarm is running
@@ -30,8 +27,7 @@ dht DHT;
 void setup() {
   if(true) Serial.begin(115200); 
   pinMode(PIR_PIN, INPUT);
-
-//  PT_INIT(&pushThread);
+  pinMode(BUZZER, OUTPUT);
   
   connectHttp();
   setupResource();
@@ -42,7 +38,6 @@ void loop() {
   // USE A DELAY with millis when using this code with motor controlling or simply use the thread block
   if (pushClient.connected()) {   
     pushData();                    // batches all the required pin values together and pushes once
-//    protothread1(&pushThread, 1000);      // Pushes data and waits for control signals to be received
     delay(POLL_INTERVAL);
     
   } else {
@@ -57,16 +52,3 @@ void loop() {
   }  
 }
 
-
-//static int protothread1(struct pt *pt, int interval) {
-//  static unsigned long timestamp = 0;
-//  PT_BEGIN(pt);
-//  while(1) { // never stop 
-//    /* each time the function it is checked whether any control signals are sent
-//    *  if so exit this proto thread
-//    */
-////    PT_WAIT_UNTIL(pt, readControls() );
-////   pushData();
-//  }
-//  PT_END(pt);
-//}

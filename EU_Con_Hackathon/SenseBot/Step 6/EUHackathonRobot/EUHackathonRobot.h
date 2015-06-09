@@ -23,21 +23,19 @@
 #define DEVICE_OWNER "Test" //"${DEVICE_OWNER}"          
 #define DEVICE_ID "Test" //"${DEVICE_ID}"             
 
-
-
 #define SERVICE_PORT 9763 
 #define SERVICE_EPOINT "/iotdevices/SenseBotController/" 
                                         // pushalarmdata - application/json - {"owner":"","deviceId":"","replyMessage":"","time":"","key":"","value":""}
                                         // readcontrols/{owner}/{deviceId}
                                         // reply - application/json - {"owner":"","deviceId":"","replyMessage":""}
 
-#define SONAR_TRIG  2
-#define SONAR_ECHO  4
-#define PIR_PIN  A3
+#define BUZZER A0
 #define LDR_PIN  A1
 #define TEMP_PIN A2
+#define PIR_PIN  A3
+#define SONAR_TRIG  A4
+#define SONAR_ECHO  A5
 
-#define BUZZER 6
 #define BUZZER_SOUND 100
 #define MAX_DISTANCE 30
 
