@@ -32,9 +32,7 @@
                                         // reply - application/json - {"owner":"","deviceId":"","replyMessage":""}
 
 
-#define TEMP_PIN 12
-
-
+#define TEMP_PIN A2
 
 #define TURN_DELAY 100
 
