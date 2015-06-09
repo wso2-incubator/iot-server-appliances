@@ -24,16 +24,12 @@
          http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
 
 
-    <jaxrs:server id="DeviceController" address="/DeviceController">
-        <jaxrs:serviceBeans>
-            <bean id="DeviceControllerService" class="org.wso2.carbon.device.mgt.iot.services.DeviceControllerService"/>
-        </jaxrs:serviceBeans>
-    </jaxrs:server>
 
-    <jaxrs:server id="SenseBotController" address="/SenseBotController">
+
+    <jaxrs:server id="SenseBotController" address="/controller">
         <jaxrs:serviceBeans>
             <bean id="SenseBotControllerService"
-                  class="org.wso2.carbon.device.mgt.iot.services.sensebot.SenseBotControllerService">
+                  class="org.wso2.carbon.device.mgt.iot.sensebot.api.SensebotControllerService">
             </bean>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
@@ -41,11 +37,10 @@
         </jaxrs:providers>
     </jaxrs:server>
 
-    <jaxrs:server id="FireAlarmController" address="/FireAlarmController">
+    <jaxrs:server id="SenseBotManager" address="/manager">
         <jaxrs:serviceBeans>
-            <bean id="FireAlarmControllerService"
-                  class="org.wso2.carbon.device.mgt.iot.services.firealarm.FireAlarmControllerService">
-                <property name="mqttSubscriber" ref="mqttSubscriber"/>
+            <bean id="SenseBotManagerService"
+                  class="org.wso2.carbon.device.mgt.iot.sensebot.api.SensebotManagerService">
             </bean>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
@@ -53,24 +48,7 @@
         </jaxrs:providers>
     </jaxrs:server>
 
-    <jaxrs:server id="FireAlarmManager" address="/FireAlarmManager">
-        <jaxrs:serviceBeans>
-            <bean id="FireAlarmManagerService"
-                  class="org.wso2.carbon.device.mgt.iot.services.firealarm.FireAlarmManagerService"/>
-        </jaxrs:serviceBeans>
-    </jaxrs:server>
 
-    <jaxrs:server id="DevicesManager" address="/DevicesManager">
-        <jaxrs:serviceBeans>
-            <bean id="DevicesManagerService"
-                  class="org.wso2.carbon.device.mgt.iot.services.common.DevicesManagerService"/>
-        </jaxrs:serviceBeans>
-    </jaxrs:server>
-
-    <bean id="mqttSubscriber" class="org.wso2.carbon.device.mgt.iot.services.MQTTSubscriber">
-        <constructor-arg index="0" value="Subscriber"></constructor-arg>
-        <constructor-arg index="1" value="FireAlarm"></constructor-arg>
-    </bean>
 
 
 </beans>

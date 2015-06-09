@@ -1,4 +1,4 @@
-package org.wso2.carbon.device.mgt.iot.services;
+package org.wso2.carbon.device.mgt.iot.sensebot.api.util;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
