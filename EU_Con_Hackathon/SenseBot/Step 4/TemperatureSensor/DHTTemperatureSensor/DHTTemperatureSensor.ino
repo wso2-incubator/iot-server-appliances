@@ -1,7 +1,7 @@
 #include "dht.h"
 
 #define LOOP_DELAY  5000
-#define TEMP_PIN 12
+#define TEMP_PIN A2
 
 void setup() {
   Serial.begin(9600);

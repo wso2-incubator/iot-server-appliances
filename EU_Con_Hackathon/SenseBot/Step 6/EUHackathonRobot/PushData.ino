@@ -8,7 +8,7 @@
 void pushData(){
   String payLoad = "Data";
   payLoad = payLoad +  "\",\"value\":\"";
- 
+
   int temperature =  (uint8_t)getTemperature();
   payLoad += temperature;
   payLoad += ":"; 

@@ -1,6 +1,7 @@
 #include "EUHackathonRobot.h"
 
 #include <Adafruit_CC3000.h>
+#include <avr/wdt.h>
 #include <SPI.h>
 #include "dht.h"
 #include <pt.h>
@@ -9,11 +10,18 @@ Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ
                                          SPI_CLOCK_DIVIDER); // you can change this clock speed
 
 Adafruit_CC3000_Client pushClient;
+Adafruit_CC3000_Server httpServer(LISTEN_PORT);
 
 static struct pt pushThread;
 
 int motor_right[] = {9, 11};
 int motor_left[] = {7, 8};
+int enA = 12;
+int enB = 13;
+
+int motion_global = 0;
+static unsigned long previous = 0;
+static int gap = 0;
 
     /**********************************************************************************************  
         0. Check with a sample Wifi code of the Adafruit_CC3000 library to ensure that the sheild is working
@@ -25,130 +33,98 @@ int motor_left[] = {7, 8};
     ***********************************************************************************************/
 
 uint32_t sserver;
-byte server[4] = { 192, 168, 43, 234 };
+byte server[4] = { 10, 100, 7, 38 };
 
 String host, jsonPayLoad;
+dht DHT;
+  
+
 
 void setup() {
-  motor_stop();
   Serial.begin(115200);
- 
-   int i;
-  for(i = 0; i < 2; i++){
+  pinMode(PIR_PIN, INPUT);
+  
+  for(int i = 0; i < 2; i++){
     pinMode(motor_left[i], OUTPUT);
     pinMode(motor_right[i], OUTPUT);
   }
   
-  pinMode(PIR_PIN, INPUT);
-
+  motor_stop();
+  
+  pinMode(enA, OUTPUT);
+  pinMode(enB, OUTPUT);
+  digitalWrite(enA, 100);
+  digitalWrite(enB, 100);
+  
   PT_INIT(&pushThread);
   
   connectHttp();
   setupResource();
-  
+  wdt_enable(WDTO_4S);
 }
 
-int motion_global=0;
-static unsigned long previous = 0;
-static int gap=0;
+
+
 void loop() {
-  
   
   protothread1(&pushThread, 1000);
   
- 
-  if(millis() - previous > gap){
-    if(motion_global==0){
-      motion_global=1;
-      drive_forward();
-      gap=10000;
+//  listen();
+  wdt_reset();
+  
+  // Check connection
+  if( !cc3000.checkConnected() ){
+    while(1){
     }
-    
-    
-    
-    else if(motion_global==1){
-      motion_global=2;
-      motor_stop();
-      gap=5000;
-    }
-    
-    else if(motion_global==2){
-      motion_global=0;
-      drive_backward();
-      gap=5000;
-    }
-    
-    
-    previous=millis();
-    
   }
-   
+  
+  wdt_reset(); 
 
-   
+  drive();
+  
+  
+  
+  
+//  if (millis() - previous > gap) {
+//    if(motion_global==0){
+//      motion_global=1;
+//      drive_forward();
+//      gap=10000;
+//    } else if (motion_global==1) {
+//      motion_global=2;
+//      motor_stop();
+//      gap=5000;
+//    } else if (motion_global==2) {
+//      motion_global=0;
+//      drive_backward();
+//      gap=5000;
+//    }
+//   
+//    previous=millis(); 
+//  }   
 }
 
 
-
-
-
-void motor_stop(){
-digitalWrite(motor_left[0], LOW); 
-digitalWrite(motor_left[1], LOW); 
-
-digitalWrite(motor_right[0], LOW); 
-digitalWrite(motor_right[1], LOW);
-unsigned long  motorStop= millis() + 25;  
-while (!(motorStop<= millis())){
-//delay 25ms
-}
-}
-
-void drive_backward(){
-motor_stop();
-digitalWrite(motor_left[0], LOW); 
-digitalWrite(motor_left[1], HIGH); 
-
-digitalWrite(motor_right[0], LOW); 
-digitalWrite(motor_right[1], HIGH); 
-}
-
-void drive_forward(){
-//motor_stop();
-
-
-digitalWrite(motor_left[0], HIGH); 
-digitalWrite(motor_left[1], LOW); 
-
-digitalWrite(motor_right[0], HIGH); 
-digitalWrite(motor_right[1], LOW); 
-}
-
-void turn_right(){
-motor_stop();
-digitalWrite(motor_left[0], LOW); 
-digitalWrite(motor_left[1], HIGH); 
-unsigned long  motorStop= millis() + TURN_DELAY;  
-while (!(motorStop<= millis())){
-//delay 300ms
-}
-motor_stop();
-
-}
-
-void turn_left(){
-motor_stop();
-
-digitalWrite(motor_right[0], LOW); 
-digitalWrite(motor_right[1], HIGH); 
-unsigned long  motorStop= millis() + TURN_DELAY;  
-while (!(motorStop<= millis())){
-//delay 300ms
-}
-motor_stop();
+void drive(){   
+  switch(motion_global){           
+     case 1 : drive_forward();                     
+               break;
+     case 2 : drive_backward();            
+               break;
+     case 3 : turn_left();           
+               break;
+     case 4 : turn_right();
+               break;                   
+     case 5 : 
+              motor_stop();          
+               break;  
+  }
 }
 
 
-
+void updateDirectionVariable(int motionDir){
+  motion_global = motionDir;
+}
 
 
 
@@ -159,20 +135,77 @@ static int protothread1(struct pt *pt, int interval) {
     /* each time the function is called the second boolean
     *  argument "millis() - timestamp > interval" is re-evaluated
     *  and if false the function exits after that. */
-    PT_WAIT_UNTIL(pt, millis() - timestamp > interval );
-    connectHttp();
-    timestamp = millis(); // take a new timestamp
+    PT_WAIT_UNTIL(pt, listen() );
+
     if (pushClient.connected()) {   
                        // batches all the required pin values together and pushes once
          // Pushes data in 1 second interval
-
-    pushData();
-   
-   pushClient.close();
-    cc3000.disconnect(); 
-  } 
-     
-    
+      pushData(); 
+      wdt_reset();  
+    } else {
+      pushClient.close();
+      cc3000.disconnect();
+      connectHttp(); 
+    }   
   }
   PT_END(pt);
 }
+
+
+void motor_stop(){
+  digitalWrite(motor_left[0], LOW); 
+  digitalWrite(motor_left[1], LOW); 
+  
+  digitalWrite(motor_right[0], LOW); 
+  digitalWrite(motor_right[1], LOW);
+  unsigned long  motorStop= millis() + 25;  
+  while (!(motorStop<= millis())){
+  //delay 25ms
+  }
+}
+
+void drive_backward(){
+  //motor_stop();
+  digitalWrite(motor_left[0], LOW); 
+  digitalWrite(motor_left[1], HIGH); 
+  
+  digitalWrite(motor_right[0], LOW); 
+  digitalWrite(motor_right[1], HIGH); 
+}
+
+void drive_forward(){
+  //motor_stop();
+  digitalWrite(motor_left[0], HIGH); 
+  digitalWrite(motor_left[1], LOW); 
+  
+  digitalWrite(motor_right[0], HIGH); 
+  digitalWrite(motor_right[1], LOW); 
+}
+
+
+void turn_right(){
+  motor_stop();
+  digitalWrite(motor_left[0], LOW); 
+  digitalWrite(motor_left[1], HIGH); 
+  unsigned long  motorStop= millis() + TURN_DELAY;  
+  while (!(motorStop<= millis())){
+  //delay 300ms
+  }
+  updateDirectionVariable(0);
+  motor_stop();
+}
+
+void turn_left(){
+  motor_stop();
+  digitalWrite(motor_right[0], LOW); 
+  digitalWrite(motor_right[1], HIGH); 
+  unsigned long  motorStop= millis() + TURN_DELAY;  
+  while (!(motorStop<= millis())){
+  //delay 300ms
+  }
+  updateDirectionVariable(0);
+  motor_stop();
+}
+
+
+

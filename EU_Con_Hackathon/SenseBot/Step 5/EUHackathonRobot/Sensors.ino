@@ -1,7 +1,6 @@
 
 
 double getTemperature(){
-  dht DHT;
   int chk = DHT.read11(TEMP_PIN);
   if(DEBUG){
     Serial.println("-------------------------------");

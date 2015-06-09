@@ -13,8 +13,8 @@
 #define ADAFRUIT_CC3000_VBAT  5
 #define ADAFRUIT_CC3000_CS    10
 
-#define WLAN_SSID       "AndroidAP"           // cannot be longer than 32 characters!
-#define WLAN_PASS       "1234567890"
+#define WLAN_SSID       "WSO2-Restricted"           // cannot be longer than 32 characters!
+#define WLAN_PASS       "LKvene8xIOT"
 
 #define WLAN_SECURITY   WLAN_SEC_WPA2
                            // Security can be WLAN_SEC_UNSEC, WLAN_SEC_WEP, WLAN_SEC_WPA or WLAN_SEC_WPA2
@@ -45,7 +45,7 @@
 
 #define POLL_INTERVAL 1000
 #define DEBUG false
-#define CON_DEBUG false
+#define CON_DEBUG true
 
 #endif
 

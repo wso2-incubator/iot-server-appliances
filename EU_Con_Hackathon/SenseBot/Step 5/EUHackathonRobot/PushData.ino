@@ -9,7 +9,8 @@ void pushData(){
   String payLoad = "Data";
   payLoad = payLoad +  "\",\"value\":\"";
  
-  int temperature =  (uint8_t)getTemperature();
+  int temperature =  getTemperature();
+  if(DEBUG) Serial.println(getTemperature());
   payLoad += temperature;
   payLoad += "\"}";
 

@@ -159,13 +159,3 @@ void drive(){
 void updateDirectionVariable(int direction){
   motion_global = direction;
 }
-
-
-
-
-
-
-
-
-
-

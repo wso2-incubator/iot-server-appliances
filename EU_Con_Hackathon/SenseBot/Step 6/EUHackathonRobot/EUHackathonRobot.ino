@@ -22,10 +22,11 @@ static struct pt pushThread;
     ***********************************************************************************************/
 
 uint32_t sserver;
-byte server[4] = { 192, 168, 43, 234 };
+byte server[4] = { 10, 100, 7, 38 };
 
 String host, jsonPayLoad;
-
+dht DHT;
+  
 void setup() {
   if(true) Serial.begin(115200); 
   pinMode(PIR_PIN, INPUT);

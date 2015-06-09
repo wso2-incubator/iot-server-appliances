@@ -1,6 +1,6 @@
 #define LOOP_DELAY  5000
 
-#define PIR_PIN  13
+#define PIR_PIN  A3
 #define LED_PIN  8
 
 int motionDetect;
