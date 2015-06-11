@@ -25,12 +25,17 @@
 
 
 
-#define SERVICE_PORT 9763 
-#define SERVICE_EPOINT "/iotdevices/SenseBotController/" 
-                                        // pushalarmdata - application/json - {"owner":"","deviceId":"","replyMessage":"","time":"","key":"","value":""}
-                                        // readcontrols/{owner}/{deviceId}
-                                        // reply - application/json - {"owner":"","deviceId":"","replyMessage":""}
+  /**********************************************************************************************  
+    The following two parameters are used when pushing data via the API in the API Manager
+   ***********************************************************************************************/
+#define SERVICE_PORT 8281
+#define SERVICE_EPOINT "/sensebotdata/1.0/controller/"
 
+  /**********************************************************************************************  
+    Use the following two parameters when pushing data directly to the JAX-RS Service
+   ***********************************************************************************************/
+//#define SERVICE_PORT 9763
+//#define SERVICE_EPOINT "/sensebot/controller/"
 
 #define TEMP_PIN A2
 
