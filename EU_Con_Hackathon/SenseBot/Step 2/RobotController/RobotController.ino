@@ -38,19 +38,19 @@ void setup() {
   initializeServer();
  
  //watchdog
-  wdt_enable(WDTO_4S);
+//  wdt_enable(WDTO_4S);
 }
 
 
 
 void loop() {  
  listen();
- wdt_reset();
-  // Check connection
-  if(!cc3000.checkConnected()){
-    while(1){}
-  }
-  wdt_reset(); 
+// wdt_reset();
+//  // Check connection
+//  if(!cc3000.checkConnected()){
+//    while(1){}
+//  }
+//  wdt_reset(); 
 
  drive();
 }
