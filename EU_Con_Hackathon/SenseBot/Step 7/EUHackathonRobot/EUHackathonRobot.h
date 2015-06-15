@@ -12,14 +12,14 @@
 #define ADAFRUIT_CC3000_VBAT  5
 #define ADAFRUIT_CC3000_CS    10
 
-#define WLAN_SSID       "YourAccessPointSSID"           // cannot be longer than 32 characters!
-#define WLAN_PASS       "APPassword"
+#define WLAN_SSID       "botspot"           // cannot be longer than 32 characters!
+#define WLAN_PASS       "botpassword"
 
 #define WLAN_SECURITY   WLAN_SEC_WPA2
                            // Security can be WLAN_SEC_UNSEC, WLAN_SEC_WEP, WLAN_SEC_WPA or WLAN_SEC_WPA2
 
-#define DEVICE_OWNER "Test" //"${DEVICE_OWNER}"          
-#define DEVICE_ID "Test" //"${DEVICE_ID}"             
+#define DEVICE_OWNER "ruwan" //"${DEVICE_OWNER}"          
+#define DEVICE_ID "1k1uiu0zdh10m" //"${DEVICE_ID}"           
 
   /**********************************************************************************************  
     The following two parameters are used when pushing data via the API in the API Manager

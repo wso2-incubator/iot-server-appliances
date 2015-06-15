@@ -6,7 +6,7 @@ int motion_global = 0;
 int motor_left[] = {7, 8};
 int enA = 12;
 
-int motor_right[] = {4, 6};
+int motor_right[] = {6, 4};
 int enB = 11;
 
 

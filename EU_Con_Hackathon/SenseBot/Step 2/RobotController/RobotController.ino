@@ -1,4 +1,4 @@
-#include <avr/wdt.h>
+//#include <avr/wdt.h>
 #include <Adafruit_CC3000.h>
 #include <SPI.h>
 
