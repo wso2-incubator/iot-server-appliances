@@ -15,10 +15,10 @@ Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ
 
 int motion_global = 0;
 
-int motor_left[] = {7, 8};
+int motor_left[] = {6,4};
 int enA = 12;
 
-int motor_right[] = {4, 6};
+int motor_right[] = {8, 7};
 int enB = 11;
 
 void setup() {
@@ -31,8 +31,8 @@ void setup() {
   
   pinMode(enA, OUTPUT);
   pinMode(enB, OUTPUT);
-  digitalWrite(enA, 100);
-  digitalWrite(enB, 100);
+  digitalWrite(enA, 30);
+  digitalWrite(enB, 30);
   
   motor_stop();
   initializeServer();

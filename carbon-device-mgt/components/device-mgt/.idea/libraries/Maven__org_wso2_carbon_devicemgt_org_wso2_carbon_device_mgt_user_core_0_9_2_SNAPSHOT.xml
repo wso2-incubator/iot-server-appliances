@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.wso2.carbon.devicemgt:org.wso2.carbon.device.mgt.user.core:0.9.2-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/carbon/devicemgt/org.wso2.carbon.device.mgt.user.core/0.9.2-SNAPSHOT/org.wso2.carbon.device.mgt.user.core-0.9.2-20150603.195632-216.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/carbon/devicemgt/org.wso2.carbon.device.mgt.user.core/0.9.2-SNAPSHOT/org.wso2.carbon.device.mgt.user.core-0.9.2-20150603.195632-216-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/carbon/devicemgt/org.wso2.carbon.device.mgt.user.core/0.9.2-SNAPSHOT/org.wso2.carbon.device.mgt.user.core-0.9.2-20150603.195632-216-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

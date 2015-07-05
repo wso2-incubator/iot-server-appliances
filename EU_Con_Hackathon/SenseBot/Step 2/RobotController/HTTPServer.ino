@@ -38,7 +38,8 @@ void initializeServer(void)
     Serial.println(F("Couldn't begin()! Check your wiring?"));
     while(1);
   }
-  // cc3000.setMacAddress(mac);
+  byte mac[6] = { 0xc0, 0x4a, 0x00, 0x19, 0x6d, 0x1b };
+   cc3000.setMacAddress(mac);
  
   if (!cc3000.connectToAP(WLAN_SSID, WLAN_PASS, WLAN_SECURITY)) {
     Serial.println(F("Failed!"));
