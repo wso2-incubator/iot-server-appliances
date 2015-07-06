@@ -140,14 +140,29 @@ public class DeviceManagementServiceProviderImpl implements DeviceManagementServ
     public boolean disenrollDevice(DeviceIdentifier deviceId) throws DeviceManagementException {
         DeviceManager dms =
                 this.getPluginRepository().getDeviceManagementProvider(deviceId.getType());
-        return dms.disenrollDevice(deviceId);
+        boolean status= dms.disenrollDevice(deviceId);
+
+        //simple workaroud for london con branch
+
+        try {
+            Device device=getCoreDevice(deviceId);
+            this.getDeviceDAO().deleteDevice(device.getId());
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementException("Error occurred while modifying the device " +
+                                                        "''", e);
+        }
+        return status;
+
     }
 
     @Override
     public boolean isEnrolled(DeviceIdentifier deviceId) throws DeviceManagementException {
         DeviceManager dms =
                 this.getPluginRepository().getDeviceManagementProvider(deviceId.getType());
-        return dms.isEnrolled(deviceId);
+        return  dms.isEnrolled(deviceId);
+
+
+
     }
 
     @Override

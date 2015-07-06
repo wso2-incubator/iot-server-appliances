@@ -79,7 +79,28 @@ public class DeviceDAOImpl implements DeviceDAO {
 
     @Override
     public void updateDevice(Device device) throws DeviceManagementDAOException {
+        Connection conn=null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int deviceId = -1;
+        try {
+            conn = this.getConnection();
+            String sql = "UPDATE DM_DEVICE SET NAME = ? WHERE DEVICE_IDENTIFICATION = ? AND " +
+                    "DEVICE_TYPE_ID = ? AND TENANT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, device.getName());
+            stmt.setString(2, device.getDeviceIdentificationId());
+            stmt.setInt(3, device.getDeviceTypeId());
+            stmt.setInt(4, device.getTenantId());
+            stmt.executeUpdate();
 
+
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while enrolling device '" +
+                                                           device.getName() + "'", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(conn, stmt, null);
+        }
     }
 
     @Override
@@ -89,7 +110,23 @@ public class DeviceDAOImpl implements DeviceDAO {
 
     @Override
     public void deleteDevice(int deviceId) throws DeviceManagementDAOException {
+        Connection conn=null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = this.getConnection();
+            String sql = "DELETE from DM_DEVICE  WHERE ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
 
+            stmt.executeUpdate();
+
+
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while enrolling device ''", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(conn, stmt, null);
+        }
     }
 
     @Override
