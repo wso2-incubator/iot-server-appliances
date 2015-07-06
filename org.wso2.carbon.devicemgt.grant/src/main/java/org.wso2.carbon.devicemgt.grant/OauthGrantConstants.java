@@ -15,18 +15,7 @@
  */
 package org.wso2.carbon.devicemgt.grant;
 
-import org.apache.amber.oauth2.common.validators.AbstractValidator;
-import javax.servlet.http.HttpServletRequest;
-
-/**
- * Validator class for Device Grant Type.
- * Picks out the device id and the user name from the request and adds
- * same to request parameter array.
- */
-public class DeviceGrantValidator extends AbstractValidator<HttpServletRequest> {
-
-    public DeviceGrantValidator(){
-        requiredParams.add(OauthGrantConstants.DEVICE_ID);
-        requiredParams.add(OauthGrantConstants.USER_NAME);
-    }
+public class OauthGrantConstants {
+    public static final String DEVICE_ID = "device_id";
+    public static final String USER_NAME = "username";
 }

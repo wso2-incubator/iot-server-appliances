@@ -1,3 +1,19 @@
+/*
+ *  Copyright WSO2 Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.wso2.carbon.devicemgt.grant;
 
 import org.apache.commons.logging.Log;
@@ -10,15 +26,22 @@ import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.AbstractAuthorizationGrantHandler;
 
 /**
- * Created by ace on 7/3/15.
+ * The grant type responsible for issuing access tokens for IOT devices
+ * device_id and username should be passed in as parameters.
  */
 public class DeviceGrant extends AbstractAuthorizationGrantHandler {
 
     private static Log log = LogFactory.getLog(AbstractAuthorizationGrantHandler.class);
 
-    private static final String DEVICE_ID = "device_id";
-    private static final String USER_NAME = "username";
-
+    /**
+     * The tokReqMsgCtx should contain username and device_id
+     * the username field in the IDN_OAUTH2_ACCESS_TOKEN field
+     * will be updated with a concatenated string consisting of username and device_id
+     * token will be issued as usual
+     * @param tokReqMsgCtx
+     * @return
+     * @throws IdentityOAuth2Exception
+     */
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx) throws IdentityOAuth2Exception {
 
@@ -34,7 +57,7 @@ public class DeviceGrant extends AbstractAuthorizationGrantHandler {
         String deviceId = null;
 
         for(RequestParameter parameter : parameters){
-            if(DEVICE_ID.equals(parameter.getKey())){
+            if(OauthGrantConstants.DEVICE_ID.equals(parameter.getKey())){
                 if(parameter.getValue() != null && parameter.getValue().length > 0){
                     if(parameter.getValue()[0] == "0"){
                         deviceId = null;
@@ -43,7 +66,7 @@ public class DeviceGrant extends AbstractAuthorizationGrantHandler {
                     }
 
                 }
-            }else if(USER_NAME.equals(parameter.getKey())){
+            }else if(OauthGrantConstants.USER_NAME.equals(parameter.getKey())){
                 if(parameter.getValue() != null && parameter.getValue().length > 0){
                     if(parameter.getValue()[0] == "0"){
                         username = null;
@@ -71,10 +94,10 @@ public class DeviceGrant extends AbstractAuthorizationGrantHandler {
         return true;
     }
 
-    @Override
-    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) throws IdentityOAuth2Exception {
-        return true;
-    }
+//    @Override
+//    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) throws IdentityOAuth2Exception {
+//        return true;
+//    }
 
 
 }
