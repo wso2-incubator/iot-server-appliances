@@ -94,6 +94,8 @@ public class DeviceDAOImpl implements DeviceDAO {
             stmt.setInt(4, device.getTenantId());
             stmt.executeUpdate();
 
+            conn.commit();
+
 
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while enrolling device '" +

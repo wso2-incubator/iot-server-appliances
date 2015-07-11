@@ -416,9 +416,17 @@ public class DeviceManagementServiceProviderImpl implements DeviceManagementServ
 
     @Override
     public boolean updateDeviceInfo(DeviceIdentifier deviceIdentifier, Device device) throws DeviceManagementException {
+
         DeviceManager dms =
                 this.getPluginRepository().getDeviceManagementProvider(device.getType());
-        return dms.updateDeviceInfo(deviceIdentifier, device);
+        boolean status = dms.updateDeviceInfo(deviceIdentifier, device);
+        try {
+            this.getDeviceDAO().updateDevice(DeviceManagementDAOUtil.convertDevice(device));
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementException("Error occurred while modifying the device " +
+                                                        "'" + device.getId() + "'", e);
+        }
+        return status;
     }
 
     @Override

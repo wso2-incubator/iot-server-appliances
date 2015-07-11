@@ -151,6 +151,7 @@ public final class DeviceManagementDAOUtil {
 		deviceBO.setOwnerShip(device.getOwnership());
 		deviceBO.setTenantId(DeviceManagementDAOUtil.getTenantId());
 		deviceBO.setDeviceIdentificationId(device.getDeviceIdentifier());
+		deviceBO.setDeviceTypeId(device.getDeviceTypeId());
 		return deviceBO;
 	}
 
