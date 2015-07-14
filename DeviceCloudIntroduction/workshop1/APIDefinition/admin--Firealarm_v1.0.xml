@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api xmlns="http://ws.apache.org/ns/synapse"
+     name="admin--Firealarm"
+     context="/firealarm/1.0"
+     version="1.0"
+     version-type="context">
+   <resource methods="OPTIONS GET"
+             url-mapping="/controller/readtemperature"
+             faultSequence="fault">
+      <inSequence>
+         <filter source="$ctx:AM_KEY_TYPE" regex="PRODUCTION">
+            <then>
+               <property name="api.ut.backendRequestTime"
+                         expression="get-property('SYSTEM_TIME')"/>
+               <send>
+                  <endpoint name="admin--Firealarm_APIproductionEndpoint_0">
+                     <http uri-template="http://192.168.57.128:9763/firealarm"/>
+                  </endpoint>
+               </send>
+            </then>
+            <else>
+               <sequence key="_sandbox_key_error_"/>
+            </else>
+         </filter>
+      </inSequence>
+      <outSequence>
+         <class name="org.wso2.carbon.apimgt.usage.publisher.APIMgtResponseHandler"/>
+         <send/>
+      </outSequence>
+   </resource>
+   <resource methods="OPTIONS POST"
+             url-mapping="/controller/push_temperature"
+             faultSequence="fault">
+      <inSequence>
+         <filter source="$ctx:AM_KEY_TYPE" regex="PRODUCTION">
+            <then>
+               <property name="api.ut.backendRequestTime"
+                         expression="get-property('SYSTEM_TIME')"/>
+               <send>
+                  <endpoint name="admin--Firealarm_APIproductionEndpoint_1">
+                     <http uri-template="http://192.168.57.128:9763/firealarm"/>
+                  </endpoint>
+               </send>
+            </then>
+            <else>
+               <sequence key="_sandbox_key_error_"/>
+            </else>
+         </filter>
+      </inSequence>
+      <outSequence>
+         <class name="org.wso2.carbon.apimgt.usage.publisher.APIMgtResponseHandler"/>
+         <send/>
+      </outSequence>
+   </resource>
+   <resource methods="OPTIONS POST"
+             uri-template="/controller/bulb/{state}"
+             faultSequence="fault">
+      <inSequence>
+         <filter source="$ctx:AM_KEY_TYPE" regex="PRODUCTION">
+            <then>
+               <property name="api.ut.backendRequestTime"
+                         expression="get-property('SYSTEM_TIME')"/>
+               <send>
+                  <endpoint name="admin--Firealarm_APIproductionEndpoint_2">
+                     <http uri-template="http://192.168.57.128:9763/firealarm"/>
+                  </endpoint>
+               </send>
+            </then>
+            <else>
+               <sequence key="_sandbox_key_error_"/>
+            </else>
+         </filter>
+      </inSequence>
+      <outSequence>
+         <class name="org.wso2.carbon.apimgt.usage.publisher.APIMgtResponseHandler"/>
+         <send/>
+      </outSequence>
+   </resource>
+   <resource methods="OPTIONS POST"
+             uri-template="/controller/register/{owner}/{deviceId}/{ip}"
+             faultSequence="fault">
+      <inSequence>
+         <filter source="$ctx:AM_KEY_TYPE" regex="PRODUCTION">
+            <then>
+               <property name="api.ut.backendRequestTime"
+                         expression="get-property('SYSTEM_TIME')"/>
+               <send>
+                  <endpoint name="admin--Firealarm_APIproductionEndpoint_3">
+                     <http uri-template="http://192.168.57.128:9763/firealarm"/>
+                  </endpoint>
+               </send>
+            </then>
+            <else>
+               <sequence key="_sandbox_key_error_"/>
+            </else>
+         </filter>
+      </inSequence>
+      <outSequence>
+         <class name="org.wso2.carbon.apimgt.usage.publisher.APIMgtResponseHandler"/>
+         <send/>
+      </outSequence>
+   </resource>
+   <resource methods="OPTIONS GET"
+             uri-template="/manager/devices/{username}"
+             faultSequence="fault">
+      <inSequence>
+         <filter source="$ctx:AM_KEY_TYPE" regex="PRODUCTION">
+            <then>
+               <property name="api.ut.backendRequestTime"
+                         expression="get-property('SYSTEM_TIME')"/>
+               <send>
+                  <endpoint name="admin--Firealarm_APIproductionEndpoint_4">
+                     <http uri-template="http://192.168.57.128:9763/firealarm"/>
+                  </endpoint>
+               </send>
+            </then>
+            <else>
+               <sequence key="_sandbox_key_error_"/>
+            </else>
+         </filter>
+      </inSequence>
+      <outSequence>
+         <class name="org.wso2.carbon.apimgt.usage.publisher.APIMgtResponseHandler"/>
+         <send/>
+      </outSequence>
+   </resource>
+   <handlers>
+      <handler class="org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler">
+         <property name="inline" value="ENDPOINT"/>
+      </handler>
+      <handler class="org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler"/>
+      <handler class="org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler">
+         <property name="id" value="A"/>
+         <property name="policyKey" value="gov:/apimgt/applicationdata/tiers.xml"/>
+      </handler>
+      <handler class="org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageHandler"/>
+      <handler class="org.wso2.carbon.apimgt.usage.publisher.APIMgtGoogleAnalyticsTrackingHandler">
+         <property name="configKey" value="gov:/apimgt/statistics/ga-config.xml"/>
+      </handler>
+      <handler class="org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler"/>
+   </handlers>
+</api>
