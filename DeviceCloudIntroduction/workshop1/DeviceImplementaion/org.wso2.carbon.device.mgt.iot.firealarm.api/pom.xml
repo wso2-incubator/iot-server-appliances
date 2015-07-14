@@ -2,14 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>devicecloud-api</artifactId>
-        <groupId>org.wso2.carbon.device.mgt.iot</groupId>
-        <version>1.0.0</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+    
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>org.wso2.carbon.device.mgt.iot</groupId>
     <artifactId>org.wso2.carbon.device.mgt.iot.firealarm.api</artifactId>
     <version>1.0.0</version>
 
@@ -40,12 +36,7 @@
             <artifactId>cxf-rt-transports-http</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!--MQTT -->
-        <dependency>
-            <groupId>org.eclipse.paho</groupId>
-            <artifactId>mqtt-client</artifactId>
-            <scope>provided</scope>
-        </dependency>
+      
 
         <!--IOT -->
         <dependency>
