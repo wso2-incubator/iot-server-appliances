@@ -67,13 +67,9 @@
 							org.w3c.dom,
 							org.wso2.carbon.device.mgt.common.*,
 							org.wso2.carbon.device.mgt.common,
-							<!--org.wso2.carbon.user.core.service,-->
-							<!--org.wso2.carbon.user.api,-->
-							<!--org.wso2.carbon.device.mgt.user.common,-->
 							org.wso2.carbon.context.*,
 							org.wso2.carbon.ndatasource.core,
 							org.wso2.carbon.device.mgt.iot.common.*,
-							<!--org.apache.velocity.*-->
 						</Import-Package>
 
 						<Export-Package>
@@ -83,20 +79,6 @@
 					</instructions>
 				</configuration>
 			</plugin>
-			<!--<plugin>-->
-			<!--<groupId>org.apache.maven.plugins</groupId>-->
-			<!--<artifactId>maven-surefire-plugin</artifactId>-->
-			<!--<version>2.18</version>-->
-			<!--<configuration>-->
-			<!--<systemPropertyVariables>-->
-			<!--<log4j.configuration>file:src/test/resources/log4j.properties-->
-			<!--</log4j.configuration>-->
-			<!--</systemPropertyVariables>-->
-			<!--<suiteXmlFiles>-->
-			<!--<suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>-->
-			<!--</suiteXmlFiles>-->
-			<!--</configuration>-->
-			<!--</plugin>-->
 		</plugins>
 	</build>
 
@@ -123,16 +105,7 @@
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.ndatasource.core</artifactId>
 		</dependency>
-		<!--<dependency>-->
-		<!--<groupId>org.testng</groupId>-->
-		<!--<artifactId>testng</artifactId>-->
-		<!--</dependency>-->
-
-		<!--<dependency>-->
-		<!--<groupId>com.h2database.wso2</groupId>-->
-		<!--<artifactId>h2-database-engine</artifactId>-->
-		<!--<scope>test</scope>-->
-		<!--</dependency>-->
+		
 		<dependency>
 			<groupId>org.wso2.carbon.device.mgt.iot</groupId>
 			<artifactId>org.wso2.carbon.device.mgt.iot.common</artifactId>
@@ -144,13 +117,3 @@
 
 
 </project>
-<!--<repositories>-->
-<!--<repository>-->
-	<!--<id>Eclipse Paho Repo</id>-->
-	<!--<url>http://repo.spring.io/plugins-release/</url>-->
-<!--</repository>-->
-<!--</repositories>-->
-<!--<dependency>-->
-<!--<groupId>org.eclipse.paho</groupId>-->
-<!--<artifactId>mqtt-client</artifactId>-->
-<!--</dependency>-->
