@@ -166,9 +166,8 @@ public class FireAlarmManagerService {
 		deviceIdentifier.setType(FireAlarmConstants.DEVICE_TYPE);
 
 		try {
-			Device device = deviceManagement.getDevice(deviceIdentifier);
+			return deviceManagement.getDevice(deviceIdentifier);
 
-			return device;
 		} catch (DeviceManagementException ex) {
 			log.error("Error occurred while retrieving device with Id " + deviceId + "\n" + ex);
 			return null;
@@ -211,53 +210,67 @@ public class FireAlarmManagerService {
 	public Response downloadSketch(@QueryParam("owner") String owner, @PathParam("sketch_type") String
 			sketchType) {
 
+		ZipArchive zipFile = null;
+		try {
+			zipFile = createDownloadFile(owner, sketchType);
+			Response.ResponseBuilder rb = Response.ok(zipFile.getZipFile());
+			rb.header("Content-Disposition",
+					  "attachment; filename=\"" + zipFile.getFileName() + "\"");
+			return rb.build();
+		} catch (IllegalArgumentException ex) {
+			return Response.status(400).entity(ex.getMessage()).build();//bad request
+		} catch (DeviceManagementException ex) {
+			return Response.status(500).entity(ex.getMessage()).build();
+		}
+
+	}
+
+	@Path("/device/{sketch_type}/generate_link")
+	@GET
+	public Response generateSketchLink(@QueryParam("owner") String owner, @PathParam("sketch_type") String
+			sketchType) {
+
+		ZipArchive zipFile = null;
+		try {
+			zipFile = createDownloadFile(owner, sketchType);
+			Response.ResponseBuilder rb = Response.ok(zipFile.getDeviceId());
+			return rb.build();
+		} catch (IllegalArgumentException ex) {
+			return Response.status(400).entity(ex.getMessage()).build();//bad request
+		} catch (DeviceManagementException ex) {
+			return Response.status(500).entity(ex.getMessage()).build();
+		}
+
+	}
+
+	private ZipArchive createDownloadFile(String owner, String sketchType) throws DeviceManagementException{
 		if (owner == null) {
-			return Response.status(400).build();//bad request
+			throw new IllegalArgumentException("Error on createDownloadFile() Owner is null!");
 		}
 
 		//create new device id
 		String deviceId = shortUUID();
 
+		//create token
+		String token = UUID.randomUUID().toString();
+		String refreshToken = UUID.randomUUID().toString();
+		//adding registering data
 
-
-
-		try {
-			TokenClient accessTokenClient=new TokenClient(FireAlarmConstants.DEVICE_TYPE);
-			AccessTokenInfo accessTokenInfo=accessTokenClient.getAccessToken(owner,deviceId);
-
-			//create token
-			String accessToken = accessTokenInfo.getAccess_token();
-			String refreshToken=accessTokenInfo.getRefresh_token();
-			//adding registering data
-
-			boolean status = register(deviceId,
-									  owner + "s_" + sketchType + "_" + deviceId.substring(0, 3),
-									  owner);
-			if (!status) {
-				return Response.status(500).entity(
-						"Error occurred while registering the device with " + "id: " + deviceId
-								+ " owner:" + owner).build();
-
-			}
-
-			ZipUtil ziputil = new ZipUtil();
-			ZipArchive zipFile = null;
-			try {
-				zipFile = ziputil.downloadSketch(owner, sketchType, deviceId,
-												 accessToken,refreshToken);
-			} catch (DeviceManagementException ex) {
-				return Response.status(500).entity("Error occurred while creating zip file").build();
-			}
-
-			Response.ResponseBuilder rb = Response.ok(zipFile.getZipFile());
-			rb.header("Content-Disposition", "attachment; filename=\"" + zipFile.getFileName() + "\"");
-			return rb.build();
-		} catch (AccessTokenException e) {
-			return Response.status(500).build();
+		boolean status = register(deviceId, owner + "s_" + sketchType + "_" + deviceId.substring(0,
+																								 3),
+								  owner);
+		if (!status) {
+			String msg = "Error occurred while registering the device with " + "id: " + deviceId
+					+ " owner:" + owner;
+			throw new DeviceManagementException(msg);
 		}
 
+		ZipUtil ziputil = new ZipUtil();
+		ZipArchive zipFile = null;
 
-
+		zipFile = ziputil.downloadSketch(owner, sketchType, deviceId, token, refreshToken);
+		zipFile.setDeviceId(deviceId);
+		return zipFile;
 	}
 
 	private static String shortUUID() {

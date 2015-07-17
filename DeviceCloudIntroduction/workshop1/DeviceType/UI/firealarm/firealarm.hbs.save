@@ -86,23 +86,21 @@
     <span class="padding-left"><i>(The following commands can be issued by directly typing into the terminal of the device or by an <b>"ssh"</b> login from a remote PC)</i></span> 
 </div>
 <div class="margin-doubles padding-top-double light-grey  margin-left-double margin-bottom ">
-    <span class="circle">02  </span> <span class="padding-left"><b>Download the FireAlarm setup files using the following command: "curl -k &#60;url_link_received_from_the_above_step&#62; > Agent.zip"</b></span><br>
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i> This will download a zip file named &#34;Agent.zip&#34;</i>
+    <span class="circle">02  </span> <span class="padding-left"><b>Download the FireAlarm setup files using the following command: "wget &#60;url_link_received_from_the_above_step&#62;"</b></span><br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i> This will download a zip file named &#34;FireAlarmAgent.zip&#34;</i>
 </div>
                     <div class="margin-doubles padding-top-double light-grey  margin-left-double margin-bottom ">
+                        <span class="circle">03  </span> <span class="padding-left"><b>Run the following commands to successfuly install the package and get the service running:</b></span><br>
 
-        <span class="circle">03  </span> <span class="padding-left"><b>Run the following commands to successfuly install the package and get the service running:</b></span><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>&nbsp;&nbsp;cd &#60PATH_WHERE_THE_DOWNLOADED_&#34;Agent.zip&#34;_FILE_IS&#62 </b> <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>unzip Agent.zip -d Agent</b> <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>cd Agent</b> <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>sudo chmod 755 startservice.sh</b> <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>sudo ./startservice.sh</b> <br>
 
                     </div>
 
 
                     <div class="margin-doubles padding-top-double light-grey  margin-left-double margin-bottom ">
-                        <span class="circle">04  </span> <span class="padding-left">Follow the installation instructions and complete installation. Upon completion the Agent would have started automatically</span><br>
+                        <span class="circle">04  </span> <span class="padding-left">Use the Sketch program to open the samples code samples/quickstart/quickstart.ino</span><br>
+                    </div>
+                    <div class="margin-doubles padding-top-double light-grey  margin-left-double margin-bottom ">
+                        <span class="circle">05  </span> <span class="padding-left">View the lower part of the Sketch pad window to check that the COM connection is shown as active</span><br>
                     </div>
                 </div>
             </div>
