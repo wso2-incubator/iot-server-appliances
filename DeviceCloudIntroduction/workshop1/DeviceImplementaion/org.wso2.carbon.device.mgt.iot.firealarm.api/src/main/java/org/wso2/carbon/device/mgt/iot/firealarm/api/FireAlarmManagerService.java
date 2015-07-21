@@ -22,13 +22,14 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
-import org.wso2.carbon.device.mgt.iot.common.apimgt.TokenClient;
-import org.wso2.carbon.device.mgt.iot.common.apimgt.AccessTokenInfo;
-import org.wso2.carbon.device.mgt.iot.common.exception.AccessTokenException;
-import org.wso2.carbon.device.mgt.iot.firealarm.constants.FireAlarmConstants;
-import org.wso2.carbon.device.mgt.iot.common.util.ZipUtil;
-import org.wso2.carbon.device.mgt.iot.common.util.ZipArchive;
 import org.wso2.carbon.device.mgt.iot.common.DeviceManagement;
+import org.wso2.carbon.device.mgt.iot.common.apimgt.AccessTokenInfo;
+import org.wso2.carbon.device.mgt.iot.common.apimgt.TokenClient;
+import org.wso2.carbon.device.mgt.iot.common.exception.AccessTokenException;
+import org.wso2.carbon.device.mgt.iot.common.util.ZipArchive;
+import org.wso2.carbon.device.mgt.iot.common.util.ZipUtil;
+import org.wso2.carbon.device.mgt.iot.firealarm.constants.FireAlarmConstants;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -75,10 +76,8 @@ public class FireAlarmManagerService {
 			if (added) {
 				Response.status(HttpStatus.SC_OK).build();
 
-
 			} else {
 				Response.status(HttpStatus.SC_EXPECTATION_FAILED).build();
-
 
 			}
 
@@ -112,7 +111,6 @@ public class FireAlarmManagerService {
 
 		}
 
-
 	}
 
 	@Path("/device/update/{device_id}")
@@ -137,7 +135,6 @@ public class FireAlarmManagerService {
 			device.setType(FireAlarmConstants.DEVICE_TYPE);
 
 			boolean updated = deviceManagement.update(device);
-
 
 			if (updated) {
 				response.setStatus(HttpStatus.SC_OK);
@@ -183,22 +180,20 @@ public class FireAlarmManagerService {
 
 		DeviceManagement deviceManagement = new DeviceManagement();
 
-
 		try {
 			List<Device> userDevices = deviceManagement.getDevices(username);
-			ArrayList<Device> userDevicesforFirealarm=new ArrayList<Device>();
-			for(Device device : userDevices){
+			ArrayList<Device> userDevicesforFirealarm = new ArrayList<Device>();
+			for (Device device : userDevices) {
 
-				if(device.getType().equals(FireAlarmConstants.DEVICE_TYPE)){
+				if (device.getType().equals(FireAlarmConstants.DEVICE_TYPE)) {
 					userDevicesforFirealarm.add(device);
-
 
 				}
 			}
 
-			return userDevicesforFirealarm.toArray(new Device[]{});
+			return userDevicesforFirealarm.toArray(new Device[] {});
 		} catch (DeviceManagementException ex) {
-			log.error("Error occurred while retrieving devices for "+ username);
+			log.error("Error occurred while retrieving devices for " + username);
 			return null;
 		}
 
@@ -207,8 +202,8 @@ public class FireAlarmManagerService {
 	@Path("/device/{sketch_type}/download")
 	@GET
 	@Produces("application/octet-stream")
-	public Response downloadSketch(@QueryParam("owner") String owner, @PathParam("sketch_type") String
-			sketchType) {
+	public Response downloadSketch(@QueryParam("owner") String owner,
+								   @PathParam("sketch_type") String sketchType) {
 
 		ZipArchive zipFile = null;
 		try {
@@ -221,14 +216,16 @@ public class FireAlarmManagerService {
 			return Response.status(400).entity(ex.getMessage()).build();//bad request
 		} catch (DeviceManagementException ex) {
 			return Response.status(500).entity(ex.getMessage()).build();
+		} catch (AccessTokenException ex) {
+			return Response.status(500).entity(ex.getMessage()).build();
 		}
 
 	}
 
 	@Path("/device/{sketch_type}/generate_link")
 	@GET
-	public Response generateSketchLink(@QueryParam("owner") String owner, @PathParam("sketch_type") String
-			sketchType) {
+	public Response generateSketchLink(@QueryParam("owner") String owner,
+									   @PathParam("sketch_type") String sketchType) {
 
 		ZipArchive zipFile = null;
 		try {
@@ -239,11 +236,14 @@ public class FireAlarmManagerService {
 			return Response.status(400).entity(ex.getMessage()).build();//bad request
 		} catch (DeviceManagementException ex) {
 			return Response.status(500).entity(ex.getMessage()).build();
+		} catch (AccessTokenException ex) {
+			return Response.status(500).entity(ex.getMessage()).build();
 		}
 
 	}
 
-	private ZipArchive createDownloadFile(String owner, String sketchType) throws DeviceManagementException{
+	private ZipArchive createDownloadFile(String owner, String sketchType)
+			throws DeviceManagementException, AccessTokenException {
 		if (owner == null) {
 			throw new IllegalArgumentException("Error on createDownloadFile() Owner is null!");
 		}
@@ -251,9 +251,14 @@ public class FireAlarmManagerService {
 		//create new device id
 		String deviceId = shortUUID();
 
+		TokenClient accessTokenClient = new TokenClient(FireAlarmConstants.DEVICE_TYPE);
+		AccessTokenInfo accessTokenInfo = null;
+
+		accessTokenInfo = accessTokenClient.getAccessToken(owner, deviceId);
+
 		//create token
-		String token = UUID.randomUUID().toString();
-		String refreshToken = UUID.randomUUID().toString();
+		String accessToken = accessTokenInfo.getAccess_token();
+		String refreshToken = accessTokenInfo.getRefresh_token();
 		//adding registering data
 
 		boolean status = register(deviceId, owner + "s_" + sketchType + "_" + deviceId.substring(0,
@@ -268,7 +273,7 @@ public class FireAlarmManagerService {
 		ZipUtil ziputil = new ZipUtil();
 		ZipArchive zipFile = null;
 
-		zipFile = ziputil.downloadSketch(owner, sketchType, deviceId, token, refreshToken);
+		zipFile = ziputil.downloadSketch(owner, sketchType, deviceId, accessToken, refreshToken);
 		zipFile.setDeviceId(deviceId);
 		return zipFile;
 	}
