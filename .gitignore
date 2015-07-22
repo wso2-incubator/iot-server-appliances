@@ -1,9 +1,24 @@
+# Ignore everything in this directory
+target
+.classpath
+.settings
+.project
+*.iml
+*.iws
+*.ipr
+.idea
+
+# Mac crap
+.DS_Store
+
+
 *.class
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
 # Package Files #
+*.jar
 *.war
 *.ear
 
