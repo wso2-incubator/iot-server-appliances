@@ -49,7 +49,7 @@ public class AccessTokenClient {
 	private String tokenURL ="https://192.168.57.128:9444/oauth2/token";
 	private String grantType ="password";
 	private String scope ="PRODUCTION device_";
-	private String appToken="Z2JwQlpsZGhqU09QVkhzRFRmbmZwMG9HUWNZYTpxcDU1d1BXQTZUSmdpdE1JX2NHTnhmQWlVRFlh";
+	private String appToken="NVp6UzIxM1RyWDhOUHY1QjN1Z0tXczJ1WW1nYTp3TG9iMkFldW1DZkNMVkpZVnROYjlDSFVYUXNh";
 
 	public AccessTokenInfo getAccessToken(String username,String password ,String appInstanceId) throws AccessTokenException {
 		SSLContext ctx;
