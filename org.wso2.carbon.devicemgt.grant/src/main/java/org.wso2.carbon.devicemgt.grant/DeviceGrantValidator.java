@@ -28,5 +28,6 @@ public class DeviceGrantValidator extends AbstractValidator<HttpServletRequest> 
     public DeviceGrantValidator(){
         requiredParams.add(OauthGrantConstants.DEVICE_ID);
         requiredParams.add(OauthGrantConstants.USER_NAME);
+        requiredParams.add(OauthGrantConstants.SCOPE);
     }
 }

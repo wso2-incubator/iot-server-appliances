@@ -56,6 +56,7 @@ public class DeviceGrant extends AbstractAuthorizationGrantHandler {
         }
         String username = null;
         String deviceId = null;
+        String scopeValues = null;
 
         for(RequestParameter parameter : parameters){
             if(OauthGrantConstants.DEVICE_ID.equals(parameter.getKey())){
@@ -76,7 +77,17 @@ public class DeviceGrant extends AbstractAuthorizationGrantHandler {
                     }
 
                 }
+            }else if(OauthGrantConstants.SCOPE.equals(parameter.getKey())){
+                if(parameter.getValue() != null && parameter.getValue().length > 0){
+                    if(parameter.getValue()[0] == "0"){
+                        scopeValues = null;
+                    }else{
+                        scopeValues = parameter.getValue()[0];
+                    }
+
+                }
             }
+
         }
 
         if(deviceId == null || username == null){
@@ -86,6 +97,12 @@ public class DeviceGrant extends AbstractAuthorizationGrantHandler {
         username = username + "@" + tenantDomain;
 
         tokReqMsgCtx.setAuthorizedUser(username.concat(":").concat(deviceId));
+        tokReqMsgCtx.setTenantID(-1234);
+
+        if(scopeValues!=null){
+            String[] scopes = scopeValues.split(" ");
+            tokReqMsgCtx.setScope(scopes);
+        }
 
         return true;
     }
