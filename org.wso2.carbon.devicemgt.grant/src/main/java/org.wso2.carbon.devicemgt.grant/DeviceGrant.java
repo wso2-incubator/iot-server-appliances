@@ -24,6 +24,7 @@ import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.RequestParameter;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.AbstractAuthorizationGrantHandler;
+import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 
 /**
  * The grant type responsible for issuing access tokens for IOT devices
@@ -94,10 +95,10 @@ public class DeviceGrant extends AbstractAuthorizationGrantHandler {
         return true;
     }
 
-//    @Override
-//    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) throws IdentityOAuth2Exception {
-//        return true;
-//    }
+    @Override
+    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx){
+        return ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
+    }
 
 
 }
