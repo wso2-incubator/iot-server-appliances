@@ -1,0 +1,9 @@
+define stream fireAlarmEventStream (deviceID string,temp double, sonar double, humidity double);
+@info(name = 'query1')
+from fireAlarmEventStream[sonar < 50]
+select deviceID, temp, sonar, humidity
+insert into outputStream;
+@info(name = 'query2')
+from fireAlarmEventStream[sonar > 50]
+select deviceID, temp, sonar, humidity
+insert into outputStream;
