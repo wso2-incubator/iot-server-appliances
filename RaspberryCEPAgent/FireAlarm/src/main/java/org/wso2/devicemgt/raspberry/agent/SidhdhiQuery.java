@@ -31,7 +31,11 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.concurrent.FutureCallback;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -58,9 +62,6 @@ public class SidhdhiQuery implements Runnable {
 
             executionPlan = readFile(constants.prop.getProperty("execution.plan.file.location"), StandardCharsets.UTF_8);
 
-            if(executionPlan==null) {
-                executionPlan = readSonarData(constants.prop.getProperty("sonar.reading.url"));
-            }
             //Generating runtime
             ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
@@ -106,7 +107,12 @@ public class SidhdhiQuery implements Runnable {
 
             //Sending events to Siddhi
             try {
-                String sonarReading = readFile(constants.prop.getProperty("sonar.reading.file.path"), StandardCharsets.UTF_8);
+                String sonarReading = readSonarData(constants.prop.getProperty("sonar.reading.url"));
+
+                if(sonarReading==null || sonarReading.equalsIgnoreCase("")) {
+                    sonarReading = readFile(constants.prop.getProperty("sonar.reading.file.path"), StandardCharsets.UTF_8);
+                }
+
                 inputHandler.send(new Object[]{"FIRE_1", 30.0, Double.parseDouble(sonarReading), 20.00});
                 Thread.sleep(Integer.parseInt(constants.prop.getProperty("read.interval")));
                 executionPlanRuntime.shutdown();
@@ -173,8 +179,10 @@ public class SidhdhiQuery implements Runnable {
         String responseStr = null;
         try {
             HttpResponse response = client.execute(request);
-            System.out.print("Response Code : " + response);
-            responseStr = response.toString();
+            log.debug("Response Code : " + response);
+            InputStream input = response.getEntity().getContent();
+            BufferedReader br = new BufferedReader(new InputStreamReader(input));
+            responseStr = String.valueOf(br.readLine());
 
         } catch (IOException e) {
             //log.error("Exception encountered while trying to make get request.");
