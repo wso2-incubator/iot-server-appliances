@@ -72,7 +72,7 @@ if [ "$?" -eq "1" ]; then
 
 	echo "---Running server..."
 	cd "$BASE_FOLDER/"
-	python wso2server.py &
+	python displayagent.py &
 else
 	echo "$? returned..."
 fi

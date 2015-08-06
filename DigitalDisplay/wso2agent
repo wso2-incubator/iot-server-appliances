@@ -5,7 +5,7 @@ xdotool mousemove 0 0
 #xdotool search -name LXTerminal windowunmap
 #cd ~/
 #cd ~/DigitalDisplay/KernelRunner
-python wso2server.py
+python displayagent.py
 while true; do
 sleep 100
 done
