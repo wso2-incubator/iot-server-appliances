@@ -5,6 +5,7 @@ xdotool mousemove 0 0
 #xdotool search -name LXTerminal windowunmap
 #cd ~/
 #cd ~/DigitalDisplay/KernelRunner
+mkdir -p tmp/dd-kernel-test
 python displayagent.py
 while true; do
 sleep 100
