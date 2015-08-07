@@ -23,6 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.*;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.TenantConfiguration;
+import org.wso2.carbon.device.mgt.common.license.mgt.License;
+import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManagementException;
 import org.wso2.carbon.device.mgt.iot.firealarm.impl.dao.FireAlarmDAO;
 import org.wso2.carbon.device.mgt.iot.common.util.iotdevice.dao.IotDeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.iot.common.util.iotdevice.dao.IotDeviceManagementDAOFactory;
@@ -205,6 +207,16 @@ public class FireAlarmManager implements DeviceManager {
     public boolean setStatus(DeviceIdentifier deviceId, String currentOwner,
                              EnrolmentInfo.Status status) throws DeviceManagementException {
         return false;
+    }
+
+    @Override
+    public License getLicense(String s) throws LicenseManagementException {
+        return null;
+    }
+
+    @Override
+    public void addLicense(License license) throws LicenseManagementException {
+
     }
 
     @Override
