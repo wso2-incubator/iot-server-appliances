@@ -22,11 +22,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.concurrent.FutureCallback;
@@ -35,7 +34,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -55,76 +53,43 @@ public class SidhdhiQuery implements Runnable {
         // Creating Siddhi Manager
         SiddhiManager siddhiManager = new SiddhiManager();
 
+        //Start the execution plan with pre-defined or previously persisted Siddhi query
+        StartExecutionPlan startExecutionPlan = new StartExecutionPlan(siddhiManager).invoke();
 
         while (true) {
 
-            String executionPlan = null;
-
-            executionPlan = readFile(constants.prop.getProperty("execution.plan.file.location"), StandardCharsets.UTF_8);
-
-            //Generating runtime
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
-
-            executionPlanRuntime.addCallback("query1", new QueryCallback() {
-                @Override
-                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                    if(inEvents.length > 0) {
-                        if(!isBulbOn){
-                            performHTTPCall(timeStamp, inEvents, removeEvents, "bulb.on.api.endpoint", "Bulb Switched on!");
-                            isBulbOn = true;
-                        }
-                    }
-                }
-
-            });
-
-            //Adding callback to retrieve output events from query
-            executionPlanRuntime.addCallback("query1", new QueryCallback() {
-                @Override
-                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                    EventPrinter.print(timeStamp, inEvents, removeEvents);
-                }
-            });
-
-
-            executionPlanRuntime.addCallback("query2", new QueryCallback() {
-                @Override
-                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                    if(isBulbOn){
-                        performHTTPCall(timeStamp, inEvents, removeEvents, "bulb.off.api.endpoint","Bulb Switched off!");
-                        isBulbOn = false;
-                    }
-                }
-
-            });
-
-            //Retrieving InputHandler to push events into Siddhi
-            InputHandler inputHandler = executionPlanRuntime.getInputHandler("fireAlarmEventStream");
-
-            //Starting event processing
-            executionPlanRuntime.start();
-            System.out.println("Execution Plan Started!");
+            //Check if there is new policy update available
+            if(AgentInitializer.isUpdated()) {
+                System.out.print("### Policy Update Detected!");
+                //Restart execution plan with new query
+                startExecutionPlan = new StartExecutionPlan(siddhiManager).invoke();
+            }
+            InputHandler inputHandler = startExecutionPlan.getInputHandler();
 
             //Sending events to Siddhi
             try {
-                String sonarReading = readSonarData(constants.prop.getProperty("sonar.reading.url"));
-
+                //If sonar URL is present in the config file
+                String sonarUrl = constants.prop.getProperty("sonar.reading.url");
+                String sonarReading = null;
+                if(sonarUrl!=null) {
+                    sonarReading = readSonarData(sonarUrl);
+                }
                 if(sonarReading==null || sonarReading.equalsIgnoreCase("")) {
                     sonarReading = readFile(constants.prop.getProperty("sonar.reading.file.path"), StandardCharsets.UTF_8);
                 }
-
-                inputHandler.send(new Object[]{"FIRE_1", 30.0, Double.parseDouble(sonarReading), 20.00});
+                System.out.println("Pushing data to CEP - Sonar : "+sonarReading.trim());
+                inputHandler.send(new Object[]{"FIRE_1", Double.parseDouble(sonarReading)});
                 Thread.sleep(Integer.parseInt(constants.prop.getProperty("read.interval")));
-                executionPlanRuntime.shutdown();
+//                executionPlanRuntime.shutdown();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private void performHTTPCall(long timeStamp, Event[] inEvents, Event[] removeEvents, String bulbEP, String logText) {
+    private void performHTTPCall(Event[] inEvents, String bulbEP, String logText) {
         if (inEvents != null && inEvents.length > 0) {
-            EventPrinter.print(timeStamp, inEvents, removeEvents);
+            EventPrinter.print(inEvents);
             String url = constants.prop.getProperty(bulbEP);
 
             CloseableHttpAsyncClient httpclient = null;
@@ -193,4 +158,58 @@ public class SidhdhiQuery implements Runnable {
     }
 
 
+    private class StartExecutionPlan {
+        private SiddhiManager siddhiManager;
+        private InputHandler inputHandler;
+
+        public StartExecutionPlan(SiddhiManager siddhiManager) {
+            this.siddhiManager = siddhiManager;
+        }
+
+        public InputHandler getInputHandler() {
+            return inputHandler;
+        }
+
+        public StartExecutionPlan invoke() {
+            String executionPlan;
+            executionPlan = readFile(constants.prop.getProperty("execution.plan.file.location"), StandardCharsets.UTF_8);
+
+            //Generating runtime
+            siddhiManager.addExecutionPlan(executionPlan);
+
+            siddhiManager.addCallback("bulbOnStream", new StreamCallback() {
+                @Override
+                public void receive(Event[] events) {
+                    System.out.println("Bulb on Event Fired!");
+                    if(events.length > 0) {
+                        if(!isBulbOn){
+                            performHTTPCall(events, "bulb.on.api.endpoint", "Bulb Switched on!");
+                            System.out.println("#### Performed HTTP call! ON.");
+                            isBulbOn = true;
+                        }
+                    }
+                }
+            });
+
+            siddhiManager.addCallback("bulbOffStream", new StreamCallback() {
+                @Override
+                public void receive(Event[] inEvents) {
+                    System.out.println("Bulb off Event Fired");
+                    if(isBulbOn){
+                        performHTTPCall(inEvents,"bulb.off.api.endpoint","Bulb Switched off!");
+                        System.out.println("#### Performed HTTP call! OFF.");
+                        isBulbOn = false;
+                    }
+                }
+
+            });
+
+            //Retrieving InputHandler to push events into Siddhi
+            inputHandler = siddhiManager.getInputHandler("fireAlarmEventStream");
+
+            //Starting event processing
+            System.out.println("Execution Plan Started!");
+            return this;
+        }
+    }
 }

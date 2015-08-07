@@ -34,10 +34,6 @@ public class MQTTRecieverUtil implements  MqttCallback {
     }
 
     private void initSubscriber(String controlQueueEndpoint) {
-//        if(!MqttConfig.getInstance().isEnabled()){
-//            log.info("Mqtt Queue is not enabled");
-//            return;
-//        }
         try {
             client = new MqttClient(controlQueueEndpoint, clientId, null);
             log.info("MQTT subscriber was created with ClientID : " + clientId);
@@ -63,10 +59,6 @@ public class MQTTRecieverUtil implements  MqttCallback {
     }
 
     public void subscribe() throws Exception {
-//        if(!MqttConfig.getInstance().isEnabled()){
-//            log.info("Mqtt Queue is not enabled");
-//            return;
-//        }
 
         try {
             client.connect(options);
@@ -186,6 +178,7 @@ public class MQTTRecieverUtil implements  MqttCallback {
             fop.close();
 
             System.out.println("Done");
+            AgentInitializer.setUpdated(true);
             return true;
 
         } catch (IOException e) {

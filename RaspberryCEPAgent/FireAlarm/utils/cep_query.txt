@@ -1,9 +1,14 @@
-define stream fireAlarmEventStream (deviceID string,temp double, sonar double, humidity double);
-@info(name = 'query1')
-from fireAlarmEventStream[sonar < 50]
-select deviceID, temp, sonar, humidity
-insert into outputStream;
-@info(name = 'query2')
+define stream fireAlarmEventStream (deviceID string, sonar double);
+
+from fireAlarmEventStream#window.time(30 sec)
+select deviceID, max(sonar) as maxValue
+group by deviceID
+insert into analyzeStream for expired-events;
+
+from analyzeStream[maxValue < 50]
+select maxValue
+insert into bulbOnStream;
+
 from fireAlarmEventStream[sonar > 50]
-select deviceID, temp, sonar, humidity
-insert into outputStream;
+select deviceID, sonar
+insert into bulbOffStream;
