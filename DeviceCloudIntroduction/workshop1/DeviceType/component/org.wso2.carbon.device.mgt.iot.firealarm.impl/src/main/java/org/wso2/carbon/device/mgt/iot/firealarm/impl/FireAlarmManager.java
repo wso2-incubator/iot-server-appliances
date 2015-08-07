@@ -22,9 +22,7 @@ package org.wso2.carbon.device.mgt.iot.firealarm.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.*;
-import org.wso2.carbon.device.mgt.common.app.mgt.AppManagerConnectorException;
-import org.wso2.carbon.device.mgt.common.spi.DeviceMgtService;
-import org.wso2.carbon.device.mgt.iot.firealarm.constants.FireAlarmConstants;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.TenantConfiguration;
 import org.wso2.carbon.device.mgt.iot.firealarm.impl.dao.FireAlarmDAO;
 import org.wso2.carbon.device.mgt.iot.common.util.iotdevice.dao.IotDeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.iot.common.util.iotdevice.dao.IotDeviceManagementDAOFactory;
@@ -39,18 +37,28 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 /**
  * This represents the FireAlarm implementation of DeviceManagerService.
  */
-public class FireAlarmManager implements DeviceMgtService {
+public class FireAlarmManager implements DeviceManager {
 
     private static final IotDeviceManagementDAOFactory iotDeviceManagementDAOFactory = new FireAlarmDAO();
     private static final Log log = LogFactory.getLog(FireAlarmManager.class);
 
-    @Override
-    public String getProviderType() {
-        return FireAlarmConstants.DEVICE_TYPE;
-    }
+
 
     @Override
     public FeatureManager getFeatureManager() {
+        return null;
+    }
+
+    @Override
+    public boolean saveConfiguration(TenantConfiguration tenantConfiguration)
+            throws DeviceManagementException {
+        //TODO implement this
+        return false;
+    }
+
+    @Override
+    public TenantConfiguration getConfiguration() throws DeviceManagementException {
+        //TODO implement this
         return null;
     }
 
@@ -194,6 +202,12 @@ public class FireAlarmManager implements DeviceMgtService {
     }
 
     @Override
+    public boolean setStatus(DeviceIdentifier deviceId, String currentOwner,
+                             EnrolmentInfo.Status status) throws DeviceManagementException {
+        return false;
+    }
+
+    @Override
     public boolean updateDeviceInfo(DeviceIdentifier deviceIdentifier, Device device) throws DeviceManagementException {
         boolean status;
         IotDevice iotDevice = IotDeviceManagementUtil.convertToIotDevice(device);
@@ -245,9 +259,5 @@ public class FireAlarmManager implements DeviceMgtService {
     }
 
 
-    @Override
-    public void installApplication(Operation operation, List<DeviceIdentifier> list)
-            throws AppManagerConnectorException {
 
-    }
 }

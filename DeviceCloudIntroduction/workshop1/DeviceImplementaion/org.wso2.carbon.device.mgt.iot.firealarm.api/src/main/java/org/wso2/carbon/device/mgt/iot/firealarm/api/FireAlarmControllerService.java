@@ -29,9 +29,11 @@ import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.iot.common.DeviceController;
 import org.wso2.carbon.device.mgt.iot.common.DeviceValidator;
 import org.wso2.carbon.device.mgt.iot.common.datastore.impl.DataStreamDefinitions;
+import org.wso2.carbon.device.mgt.iot.common.exception.DeviceControllerException;
 import org.wso2.carbon.device.mgt.iot.common.exception.UnauthorizedException;
 import org.wso2.carbon.device.mgt.iot.firealarm.api.util.DeviceJSON;
 import org.wso2.carbon.device.mgt.iot.firealarm.constants.FireAlarmConstants;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -44,6 +46,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -54,20 +57,23 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
-//import org.wso2.carbon.device.mgt.iot.firealarm.api.util.MQTTFirealarmSubscriber;
-
 public class FireAlarmControllerService {
 
 	private static Log log = LogFactory.getLog(FireAlarmControllerService.class);
+
 	private static final String URL_PREFIX = "http://";
 	private static final String BULB_CONTEXT = "/BULB/";
 	private static final String FAN_CONTEXT = "/FAN/";
 	private static final String TEMPERATURE_CONTEXT = "/TEMP/";
+	private static final String SONAR_CONTEXT = "/SONAR/";
+
+	public static final String XMPP_PROTOCOL = "XMPP";
+	public static final String HTTP_PROTOCOL = "HTTP";
+	public static final String MQTT_PROTOCOL = "MQTT";
 
 
 	private static ConcurrentHashMap<String, String> deviceToIpMap =
 			new ConcurrentHashMap<String, String>();
-
 
 	@Path("/register/{owner}/{deviceId}/{ip}")
 	@POST
@@ -99,6 +105,7 @@ public class FireAlarmControllerService {
 	@POST
 	public void switchBulb(@HeaderParam("owner") String owner,
 						   @HeaderParam("deviceId") String deviceId,
+						   @HeaderParam("protocol") String protocol,
 						   @PathParam("state") String state,
 						   @Context HttpServletResponse response) {
 
@@ -107,40 +114,134 @@ public class FireAlarmControllerService {
 			if (!deviceValidator.isExist(owner, new DeviceIdentifier(deviceId,
 																	 FireAlarmConstants
 																			 .DEVICE_TYPE))) {
-
 				response.setStatus(HttpStatus.SC_UNAUTHORIZED);
 				return;
 			}
-
-
-			String switchToState = state.toUpperCase();
-
-			if (!switchToState.equals(FireAlarmConstants.STATE_ON) && !switchToState.equals(
-					FireAlarmConstants.STATE_OFF)) {
-				log.error("The requested state change shoud be either - 'ON' or 'OFF'");
-				response.setStatus(HttpStatus.SC_BAD_REQUEST);
-				return;
-			}
-
-			String deviceIP = deviceToIpMap.get(deviceId);
-
-
-			if (deviceIP == null) {
-				//log.error("IP not registered for device: " + deviceId + " of owner: " + owner);
-				response.setStatus(HttpStatus.SC_PRECONDITION_FAILED);
-				return;
-			}
-
-
-			log.info("Sending command : " + switchToState + " to firealarm-BULB at : " + deviceIP);
-
-			String callUrlPattern = BULB_CONTEXT + switchToState;
-
-			sendCommand(deviceIP, 80, callUrlPattern, true);
 		} catch (DeviceManagementException e) {
+			log.error("DeviceValidation Failed for deviceId: " + deviceId + " of user: " + owner);
 			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}
+
+		String switchToState = state.toUpperCase();
+
+		if (!switchToState.equals(FireAlarmConstants.STATE_ON) && !switchToState.equals(
+				FireAlarmConstants.STATE_OFF)) {
+			log.error("The requested state change shoud be either - 'ON' or 'OFF'");
+			response.setStatus(HttpStatus.SC_BAD_REQUEST);
+			return;
+		}
+
+		String deviceIP = deviceToIpMap.get(deviceId);
+		if (deviceIP == null) {
+			response.setStatus(HttpStatus.SC_PRECONDITION_FAILED);
+			return;
+		}
+
+		String protocolString = protocol.toUpperCase();
+		String callUrlPattern = BULB_CONTEXT + switchToState;
+
+		log.info("Sending command: '" + callUrlPattern + "' to firealarm at: " + deviceIP + " " +
+						 "via" + " " + protocol);
+
+		try {
+			switch (protocolString) {
+				case HTTP_PROTOCOL:
+					sendCommandViaHTTP(deviceIP, 80, callUrlPattern, true);
+					break;
+				case MQTT_PROTOCOL:
+					callUrlPattern = BULB_CONTEXT.replace("/", "");
+					sendCommandViaMQTT(owner, deviceId, callUrlPattern, switchToState);
+					break;
+				default:
+					if (protocolString == null) {
+						sendCommandViaHTTP(deviceIP, 80, callUrlPattern, true);
+					} else {
+						response.setStatus(HttpStatus.SC_NOT_IMPLEMENTED);
+						return;
+					}
+					break;
+			}
+		} catch (DeviceManagementException e) {
+			log.error("Failed to send command '" + callUrlPattern + "' to: " + deviceIP + " via" +
+							  " " + protocol);
+			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			return;
+		}
+
+		response.setStatus(HttpStatus.SC_OK);
+	}
+
+
+	@Path("/fan/{state}")
+	@POST
+	public void switchFan(@HeaderParam("owner") String owner,
+						  @HeaderParam("deviceId") String deviceId,
+						  @HeaderParam("protocol") String protocol,
+						  @PathParam("state") String state,
+						  @Context HttpServletResponse response) {
+
+		try {
+			DeviceValidator deviceValidator = new DeviceValidator();
+			if (!deviceValidator.isExist(owner, new DeviceIdentifier(deviceId,
+																	 FireAlarmConstants
+																			 .DEVICE_TYPE))) {
+				response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+				return;
+			}
+		} catch (DeviceManagementException e) {
+			log.error("DeviceValidation Failed for deviceId: " + deviceId + " of user: " + owner);
+			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			return;
+		}
+
+		String switchToState = state.toUpperCase();
+
+		if (!switchToState.equals(FireAlarmConstants.STATE_ON) && !switchToState.equals(
+				FireAlarmConstants.STATE_OFF)) {
+			log.error("The requested state change shoud be either - 'ON' or 'OFF'");
+			response.setStatus(HttpStatus.SC_BAD_REQUEST);
+			return;
+		}
+
+		String deviceIP = deviceToIpMap.get(deviceId);
+
+		if (deviceIP == null) {
+			response.setStatus(HttpStatus.SC_PRECONDITION_FAILED);
+			return;
+		}
+
+		String protocolString = protocol.toUpperCase();
+		String callUrlPattern = FAN_CONTEXT + switchToState;
+
+		log.info("Sending command: '" + callUrlPattern + "' to firealarm at: " + deviceIP + " " +
+						 "via" + " " + protocol);
+
+		try {
+			switch (protocolString) {
+				case HTTP_PROTOCOL:
+					sendCommandViaHTTP(deviceIP, 80, callUrlPattern, true);
+					break;
+				case MQTT_PROTOCOL:
+					callUrlPattern = FAN_CONTEXT.replace("/", "");
+					sendCommandViaMQTT(owner, deviceId, callUrlPattern, switchToState);
+					break;
+				default:
+					if (protocolString == null) {
+						sendCommandViaHTTP(deviceIP, 80, callUrlPattern, true);
+					} else {
+						response.setStatus(HttpStatus.SC_NOT_IMPLEMENTED);
+						return;
+					}
+					break;
+			}
+		} catch (DeviceManagementException e) {
+			log.error("Failed to send command '" + callUrlPattern + "' to: " + deviceIP + " via" +
+							  " " + protocol);
+			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			return;
+		}
+
 		response.setStatus(HttpStatus.SC_OK);
 	}
 
@@ -149,33 +250,61 @@ public class FireAlarmControllerService {
 	@GET
 	public String requestTemperature(@HeaderParam("owner") String owner,
 									 @HeaderParam("deviceId") String deviceId,
+									 @HeaderParam("protocol") String protocol,
 									 @Context HttpServletResponse response) {
-
 		String replyMsg = "";
+
+		DeviceValidator deviceValidator = new DeviceValidator();
 		try {
-			DeviceValidator deviceValidator = new DeviceValidator();
 			if (!deviceValidator.isExist(owner, new DeviceIdentifier(deviceId,
 																	 FireAlarmConstants
 																			 .DEVICE_TYPE))) {
-
 				response.setStatus(HttpStatus.SC_UNAUTHORIZED);
 				return "Unauthorized Access";
 			}
+		} catch (DeviceManagementException e) {
+			replyMsg = e.getErrorMessage();
+			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			return replyMsg;
+		}
 
+		String deviceIp = deviceToIpMap.get(deviceId);
 
-			String deviceIp = deviceToIpMap.get(deviceId);
+		if (deviceIp == null) {
+			replyMsg = "IP not registered for device: " + deviceId + " of owner: " + owner;
+			response.setStatus(HttpStatus.SC_PRECONDITION_FAILED);
+			return replyMsg;
+		}
 
-			if (deviceIp == null) {
-				replyMsg = "IP not registered for device: " + deviceId + " of owner: " + owner;
-				response.setStatus(HttpStatus.SC_PRECONDITION_FAILED);
-				return replyMsg;
+		try {
+			switch (protocol) {
+				case HTTP_PROTOCOL:
+					log.info("Sending request to read firealarm-temperature at : " + deviceIp +
+									 " via " + HTTP_PROTOCOL);
+
+					replyMsg = sendCommandViaHTTP(deviceIp, 80, TEMPERATURE_CONTEXT, false);
+					break;
+
+				case XMPP_PROTOCOL:
+					log.info("Sending request to read firealarm-temperature at : " + deviceIp +
+									 " via " +
+									 XMPP_PROTOCOL);
+					replyMsg = requestTemperatureViaXMPP(deviceIp, response);
+					break;
+
+				default:
+					if (protocol == null) {
+						log.info("Sending request to read firealarm-temperature at : " + deviceIp +
+										 " via " + HTTP_PROTOCOL);
+
+						replyMsg = sendCommandViaHTTP(deviceIp, 80, TEMPERATURE_CONTEXT, false);
+					} else {
+						replyMsg = "Requested protocol '" + protocol + "' is not supported";
+						response.setStatus(HttpStatus.SC_NOT_IMPLEMENTED);
+						return replyMsg;
+					}
+					break;
 			}
-
-
-			log.info("Sending request to read firealarm-temperature at : " + deviceIp);
-
-
-			replyMsg = sendCommand(deviceIp, 80, TEMPERATURE_CONTEXT, false);
 		} catch (DeviceManagementException e) {
 			replyMsg = e.getErrorMessage();
 			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -187,6 +316,117 @@ public class FireAlarmControllerService {
 		return replyMsg;
 	}
 
+
+	public String requestTemperatureViaXMPP(String deviceIp,
+											@Context HttpServletResponse response) {
+		String replyMsg = "";
+
+		String sep = File.separator;
+		String scriptsFolder = "repository" + sep + "resources" + sep + "scripts";
+		String scriptPath = CarbonUtils.getCarbonHome() + sep + scriptsFolder + sep
+				+ "xmpp_client.py";
+		String command = "python " + scriptPath;
+
+		replyMsg = executeCommand(command);
+
+		response.setStatus(HttpStatus.SC_OK);
+		return replyMsg;
+	}
+
+
+	private String executeCommand(String command) {
+		StringBuffer output = new StringBuffer();
+
+		Process p;
+		try {
+			p = Runtime.getRuntime().exec(command);
+			p.waitFor();
+			BufferedReader reader =
+					new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+			String line = "";
+			while ((line = reader.readLine()) != null) {
+				output.append(line + "\n");
+			}
+
+		} catch (Exception e) {
+			log.info(e.getMessage(), e);
+		}
+
+		return output.toString();
+
+	}
+
+
+	@Path("/readsonar")
+	@GET
+	public String requestSonar(@HeaderParam("owner") String owner,
+							   @HeaderParam("deviceId") String deviceId,
+							   @HeaderParam("protocol") String protocol,
+							   @Context HttpServletResponse response) {
+		String replyMsg = "";
+
+		DeviceValidator deviceValidator = new DeviceValidator();
+		try {
+			if (!deviceValidator.isExist(owner, new DeviceIdentifier(deviceId,
+																	 FireAlarmConstants
+																			 .DEVICE_TYPE))) {
+				response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+				return "Unauthorized Access";
+			}
+		} catch (DeviceManagementException e) {
+			replyMsg = e.getErrorMessage();
+			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			return replyMsg;
+		}
+
+		String deviceIp = deviceToIpMap.get(deviceId);
+
+		if (deviceIp == null) {
+			replyMsg = "IP not registered for device: " + deviceId + " of owner: " + owner;
+			response.setStatus(HttpStatus.SC_PRECONDITION_FAILED);
+			return replyMsg;
+		}
+
+		try {
+			switch (protocol) {
+				case HTTP_PROTOCOL:
+					log.info("Sending request to read firealarm-sonar at : " + deviceIp +
+									 " via " + HTTP_PROTOCOL);
+
+					replyMsg = sendCommandViaHTTP(deviceIp, 80, SONAR_CONTEXT, false);
+					break;
+
+//				case XMPP_PROTOCOL:
+//					log.info("Sending request to read firealarm-sonar at : " + deviceIp +
+//									 " via " +
+//									 XMPP_PROTOCOL);
+//					replyMsg = requestTemperatureViaXMPP(deviceIp, response);
+//					break;
+
+				default:
+					if (protocol == null) {
+						log.info("Sending request to read firealarm-sonar at : " + deviceIp +
+										 " via " + HTTP_PROTOCOL);
+
+						replyMsg = sendCommandViaHTTP(deviceIp, 80, SONAR_CONTEXT, false);
+					} else {
+						replyMsg = "Requested protocol '" + protocol + "' is not supported";
+						response.setStatus(HttpStatus.SC_NOT_IMPLEMENTED);
+						return replyMsg;
+					}
+					break;
+			}
+		} catch (DeviceManagementException e) {
+			replyMsg = e.getErrorMessage();
+			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			return replyMsg;
+		}
+
+		response.setStatus(HttpStatus.SC_OK);
+		replyMsg = "The current sonar reading of the device is " + replyMsg;
+		return replyMsg;
+	}
 
 	@Path("/push_temperature")
 	@POST
@@ -231,8 +471,8 @@ public class FireAlarmControllerService {
 				response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			}
 		} catch (UnauthorizedException e) {
-			response.setStatus(HttpStatus.SC_UNAUTHORIZED);
-
+			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			log.error("Data Push Attempt Failed for BAM Publisher: " + e.getMessage());
 		}
 
 		try {
@@ -250,60 +490,19 @@ public class FireAlarmControllerService {
 				response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			}
 		} catch (UnauthorizedException e) {
-			response.setStatus(HttpStatus.SC_UNAUTHORIZED);
-
-		}
-
-
-	}
-
-
-	@Path("/fan/{state}")
-	@POST
-	public void switchFan(@HeaderParam("owner") String owner,
-						  @HeaderParam("deviceId") String deviceId,
-						  @PathParam("state") String state,
-						  @Context HttpServletResponse response) {
-
-		String switchToState = state.toUpperCase();
-
-		if (!switchToState.equals(FireAlarmConstants.STATE_ON) && !switchToState.equals(
-				FireAlarmConstants.STATE_OFF)) {
-			log.error("The requested state change shoud be either - 'ON' or 'OFF'");
-			response.setStatus(HttpStatus.SC_BAD_REQUEST);
-			return;
-		}
-
-
-		String deviceIp = deviceToIpMap.get(deviceId);
-
-		if (deviceIp == null) {
-			//log.error("IP not registered for device: " + deviceId + " of owner: " + owner);
-			response.setStatus(HttpStatus.SC_PRECONDITION_FAILED);
-			return;
-		}
-
-
-		log.info("Sending command : " + switchToState + " to firealarm-FAN at : " + deviceIp);
-
-		String callUrlPattern = FAN_CONTEXT + switchToState;
-		try {
-			sendCommand(deviceIp, 80, callUrlPattern, true);
-		} catch (DeviceManagementException e) {
 			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-			return;
+			log.error("Data Push Attempt Failed for CEP Publisher: " + e.getMessage());
 		}
-
-		response.setStatus(HttpStatus.SC_OK);
 	}
 
 
 	/*    Service to push all the sensor data collected by the FireAlarm
 		   Called by the FireAlarm device  */
+
 	@Path("/pushalarmdata")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void pushAlarmData(final DeviceJSON dataMsg) {
+	public void pushAlarmData(final DeviceJSON dataMsg, @Context HttpServletResponse response) {
 		boolean result;
 		String sensorValues = dataMsg.value;
 		log.info("Recieved Sensor Data Values: " + sensorValues);
@@ -316,8 +515,7 @@ public class FireAlarmControllerService {
 				String fan = sensors[2];
 
 				sensorValues = "Temperature:" + temperature + "C\tBulb Status:" + bulb +
-						"\t\tFan Status:" +
-						fan;
+						"\t\tFan Status:" + fan;
 				log.info(sensorValues);
 				DeviceController deviceController = new DeviceController();
 				result = deviceController.pushBamData(dataMsg.owner, FireAlarmConstants
@@ -327,8 +525,8 @@ public class FireAlarmControllerService {
 													  temperature, "TEMPERATURE");
 
 				if (!result) {
-//					response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-					log.error("Temp + Error: " + sensorValues);
+					response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+					log.error("Error whilst pushing temperature: " + sensorValues);
 					return;
 				}
 
@@ -340,8 +538,8 @@ public class FireAlarmControllerService {
 													  "BULB");
 
 				if (!result) {
-//					response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-					log.error("Bulb + Error: " + sensorValues);
+					response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+					log.error("Error whilst pushing Bulb data: " + sensorValues);
 					return;
 				}
 
@@ -353,8 +551,8 @@ public class FireAlarmControllerService {
 													  "FAN");
 
 				if (!result) {
-//					response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-					log.error("Fan + Error: " + sensorValues);
+					response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+					log.error("Error whilst pushing Fan data: " + sensorValues);
 				}
 
 			} else {
@@ -365,20 +563,40 @@ public class FireAlarmControllerService {
 													  System.currentTimeMillis(), "DeviceData",
 													  dataMsg.value, dataMsg.reply);
 				if (!result) {
-//					response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-					log.error("Bottom + Error: " + sensorValues);
+					response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+					log.error("Error whilst pushing sensor data: " + sensorValues);
 				}
 			}
 
 		} catch (UnauthorizedException e) {
-//			response.setStatus(HttpStatus.SC_UNAUTHORIZED);
-			log.error("Unauthorized Data Push Attempt: " + e.getMessage());
+			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			log.error("Data Push Attempt Failed at Publisher: " + e.getMessage());
 		}
-
 	}
 
-	private String sendCommand(final String deviceIp, int deviceServerPort, String callUrlPattern,
-							   boolean fireAndForgot)
+
+	private boolean sendCommandViaMQTT(String deviceOwner, String deviceId, String resource,
+									   String state) throws DeviceManagementException {
+
+		boolean result = false;
+		DeviceController deviceController = new DeviceController();
+
+		try {
+			result = deviceController.publishMqttControl(deviceOwner,
+														 FireAlarmConstants.DEVICE_TYPE,
+														 deviceId, resource, state);
+		} catch (DeviceControllerException e) {
+			String errorMsg = "Error whilst trying to publish to MQTT Queue";
+			log.error(errorMsg);
+			throw new DeviceManagementException(errorMsg, e);
+		}
+		return result;
+	}
+
+
+	private String sendCommandViaHTTP(final String deviceIp, int deviceServerPort,
+									  String callUrlPattern,
+									  boolean fireAndForgot)
 			throws DeviceManagementException {
 
 		if (deviceServerPort == 0) {
@@ -400,8 +618,7 @@ public class FireAlarmControllerService {
 			} catch (ProtocolException e) {
 				String errorMsg =
 						"Protocol specific error occurred when trying to set method to GET" +
-								" for:" +
-								urlString;
+								" for:" + urlString;
 				log.error(errorMsg);
 				throw new DeviceManagementException(errorMsg, e);
 			}
@@ -417,10 +634,7 @@ public class FireAlarmControllerService {
 				HttpGet request = new HttpGet(urlString);
 				final CountDownLatch latch = new CountDownLatch(1);
 				Future<HttpResponse> future = httpclient.execute(
-						request, new FutureCallback<HttpResponse>
-								() {
-
-
+						request, new FutureCallback<HttpResponse>() {
 							@Override
 							public void completed(HttpResponse httpResponse) {
 								latch.countDown();
@@ -464,6 +678,7 @@ public class FireAlarmControllerService {
     /* Utility methods relevant to creating and sending http requests */
 
 	/* This methods creates and returns a http connection object */
+
 	private HttpURLConnection getHttpConnection(String urlString) throws
 																  DeviceManagementException {
 
@@ -489,6 +704,7 @@ public class FireAlarmControllerService {
 	}
 
 	/* This methods reads and returns the response from the connection */
+
 	private String readResponseFromGetRequest(HttpURLConnection httpConnection)
 			throws DeviceManagementException {
 		BufferedReader bufferedReader = null;

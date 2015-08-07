@@ -23,9 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.device.mgt.common.spi.DeviceMgtService;
+import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.iot.common.service.DeviceTypeService;
-import org.wso2.carbon.device.mgt.iot.firealarm.impl.FireAlarmManager;
+import org.wso2.carbon.device.mgt.iot.firealarm.impl.FireAlarmManagerService;
 
 
 /**
@@ -55,8 +55,8 @@ public class FirealarmManagementServiceComponent {
 
 
             firealarmServiceRegRef =
-                    bundleContext.registerService(DeviceMgtService.class.getName(), new
-					FireAlarmManager(),
+                    bundleContext.registerService(DeviceManagementService.class.getName(),
+                                                 new FireAlarmManagerService(),
 												  null);
 
 

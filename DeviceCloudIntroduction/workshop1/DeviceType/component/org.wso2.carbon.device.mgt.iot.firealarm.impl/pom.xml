@@ -67,13 +67,9 @@
 							org.w3c.dom,
 							org.wso2.carbon.device.mgt.common.*,
 							org.wso2.carbon.device.mgt.common,
-							<!--org.wso2.carbon.user.core.service,-->
-							<!--org.wso2.carbon.user.api,-->
-							<!--org.wso2.carbon.device.mgt.user.common,-->
 							org.wso2.carbon.context.*,
 							org.wso2.carbon.ndatasource.core,
 							org.wso2.carbon.device.mgt.iot.common.*,
-							<!--org.apache.velocity.*-->
 						</Import-Package>
 
 						<Export-Package>
@@ -141,6 +137,62 @@
 
 
 	</dependencies>
+	
+	 <repositories>
+        <!-- Before adding ANYTHING in here, please start a discussion on the dev list.
+             Ideally the Axis2 build should only use Maven central (which is available
+             by default) and nothing else. We had troubles with other repositories in
+             the past. Therefore configuring additional repositories here should be
+             considered very carefully. -->
+        <repository>
+            <id>iot.snapshots</id>
+            <name>WSO2 Snapshot Repository</name>
+            <url>http://maven.wso2.org/nexus/content/repositories/iotdemo/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+
+	<repository>
+            <id>wso2-nexus</id>
+            <name>WSO2 internal Repository</name>
+            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+
+        <repository>
+            <id>wso2.releases</id>
+            <name>WSO2 internal Repository</name>
+            <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+
+        <repository>
+            <id>wso2.snapshots</id>
+            <name>WSO2 Snapshot Repository</name>
+            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+
+    </repositories>
 
 
 </project>
