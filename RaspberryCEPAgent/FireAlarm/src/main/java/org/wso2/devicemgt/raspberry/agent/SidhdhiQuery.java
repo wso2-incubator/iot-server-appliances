@@ -47,11 +47,14 @@ public class SidhdhiQuery implements Runnable {
     final AgentConstants constants = new AgentConstants();
 
     boolean isBulbOn = false;
+    PushBamData pushBamData = null;
 
 
     public void run() {
         // Creating Siddhi Manager
         SiddhiManager siddhiManager = new SiddhiManager();
+        pushBamData = new PushBamData();
+        pushBamData.initializeDataPublisher();
 
         //Start the execution plan with pre-defined or previously persisted Siddhi query
         StartExecutionPlan startExecutionPlan = new StartExecutionPlan(siddhiManager).invoke();
@@ -185,6 +188,10 @@ public class SidhdhiQuery implements Runnable {
                         if(!isBulbOn){
                             performHTTPCall(events, "bulb.on.api.endpoint", "Bulb Switched on!");
                             System.out.println("#### Performed HTTP call! ON.");
+                            pushBamData.publishData(constants.prop.getProperty("device.id"),
+                                                    constants.prop.getProperty("device.type"),
+                                                    constants.prop.getProperty("device.user"),
+                                                    "BULB SWITCHED ON");
                             isBulbOn = true;
                         }
                     }
@@ -198,6 +205,10 @@ public class SidhdhiQuery implements Runnable {
                     if(isBulbOn){
                         performHTTPCall(inEvents,"bulb.off.api.endpoint","Bulb Switched off!");
                         System.out.println("#### Performed HTTP call! OFF.");
+                        pushBamData.publishData(constants.prop.getProperty("device.id"),
+                                                constants.prop.getProperty("device.type"),
+                                                constants.prop.getProperty("device.user"),
+                                                "BULB SWITCHED OFF");
                         isBulbOn = false;
                     }
                 }
