@@ -16,7 +16,7 @@ public class MQTTPolicyReciever implements Runnable {
         try {
             mqttReciever.subscribe();
         } catch (Exception e) {
-            log.error("Error when invoking MQTT");
+            log.error("Error while subscribing to MQTT Queue");
         }
     }
 }

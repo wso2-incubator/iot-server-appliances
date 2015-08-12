@@ -1,5 +1,7 @@
 package org.wso2.devicemgt.raspberry.agent;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
@@ -16,17 +18,23 @@ import java.net.MalformedURLException;
  */
 public class PushBamData {
 
+    private static final Log log = LogFactory.getLog(PushBamData.class);
+
     private static DataPublisher dataPublisher = null;
     String streamId = null;
 
     final AgentConstants constants = new AgentConstants();
 
-
+    /**
+     * Declare the stream
+     * @return
+     */
     public boolean initializeDataPublisher(){
 
         try {
 
             setTrustStoreParams();
+            log.info("Initializing BAM data publisher.");
             dataPublisher = new DataPublisher(constants.prop.getProperty("bam.thrift.url"), constants.prop.getProperty("bam.username"), constants.prop.getProperty("bam.password"));
 
             streamId = dataPublisher.defineStream("{" +
@@ -47,19 +55,19 @@ public class PushBamData {
             return true;
 
         } catch (AgentException e) {
-            e.printStackTrace();
+            log.error("Error in agent : "+e.getMessage());
         } catch (MalformedStreamDefinitionException e) {
-            e.printStackTrace();
+            log.error("Malformed stream definition : "+e.getMessage());
         } catch (StreamDefinitionException e) {
-            e.printStackTrace();
+            log.error("Error in stream definition : "+e.getMessage());
         } catch (DifferentStreamDefinitionAlreadyDefinedException e) {
-            e.printStackTrace();
+            log.error("Duplicate stream definition : "+e.getMessage());
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            log.error("Malformed URL : "+e.getMessage());
         } catch (AuthenticationException e) {
-            e.printStackTrace();
+            log.error("Error in authentication : "+e.getMessage());
         } catch (TransportException e) {
-            e.printStackTrace();
+            log.error("Error in transport : "+e.getMessage());
         }
 
         return false;
@@ -76,10 +84,18 @@ public class PushBamData {
 
     }
 
+    /**
+     * Push data to BAM
+     * @param deviceId
+     * @param type
+     * @param owner
+     * @param event
+     * @return
+     */
     public boolean publishData(String deviceId, String type, String owner, String event){
         try {
 
-            System.out.println("########### "+event);
+            log.debug("DeviceID : "+deviceId+", Type : "+type+", Owner: "+owner+", Event : "+event);
             dataPublisher.publish(streamId, new Object[]{deviceId}, null, new Object[]{type, owner, event});
 //            dataPublisher.stop();
             return true;
