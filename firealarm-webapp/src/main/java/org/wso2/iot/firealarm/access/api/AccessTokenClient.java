@@ -102,7 +102,6 @@ public class AccessTokenClient {
 
 
 		} catch (NoSuchAlgorithmException | KeyManagementException| IOException |JSONException e) {
-
 			log.error(e.getMessage());
 			throw new AccessTokenException("Configuration Error for Access Token Generation");
 		}catch (NullPointerException e){
