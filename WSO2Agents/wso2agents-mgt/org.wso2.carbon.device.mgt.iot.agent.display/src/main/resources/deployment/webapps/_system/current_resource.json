@@ -1,0 +1,7 @@
+{
+  "agent":"displayagent",
+  "version":"1.0.0",
+  "path":"http://localhost:8000/test",
+  "next_poll": 5000,
+  "load_delay": 2000
+}

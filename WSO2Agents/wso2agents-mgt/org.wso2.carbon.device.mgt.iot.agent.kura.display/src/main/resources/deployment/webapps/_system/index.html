@@ -1,0 +1,145 @@
+<!--
+  ~
+  ~  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  ~
+  -->
+
+<html>
+<head>
+    <style type="text/css">
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #content {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 0px;
+        }
+    </style>
+    <script type="text/javascript">
+        var currentFrame = "iFrameName1";
+        var tempFrame = "iFrameName2";
+        var configJsonFile = "current_resource.json";
+        var startupHtmlFile = "loading.html";
+        var pollingInterval = 2000;
+        var transitionDelay = 2000;
+        var currentUrl = "";
+        var transitionTimer;
+        var pollingTimer;
+
+        function ajax(method, url, successCallback, errorCallback) {
+            var xhr;
+
+            if (window.XMLHttpRequest) { // code for IE7+, Firefox, Chrome, Opera, Safari
+                xhr = new XMLHttpRequest();
+            } else { // code for IE6, IE5
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    if (xhr.status == 200) { if(successCallback) successCallback(xhr.responseText, xhr); return xhr.responseText; } else { if(errorCallback) errorCallback(xhr); return;}
+                }
+            };
+
+            xhr.open(method, url, true);
+
+            try {
+                xhr.send();
+            } catch ( e ) {
+                if ( errorCallback ) { throw e; }
+            }
+        }
+
+        function swapFrameRoles() {
+            var t = currentFrame;
+            currentFrame = tempFrame;
+            tempFrame = t;
+
+        }
+
+        function hideFrame(frameName){
+            document.getElementById(frameName).style.position = 'absolute';
+            document.getElementById(frameName).style.left = '100000px';
+            //console.log(frameName+": hidden");
+        }
+
+        function showFrame(frameName){
+            document.getElementById(frameName).style.position = 'absolute';
+            document.getElementById(frameName).style.left = '0px';
+            //console.log(frameName+": shown");
+        }
+
+        function swapFrames(){
+            hideFrame(currentFrame);
+            showFrame(tempFrame);
+            document.getElementById(currentFrame).src = "";
+            //console.log(currentFrame+": cleared!");
+            swapFrameRoles();
+            //console.log("Swap frames done ! temp="+tempFrame+" currnt="+currentFrame);
+        }
+
+        function urlChange(url) {
+            //console.log("=======urlChange()=======");
+            showFrame(currentFrame);
+            hideFrame(tempFrame);
+            document.getElementById(tempFrame).src = url;
+            //console.log(tempFrame+": URL changed:" + url);
+            //console.log(tempFrame+": will display after transitionDelay=" + transitionDelay);
+            transitionTimer = setTimeout(function() {swapFrames()}, transitionDelay);
+        }
+
+        function getCurrentUrl(newUrl) {
+            //console.log("=======getCurrentUrl()=======");
+            var currentUrl = newUrl; //setting default
+            var successCallback = function(data){
+                var path = JSON.parse(data).path;
+                //console.log("path: "+path);
+                //alert(path);
+                if(path && path != "" && currentUrl != path) {currentUrl = path; urlChange(currentUrl);}
+
+                var nextPollTime = JSON.parse(data).next_poll;
+                //alert(nextPollTime);
+                if(nextPollTime && nextPollTime != "") {pollingInterval = nextPollTime;}
+
+                var loadDelay = JSON.parse(data).load_delay;
+                //alert(loadDelay);
+                if(loadDelay && loadDelay != "") {transitionDelay = loadDelay;}
+            };
+            ajax("GET", configJsonFile, successCallback);
+            pollingTimer = setTimeout(function(){getCurrentUrl(currentUrl)}, pollingInterval + transitionDelay);
+            //console.log("will read url again after:"+(pollingInterval));
+            clearTimeout(transitionTimer);
+        }
+
+        window.onload = function () {
+            getCurrentUrl(startupHtmlFile);
+        };
+    </script>
+</head>
+<body>
+<div id="content">
+    <iframe id="iFrameName1" width="100%" height="100%" frameborder="0" src="loading.html"></iframe>
+    <iframe id="iFrameName2" width="100%" height="100%" frameborder="0" src=""></iframe>
+</div>
+</body>
+</html>

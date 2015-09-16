@@ -1,0 +1,71 @@
+<!--
+  ~
+  ~  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  ~
+  -->
+
+<assembly>
+    <id>bin</id>
+    <!-- Specifies that our binary distribution is a zip package -->
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <!-- Adds the dependencies of our application to the lib directory -->
+    <dependencySets>
+        <dependencySet>
+            <!--
+                Project artifact is not copied under library directory since
+                it is added to the root directory of the zip package.
+            -->
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>lib</outputDirectory>
+            <unpack>false</unpack>
+        </dependencySet>
+    </dependencySets>
+
+    <fileSets>
+        <!--
+            Adds startup scripts to the root directory of zip package. The startup
+            scripts are copied from the src/main/scripts directory.
+        -->
+        <fileSet>
+            <directory>${project.build.scriptSourceDirectory}</directory>
+            <outputDirectory>bin/</outputDirectory>
+            <includes>
+                <include>wso2agent.*</include>
+            </includes>
+            <fileMode>755</fileMode>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <outputDirectory>repository</outputDirectory>
+        </fileSet>
+
+        <!--
+            Adds the jar file of our example application to the root directory
+            of the created zip package.
+        -->
+        <fileSet>
+            <directory>${project.build.directory}</directory>
+            <outputDirectory>bin/</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>

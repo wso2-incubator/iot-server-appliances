@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+DeploymentPackage-SymbolicName: DisplayAgent
+DeploymentPackage-Version: 1.0.0
+
+Name: bundles/%PROJECT_ARTIFACT%.jar
+Bundle-SymbolicName: org.wso2.carbon.device.mgt.iot.displayagent
+Bundle-Version: 1.0.0

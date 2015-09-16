@@ -38,7 +38,8 @@
     <description>WSO2 IoT - Agents Aggregator</description>
 
     <modules>
-        <module>org.wso2.carbon.device.mgt.iot.displayagent</module>
+        <module>org.wso2.carbon.device.mgt.iot.agent.display</module>
+        <module>org.wso2.carbon.device.mgt.iot.agent.kura.display</module>
     </modules>
 
 </project>
