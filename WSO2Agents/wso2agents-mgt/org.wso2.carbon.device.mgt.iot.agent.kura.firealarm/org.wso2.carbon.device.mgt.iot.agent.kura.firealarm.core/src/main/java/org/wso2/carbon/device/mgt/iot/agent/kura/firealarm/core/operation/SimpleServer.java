@@ -38,11 +38,9 @@ public class SimpleServer {
             server.setHandler(new AbstractHandler() {
                 public void handle(String s, Request request, HttpServletRequest httpServletRequest,
                         HttpServletResponse httpServletResponse) throws IOException, ServletException {
-                    log.info("Serving request");
                     httpServletResponse.setContentType("text/html;charset=utf-8");
                     httpServletResponse.setStatus(HttpServletResponse.SC_OK);
                     request.setHandled(true);
-                    log.info("Request path: " + request.getPathInfo());
                     AgentOperationManager agentOperationManager = AgentDataHolder.getInstance()
                             .getAgentOperationManager();
                     if (request.getPathInfo().equals("/temperature")) {
@@ -61,7 +59,7 @@ public class SimpleServer {
                 }
             });
             server.start();
-            server.join();
+            log.info("Server started");
         } catch (Exception e) {
             log.error("Unable to start server", e);
         }
