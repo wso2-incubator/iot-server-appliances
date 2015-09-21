@@ -16,12 +16,14 @@
 
 package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal;
 
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.AgentOperation;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.AgentOperationManager;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.SimpleServer;
 
 public class AgentDataHolder {
 
     private static AgentDataHolder thisInstance = new AgentDataHolder();
-    private AgentOperation agentOperation;
+    private AgentOperationManager agentOperationManager;
+    private SimpleServer simpleServer;
 
     private AgentDataHolder() {
 
@@ -31,11 +33,19 @@ public class AgentDataHolder {
         return thisInstance;
     }
 
-    public AgentOperation getAgentOperation() {
-        return agentOperation;
+    public void init() {
+        simpleServer = new SimpleServer();
     }
 
-    public void setAgentOperation(AgentOperation agentOperation) {
-        this.agentOperation = agentOperation;
+    public AgentOperationManager getAgentOperationManager() {
+        return agentOperationManager;
+    }
+
+    public void setAgentOperationManager(AgentOperationManager agentOperationManager) {
+        this.agentOperationManager = agentOperationManager;
+    }
+
+    public SimpleServer getSimpleServer() {
+        return simpleServer;
     }
 }

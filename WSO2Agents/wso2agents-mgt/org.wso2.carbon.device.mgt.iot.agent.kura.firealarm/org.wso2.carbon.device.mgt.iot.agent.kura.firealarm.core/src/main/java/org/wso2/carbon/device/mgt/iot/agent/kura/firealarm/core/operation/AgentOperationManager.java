@@ -14,9 +14,9 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core;
+package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation;
 
-public interface AgentOperation {
+public interface AgentOperationManager {
 
     void changeBulbStatus(boolean status);
 

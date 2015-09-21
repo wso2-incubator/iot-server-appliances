@@ -14,21 +14,29 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl;
+package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl.virtual.operation;
 
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.AgentOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.AgentOperationManager;
 
-public class AgentOperationVirtualImpl implements AgentOperation {
+public class AgentOperationManagerImpl implements AgentOperationManager {
+
+    private static final Logger log = LoggerFactory.getLogger(AgentOperationManagerImpl.class);
 
     public void changeBulbStatus(boolean status) {
-
+        log.info("Bulb status: " + (status ? "ON" : "OFF"));
     }
 
     public double getTemperature() {
-        return 0;
+        double temp = Math.random() * 100;
+        log.info("Temperature: " + temp);
+        return temp;
     }
 
     public double getHumidity() {
-        return 0;
+        double hum = Math.random() * (80 - 10) + 10;
+        log.info("Humidity: " + hum);
+        return hum;
     }
 }

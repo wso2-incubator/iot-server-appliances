@@ -48,11 +48,12 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-Description>Fire Alarm Agent Virtual Bundle</Bundle-Description>
-                        <Private-Package>org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl.internal
+                        <Private-Package>org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl.virtual.internal
                         </Private-Package>
                         <Export-Package>
-                            !org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl.internal,
-                            org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl; version=${project.version}
+                            !org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl.virtual.internal,
+                            org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl.virtual.*;
+                            version=${project.version}
                         </Export-Package>
                     </instructions>
                 </configuration>

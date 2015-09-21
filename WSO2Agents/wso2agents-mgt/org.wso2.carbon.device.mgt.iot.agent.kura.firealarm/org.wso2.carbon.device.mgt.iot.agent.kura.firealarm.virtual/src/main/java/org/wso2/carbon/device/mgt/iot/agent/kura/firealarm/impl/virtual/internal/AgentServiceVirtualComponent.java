@@ -14,14 +14,14 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl.internal;
+package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl.virtual.internal;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.AgentOperation;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl.AgentOperationVirtualImpl;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.AgentOperationManager;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl.virtual.operation.AgentOperationManagerImpl;
 
 /**
  * @scr.component name="org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl" immediate="true"
@@ -36,8 +36,8 @@ public class AgentServiceVirtualComponent {
         log.info("===================");
         /* Registering DeviceGroup Management service */
         BundleContext bundleContext = componentContext.getBundleContext();
-        AgentOperation agentOperation = new AgentOperationVirtualImpl();
-        bundleContext.registerService(AgentOperation.class.getName(), agentOperation, null);
+        AgentOperationManager agentOperationManager = new AgentOperationManagerImpl();
+        bundleContext.registerService(AgentOperationManager.class.getName(), agentOperationManager, null);
         if (log.isDebugEnabled()) {
             log.debug("Agent virtual emulation bundle has been successfully initialized");
         }

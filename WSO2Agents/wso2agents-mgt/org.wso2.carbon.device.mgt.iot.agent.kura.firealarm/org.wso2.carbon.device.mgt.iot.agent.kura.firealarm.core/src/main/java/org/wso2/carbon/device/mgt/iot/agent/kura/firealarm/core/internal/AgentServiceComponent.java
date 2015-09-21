@@ -19,12 +19,12 @@ package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.AgentOperation;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.AgentOperationManager;
 
 /**
  * @scr.component name="org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core" immediate="true"
  * @scr.reference name="org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl"
- * interface="org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.AgentOperation"
+ * interface="org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.AgentOperationManager"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setImplService"
@@ -38,6 +38,7 @@ public class AgentServiceComponent {
         log.info("===================");
         log.info("Agent Core Bundle has started!");
         log.info("===================");
+        AgentDataHolder.getInstance().init();
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -49,24 +50,24 @@ public class AgentServiceComponent {
     /**
      * Sets Agent Operations.
      *
-     * @param agentOperation An instance of AgentOperation
+     * @param agentOperationManager An instance of AgentOperationManager
      */
-    protected void setImplService(AgentOperation agentOperation) {
+    protected void setImplService(AgentOperationManager agentOperationManager) {
         log.info("===================");
         log.info("Agent Operations Binned!");
         log.info("===================");
-        AgentDataHolder.getInstance().setAgentOperation(agentOperation);
+        AgentDataHolder.getInstance().setAgentOperationManager(agentOperationManager);
     }
 
     /**
      * Un sets Agent Operations.
      *
-     * @param agentOperation An instance of AgentOperation
+     * @param agentOperationManager An instance of AgentOperationManager
      */
-    protected void unsetImplService(AgentOperation agentOperation) {
+    protected void unsetImplService(AgentOperationManager agentOperationManager) {
         log.info("===================");
         log.info("Agent Operations Un-binned!");
         log.info("===================");
-        AgentDataHolder.getInstance().setAgentOperation(null);
+        AgentDataHolder.getInstance().setAgentOperationManager(null);
     }
 }
