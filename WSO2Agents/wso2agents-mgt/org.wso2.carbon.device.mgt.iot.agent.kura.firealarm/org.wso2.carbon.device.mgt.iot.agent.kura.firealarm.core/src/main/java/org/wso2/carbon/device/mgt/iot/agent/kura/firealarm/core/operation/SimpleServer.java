@@ -21,6 +21,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.constants.AgentConstants;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal.AgentDataHolder;
 
 import javax.servlet.ServletException;
@@ -32,8 +33,12 @@ public class SimpleServer {
 
     private static final Logger log = LoggerFactory.getLogger(SimpleServer.class);
 
-    public SimpleServer() {
-        Server server = new Server(9090);
+	public SimpleServer() {
+		new SimpleServer(AgentConstants.DEVICE_SERVER_PORT);
+	}
+
+    public SimpleServer(int serverPort) {
+        Server server = new Server(serverPort);
         try {
             server.setHandler(new AbstractHandler() {
                 public void handle(String s, Request request, HttpServletRequest httpServletRequest,
@@ -43,6 +48,7 @@ public class SimpleServer {
                     request.setHandled(true);
                     AgentOperationManager agentOperationManager = AgentDataHolder.getInstance()
                             .getAgentOperationManager();
+
                     if (request.getPathInfo().equals("/temperature")) {
                         httpServletResponse.getWriter().println(agentOperationManager.getTemperature());
                     } else if (request.getPathInfo().equals("/humidity")) {

@@ -54,7 +54,7 @@ public class AgentServiceComponent {
      */
     protected void setImplService(AgentOperationManager agentOperationManager) {
         log.info("===================");
-        log.info("Agent Operations Binned!");
+        log.info("Agent Operations has Bound Successfully!");
         log.info("===================");
         AgentDataHolder.getInstance().setAgentOperationManager(agentOperationManager);
     }
