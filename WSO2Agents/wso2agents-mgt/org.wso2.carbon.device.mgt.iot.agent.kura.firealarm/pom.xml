@@ -139,7 +139,10 @@
 		</repository>
 	</repositories>
 
-	<!--<properties>-->
+	<properties>
+		<!-- Java Version Compatibility -->
+		<wso2.maven.compiler.source>1.7</wso2.maven.compiler.source>
+		<wso2.maven.compiler.target>1.7</wso2.maven.compiler.target>
 	<!--<deployment.package.version>0.2.0</deployment.package.version>-->
 	<!--<tycho-version>0.20.0</tycho-version>-->
 	<!--<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->
@@ -148,6 +151,6 @@
 	<!--<kura.build.version>${maven.build.timestamp}</kura.build.version>-->
 	<!--<kura.bundle.versions>0.2.0.${kura.build.version}</kura.bundle.versions>-->
 	<!--<eclipse.osgi.version>3.8.1.v20120830-144521</eclipse.osgi.version>-->
-	<!--</properties>-->
+	</properties>
 
 </project>

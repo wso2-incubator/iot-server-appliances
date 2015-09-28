@@ -3,6 +3,8 @@ package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.constants;
 import java.io.File;
 
 public class AgentConstants {
+	public static final String DEVICE_TYPE = "firealarm";
+
 	private static final String FILE_SEPERATOR = File.separator;
 	public static final String LOG_APPENDER = "AGENT_LOG:: ";
 	public static final String PROPERTIES_FILE_PATH = "." + FILE_SEPERATOR + "repository" + FILE_SEPERATOR + "conf" + FILE_SEPERATOR;
@@ -18,6 +20,12 @@ public class AgentConstants {
 	public static final String DEVICE_REGISTER_API_EP = "/register";
 	public static final String DEVICE_PUSH_TEMPERATURE_API_EP = "/push_temperature";
 	public static final String PUSH_DATA_PAYLOAD = "{\"owner\":\"%s\",\"deviceId\":\"%s\",\"reply\":\"%s\",\"value\":\"%s\"}";
+
+	public static final int DEFAULT_MQTT_RECONNECTION_INTERVAL = 2;
+	public static final int DEFAULT_MQTT_QUALITY_OF_SERVICE = 0;
+	public static final String MQTT_SUBSCRIBE_TOPIC = "wso2/iot/%s/" + DEVICE_TYPE + "/%s";
+	public static final String MQTT_TEMP_PUBLISH_TOPIC = "wso2/iot/%s/" + DEVICE_TYPE + "/%s/temp";
+	public static final String MQTT_HUMID_PUBLISH_TOPIC = "wso2/iot/%s/" + DEVICE_TYPE + "/%s/humid";
 
 	public static final String AGENT_PROPERTIES_FILE_NAME = "deviceConfig.properties";
 
@@ -42,4 +50,8 @@ public class AgentConstants {
 	public static final String DEFAULT_REFRESH_TOKEN = "1234567890ZYXWVUTSRQPONMKLJIHGFEDCBA";
 	public static final String DEFAULT_NETWORK_INTERFACE = "wlan0";
 	public static final int DEFAULT_PUSH_INTERVAL = 15;
+
+	public static final String BULB_CONTROL = "BULB";
+	public static final String TEMPERATURE_CONTROL = "TEMP";
+	public static final String HUMIDITY_CONTROL = "HUMID";
 }

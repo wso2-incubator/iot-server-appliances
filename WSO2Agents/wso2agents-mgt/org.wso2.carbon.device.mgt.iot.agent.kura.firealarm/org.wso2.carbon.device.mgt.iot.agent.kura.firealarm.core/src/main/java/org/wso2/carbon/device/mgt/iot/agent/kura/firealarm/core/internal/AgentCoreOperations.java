@@ -1,11 +1,14 @@
 package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal;
 
 import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.constants.AgentConstants;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.exception
 		.AgentCoreOperationException;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.mqtt.AgentMQTTClient;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -21,6 +24,7 @@ import java.net.NetworkInterface;
 import java.net.ProtocolException;
 import java.net.SocketException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -30,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 public class AgentCoreOperations {
 
 	private static final Logger log = LoggerFactory.getLogger(AgentCoreOperations.class);
+	private static AgentMQTTClient agentMQTTClient;
 
 	/**
 	 * This method reads the agent specific configurations for the device from the "deviceConfigs.properties" file found at /repository/conf folder
@@ -134,7 +139,7 @@ public class AgentCoreOperations {
 	 * @param deviceOwner	The owner of the device by whose name the agent was downloaded. (Read from configuration file)
 	 * @param deviceID		The deviceId that is auto-generated whilst downloadng the agent. (Read from configuration file)
 	 * @return The status code of the HTTP-Post call to the Register-API of the IoT-Server
-	 * @throws AgentCoreOperationException Throws for errors that occur when an HTTPConnection session is created
+	 * @throws AgentCoreOperationException Thrown for errors that occur when an HTTPConnection session is created
 	 */
 	public static int registerDeviceIP(String deviceOwner, String deviceID)
 			throws AgentCoreOperationException {
@@ -184,7 +189,7 @@ public class AgentCoreOperations {
 	/**
 	 * This is an overloaded method that pushes device-data to the IoT-Server at given time intervals
 	 * @param deviceOwner The owner of the device by whose name the agent was downloaded. (Read from configuration file)
-	 * @param deviceID The deviceId that is auto-generated whilst downloadng the agent. (Read from configuration file)
+	 * @param deviceID The deviceId that is auto-generated whilst downloading the agent. (Read from configuration file)
 	 * @param interval The time interval between every successive data-push attempts. (Set initially by the startup script and read from the configuration file)
 	 */
 	public static void pushDeviceData(final String deviceOwner, final String deviceID, int interval){
@@ -250,6 +255,87 @@ public class AgentCoreOperations {
 
 		ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 		service.scheduleAtFixedRate(pushDataThread, 0, interval, TimeUnit.SECONDS);
+	}
+
+	/**
+	 * This method is used by the device to subscribe to the MQTT queue which is used by the WSO2 IoT-Server to publish device-specific control signals.
+	 * For control signals which expects a reply in return (eg: readTemperature), the reply is published back to the same queue with an appropriate topic.
+	 * @param deviceOwner The owner of the device by whose name the agent was downloaded. (Read from configuration file)
+	 * @param deviceID The deviceId that is auto-generated whilst downloading the agent. (Read from configuration file)
+	 * @throws AgentCoreOperationException Thrown for errors that occur whilst trying to connect/subscribe to the MQTT Queue.
+	 */
+	public static void subscribeToMQTT(final String deviceOwner, final String deviceID)
+			throws AgentCoreOperationException {
+		String subscribeTopic = String.format(AgentConstants.MQTT_SUBSCRIBE_TOPIC, deviceOwner, deviceID);
+		String mqttBrokerEndPoint = AgentDataHolder.getInstance().getAgentConfigurations().getMqttBrokerEndPoint();
+
+		agentMQTTClient = new AgentMQTTClient(deviceOwner, deviceID, mqttBrokerEndPoint, subscribeTopic) {
+			@Override
+			protected void postMessageArrived(String topic, MqttMessage message) {
+				log.info(AgentConstants.LOG_APPENDER + "Message " + message.toString() + " was received for topic: " + topic);
+				String[] controlSignal = message.toString().split(":");
+
+				switch (controlSignal[0].toUpperCase()){
+					case AgentConstants.BULB_CONTROL:
+						AgentDataHolder.getInstance().getAgentOperationManager().changeBulbStatus(controlSignal[1].equals("ON") ?  true : false);
+						log.info(AgentConstants.LOG_APPENDER + "Bulb was switched to state: '" + controlSignal[1] + "'");
+						break;
+
+					case AgentConstants.TEMPERATURE_CONTROL:
+						String currentTemperature = "" + AgentDataHolder.getInstance().getAgentOperationManager().getTemperature();
+						String replyTemperature = "The current temperature was read to be: '" + currentTemperature + "C'";
+						log.info(AgentConstants.LOG_APPENDER + replyTemperature);
+
+						String tempPublishTopic = String.format(AgentConstants.MQTT_TEMP_PUBLISH_TOPIC, deviceOwner, deviceID);
+						publishPayloadToMQTT(tempPublishTopic, replyTemperature);
+						break;
+
+					case AgentConstants.HUMIDITY_CONTROL:
+						String currentHumidity = "" + AgentDataHolder.getInstance().getAgentOperationManager().getHumidity();
+						String replyHumidity = "The current humidity was read to be: '" + currentHumidity + "%'";
+						log.info(AgentConstants.LOG_APPENDER + replyHumidity);
+
+						String humidPublishTopic = String.format(AgentConstants.MQTT_HUMID_PUBLISH_TOPIC, deviceOwner, deviceID);
+						publishPayloadToMQTT(humidPublishTopic, replyHumidity);
+						break;
+
+					default:
+						log.warn("'" + controlSignal[0] + "' is invalid and not-supported for this device-type");
+						break;
+				}
+			}
+		};
+
+		agentMQTTClient.subscribe();
+	}
+
+
+	/**
+	 * This method is used to publish reply-messages for the control signals received.
+	 * Invocation of this method calls its overloaded-method with a QoS equal to that of the default value from "AgentConstants" class.
+	 * @param publishTopic The topic to which the reply message is to be published.
+	 * @param payLoad The reply-message (payload) of the MQTT publish action.
+	 */
+	private static void publishPayloadToMQTT(String publishTopic, String payLoad){
+		publishPayloadToMQTT(publishTopic, payLoad, AgentConstants.DEFAULT_MQTT_QUALITY_OF_SERVICE);
+	}
+
+	/**
+	 * This is an overloaded method that publishes MQTT reply-messages for control signals received form the IoT-Server.
+	 * @param publishTopic The topic to which the reply message is to be published
+	 * @param payLoad The reply-message (payload) of the MQTT publish action.
+	 * @param qos The Quality-of-Service of the current publish action. Could be 0(At most once), 1(At-least once) or 2(Exactly once)
+	 */
+	private static void publishPayloadToMQTT(String publishTopic, String payLoad, int qos){
+		try {
+			agentMQTTClient.getClient().publish(publishTopic, payLoad.getBytes(StandardCharsets.UTF_8), qos, true);
+		} catch (MqttException ex) {
+			String errorMsg =
+					"MQTT Client Error" + "\n\tReason:  " + ex.getReasonCode() + "\n\tMessage: " +
+							ex.getMessage() + "\n\tLocalMsg: " + ex.getLocalizedMessage() +
+							"\n\tCause: " + ex.getCause() + "\n\tException: " + ex;
+			log.info(AgentConstants.LOG_APPENDER + errorMsg);
+		}
 	}
 
 
@@ -395,37 +481,4 @@ public class AgentCoreOperations {
 		}
 		return completeResponse.toString();
 	}
-
-
-
-	//		OutputStream propertiesOutputStream = null;
-//
-//		try {
-//			propertiesOutputStream = new FileOutputStream("./repository/conf/deviceConfig.properties");
-//
-//			// set the properties value
-//			properties.setProperty("deviceOwner", "Shabirmean");
-//			properties.setProperty("deviceId", "12345678");
-//			properties.setProperty("iotServerEndPoint", "192.168.2.1");
-//			properties.setProperty("mqttBrokerEndPoint", "192.168.2.1");
-//			properties.setProperty("xmppServerEndPoint", "192.168.2.1");
-//			properties.setProperty("authenticationMethod", "token");
-//			properties.setProperty("authenticationToken", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0987654321");
-//			properties.setProperty("refreshToken", "1234567890ZYXWVUTSRQPONMKLJIHGFEDCBA");
-//
-//			// save properties to project root folder
-//			properties.store(propertiesOutputStream, "Device-Specific Configurations");
-//
-//		} catch (IOException ioException) {
-//			ioException.printStackTrace();
-//		} finally {
-//			if (propertiesOutputStream != null) {
-//				try {
-//					propertiesOutputStream.close();
-//				} catch (IOException exception) {
-//					exception.printStackTrace();
-//				}
-//			}
-//		}
-
 }

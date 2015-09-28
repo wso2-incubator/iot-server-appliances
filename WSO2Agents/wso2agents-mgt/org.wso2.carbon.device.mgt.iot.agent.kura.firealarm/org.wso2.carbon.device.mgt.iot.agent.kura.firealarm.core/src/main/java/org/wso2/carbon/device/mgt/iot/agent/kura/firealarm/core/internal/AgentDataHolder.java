@@ -66,6 +66,12 @@ public class AgentDataHolder {
 		}
 
 		AgentCoreOperations.pushDeviceData(this.agentConfigurations.getDeviceOwner(), this.agentConfigurations.getDeviceId(), this.agentConfigurations.getDataPushInterval());
+
+		try {
+			AgentCoreOperations.subscribeToMQTT(this.agentConfigurations.getDeviceOwner(), this.agentConfigurations.getDeviceId());
+		} catch (AgentCoreOperationException e) {
+			log.error(AgentConstants.LOG_APPENDER + "Subscription to MQTT Broker at: " + this.agentConfigurations.getMqttBrokerEndPoint() + " failed");
+		}
 		simpleServer = new SimpleServer();
 	}
 
