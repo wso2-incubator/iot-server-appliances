@@ -1,19 +1,39 @@
+/*
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal;
 
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.jivesoftware.smack.packet.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.constants.AgentConstants;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.exception
-		.AgentCoreOperationException;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.exception.AgentCoreOperationException;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.mqtt.AgentMQTTClient;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.xmpp.AgentXMPPClient;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -37,9 +57,9 @@ public class AgentCoreOperations {
 	private static AgentMQTTClient agentMQTTClient;
 
 	/**
-	 * This method reads the agent specific configurations for the device from the "deviceConfigs.properties" file found at /repository/conf folder
-	 * If the properties file is not found in the specified path, then the configuration values are set to the default ones in the 'AgentConstants' class
-	 * @return Object of type 'AgentConfigurations' which contains all the necessary configuration attributes
+	 * This method reads the agent specific configurations for the device from the "deviceConfigs.properties" file found at /repository/conf folder.
+	 * If the properties file is not found in the specified path, then the configuration values are set to the default ones in the 'AgentConstants' class.
+	 * @return an object of type 'AgentConfigurations' which contains all the necessary configuration attributes
 	 */
 	public static AgentConfigurations readIoTServerConfigs() {
 		AgentConfigurations iotServerConfigs = new AgentConfigurations();
@@ -49,23 +69,7 @@ public class AgentCoreOperations {
 
 		try {
 			propertiesInputStream = new FileInputStream(AgentConstants.PROPERTIES_FILE_PATH + propertiesFileName);;
-
-			if(propertiesInputStream == null){
-				log.error(AgentConstants.LOG_APPENDER + "Unable to find " + propertiesFileName + " file at: " + AgentConstants.PROPERTIES_FILE_PATH);
-				log.warn(AgentConstants.LOG_APPENDER + "Default Values are being set to all Agent specific configurations");
-				iotServerConfigs.setDeviceOwner(AgentConstants.DEFAULT_DEVICE_OWNER);
-				iotServerConfigs.setDeviceId(AgentConstants.DEFAULT_DEVICE_ID);
-				iotServerConfigs.setIotServerEndPoint(AgentConstants.DEFAULT_IOT_SERVER_EP);
-				iotServerConfigs.setMqttBrokerEndPoint(AgentConstants.DEFAULT_MQTT_BROKER_EP);
-				iotServerConfigs.setXmppServerEndPoint(AgentConstants.DEFAULT_XMPP_SERVER_EP);
-				iotServerConfigs.setAuthenticationMethod(AgentConstants.DEFAULT_AUTH_METHOD);
-				iotServerConfigs.setAuthenticationToken(AgentConstants.DEFAULT_AUTH_TOKEN);
-				iotServerConfigs.setRefreshToken(AgentConstants.DEFAULT_REFRESH_TOKEN);
-				iotServerConfigs.setNetworkInterface(AgentConstants.DEFAULT_NETWORK_INTERFACE);
-				iotServerConfigs.setDataPushInterval(AgentConstants.DEFAULT_PUSH_INTERVAL);
-			}
-
-			//load a properties file from class path, inside static method
+								//load a properties file from class path, inside static method
 			properties.load(propertiesInputStream);
 
 			iotServerConfigs.setDeviceOwner(properties.getProperty(AgentConstants.DEVICE_OWNER_PROPERTY));
@@ -90,7 +94,21 @@ public class AgentCoreOperations {
 			log.info(AgentConstants.LOG_APPENDER + "Network Interface: " + iotServerConfigs.getNetworkInterface());
 			log.info(AgentConstants.LOG_APPENDER + "Data Push Interval: " + iotServerConfigs.getDataPushInterval());
 
-		} catch (IOException ex) {
+		} catch (FileNotFoundException ex){
+			log.error(AgentConstants.LOG_APPENDER + "Unable to find " + propertiesFileName + " file at: " + AgentConstants.PROPERTIES_FILE_PATH);
+			log.warn(AgentConstants.LOG_APPENDER + "Default Values are being set to all Agent specific configurations");
+			iotServerConfigs.setDeviceOwner(AgentConstants.DEFAULT_DEVICE_OWNER);
+			iotServerConfigs.setDeviceId(AgentConstants.DEFAULT_DEVICE_ID);
+			iotServerConfigs.setIotServerEndPoint(AgentConstants.DEFAULT_IOT_SERVER_EP);
+			iotServerConfigs.setMqttBrokerEndPoint(AgentConstants.DEFAULT_MQTT_BROKER_EP);
+			iotServerConfigs.setXmppServerEndPoint(AgentConstants.DEFAULT_XMPP_SERVER_EP);
+			iotServerConfigs.setAuthenticationMethod(AgentConstants.DEFAULT_AUTH_METHOD);
+			iotServerConfigs.setAuthenticationToken(AgentConstants.DEFAULT_AUTH_TOKEN);
+			iotServerConfigs.setRefreshToken(AgentConstants.DEFAULT_REFRESH_TOKEN);
+			iotServerConfigs.setNetworkInterface(AgentConstants.DEFAULT_NETWORK_INTERFACE);
+			iotServerConfigs.setDataPushInterval(AgentConstants.DEFAULT_PUSH_INTERVAL);
+
+		}catch (IOException ex) {
 			log.error(AgentConstants.LOG_APPENDER + "Error occurred whilst trying to fetch '" + propertiesFileName + "' from: " + AgentConstants.PROPERTIES_FILE_PATH);
 		} finally{
 			if(propertiesInputStream != null){
@@ -108,7 +126,7 @@ public class AgentCoreOperations {
 	/**
 	 * This method constructs the URL patterns for each of the API Endpoints called by the device agent
 	 * Ex: Register API, Push-Data API
-	 * @throws AgentCoreOperationException Throws exception if any error occurs whilst trying to retrieve the deviceIP
+	 * @throws AgentCoreOperationException if any error occurs at socket level whilst trying to retrieve the deviceIP of the network-interface read from the configs file
 	 */
 	public static void initializeHTTPEndPoints() throws AgentCoreOperationException {
 		String deviceIPAddress = getDeviceIP(AgentDataHolder.getInstance().getAgentConfigurations().getNetworkInterface());
@@ -136,10 +154,10 @@ public class AgentCoreOperations {
 
 	/**
 	 * This method calls the "Register-API" of the IoT Server in order to register the device's IP against its ID
-	 * @param deviceOwner	The owner of the device by whose name the agent was downloaded. (Read from configuration file)
-	 * @param deviceID		The deviceId that is auto-generated whilst downloadng the agent. (Read from configuration file)
-	 * @return The status code of the HTTP-Post call to the Register-API of the IoT-Server
-	 * @throws AgentCoreOperationException Thrown for errors that occur when an HTTPConnection session is created
+	 * @param deviceOwner	the owner of the device by whose name the agent was downloaded. (Read from configuration file)
+	 * @param deviceID		the deviceId that is auto-generated whilst downloading the agent. (Read from configuration file)
+	 * @return the status code of the HTTP-Post call to the Register-API of the IoT-Server
+	 * @throws AgentCoreOperationException if any errors occur when an HTTPConnection session is created
 	 */
 	public static int registerDeviceIP(String deviceOwner, String deviceID)
 			throws AgentCoreOperationException {
@@ -179,20 +197,20 @@ public class AgentCoreOperations {
 	/**
 	 * This method is used to push device data to the IoT-Server via an HTTP invocation to the API.
 	 * Invocation of this method calls its overloaded-method with a push-interval equal to that of the default value from "AgentConstants" class
-	 * @param deviceOwner The owner of the device by whose name the agent was downloaded. (Read from configuration file)
-	 * @param deviceID The deviceId that is auto-generated whilst downloadng the agent. (Read from configuration file)
+	 * @param deviceOwner the owner of the device by whose name the agent was downloaded. (Read from configuration file)
+	 * @param deviceID the deviceId that is auto-generated whilst downloadng the agent. (Read from configuration file)
 	 */
-	public static void pushDeviceData(final String deviceOwner, final String deviceID){
-		pushDeviceData(deviceOwner, deviceID, AgentConstants.DEFAULT_PUSH_INTERVAL);
+	public static void initiateDeviceDataPush(final String deviceOwner, final String deviceID){
+		initiateDeviceDataPush(deviceOwner, deviceID, AgentConstants.DEFAULT_PUSH_INTERVAL);
 	}
 
 	/**
 	 * This is an overloaded method that pushes device-data to the IoT-Server at given time intervals
-	 * @param deviceOwner The owner of the device by whose name the agent was downloaded. (Read from configuration file)
-	 * @param deviceID The deviceId that is auto-generated whilst downloading the agent. (Read from configuration file)
-	 * @param interval The time interval between every successive data-push attempts. (Set initially by the startup script and read from the configuration file)
+	 * @param deviceOwner the owner of the device by whose name the agent was downloaded. (Read from configuration file)
+	 * @param deviceID the deviceId that is auto-generated whilst downloading the agent. (Read from configuration file)
+	 * @param interval the time interval between every successive data-push attempts. (Set initially by the startup script and read from the configuration file)
 	 */
-	public static void pushDeviceData(final String deviceOwner, final String deviceID, int interval){
+	public static void initiateDeviceDataPush(final String deviceOwner, final String deviceID, int interval){
 		final String pushDataEndPointURL = AgentDataHolder.getInstance().getPushDataAPIEndPoint();
 
 		if (log.isDebugEnabled()) {
@@ -244,7 +262,9 @@ public class AgentCoreOperations {
 						log.error(AgentConstants.LOG_APPENDER + "Error encountered whilst trying to Re-Register the Device's IP");
 					}
 				} else if (responseCode != HttpStatus.NO_CONTENT_204){
-					log.error(AgentConstants.LOG_APPENDER + "Status Code: " + responseCode + " encountered whilst trying to Push-Device-Data to IoT Server at: " + AgentDataHolder.getInstance().getPushDataAPIEndPoint());
+					if (log.isDebugEnabled()) {
+						log.error(AgentConstants.LOG_APPENDER + "Status Code: " + responseCode + " encountered whilst trying to Push-Device-Data to IoT Server at: " + AgentDataHolder.getInstance().getPushDataAPIEndPoint());
+					}
 				}
 
 				if (log.isDebugEnabled()) {
@@ -258,26 +278,28 @@ public class AgentCoreOperations {
 	}
 
 	/**
-	 * This method is used by the device to subscribe to the MQTT queue which is used by the WSO2 IoT-Server to publish device-specific control signals.
+	 * This method is used by the device to subscribe to any MQTT queue which is used by the WSO2 IoT-Server instance.
+	 * All device-specific control signals published to this queue is received via this subscription.
 	 * For control signals which expects a reply in return (eg: readTemperature), the reply is published back to the same queue with an appropriate topic.
-	 * @param deviceOwner The owner of the device by whose name the agent was downloaded. (Read from configuration file)
-	 * @param deviceID The deviceId that is auto-generated whilst downloading the agent. (Read from configuration file)
-	 * @throws AgentCoreOperationException Thrown for errors that occur whilst trying to connect/subscribe to the MQTT Queue.
+	 * @param deviceOwner the owner of the device by whose name the agent was downloaded. (Read from configuration file)
+	 * @param deviceID the deviceId that is auto-generated whilst downloading the agent. (Read from configuration file)
+	 * @param mqttBrokerEndPoint the IP Address of the MQTT Broker to which the agent is to subscribe. (Read from configuration file)
+	 * @throws AgentCoreOperationException if any errors occur whilst trying to connect/subscribe to the MQTT Queue.
 	 */
-	public static void subscribeToMQTT(final String deviceOwner, final String deviceID)
+	public static void subscribeToMQTT(final String deviceOwner, final String deviceID, final String mqttBrokerEndPoint)
 			throws AgentCoreOperationException {
 		String subscribeTopic = String.format(AgentConstants.MQTT_SUBSCRIBE_TOPIC, deviceOwner, deviceID);
-		String mqttBrokerEndPoint = AgentDataHolder.getInstance().getAgentConfigurations().getMqttBrokerEndPoint();
 
 		agentMQTTClient = new AgentMQTTClient(deviceOwner, deviceID, mqttBrokerEndPoint, subscribeTopic) {
 			@Override
 			protected void postMessageArrived(String topic, MqttMessage message) {
 				log.info(AgentConstants.LOG_APPENDER + "Message " + message.toString() + " was received for topic: " + topic);
 				String[] controlSignal = message.toString().split(":");
+							// message is in "<SIGNAL_TYPE>:<SIGNAL_MODE>" format. (ex: "BULB:ON", "TEMP", "HUMID")
 
 				switch (controlSignal[0].toUpperCase()){
 					case AgentConstants.BULB_CONTROL:
-						AgentDataHolder.getInstance().getAgentOperationManager().changeBulbStatus(controlSignal[1].equals("ON") ?  true : false);
+						AgentDataHolder.getInstance().getAgentOperationManager().changeBulbStatus(controlSignal[1].equals(AgentConstants.CONTROL_ON) ?  true : false);
 						log.info(AgentConstants.LOG_APPENDER + "Bulb was switched to state: '" + controlSignal[1] + "'");
 						break;
 
@@ -313,8 +335,8 @@ public class AgentCoreOperations {
 	/**
 	 * This method is used to publish reply-messages for the control signals received.
 	 * Invocation of this method calls its overloaded-method with a QoS equal to that of the default value from "AgentConstants" class.
-	 * @param publishTopic The topic to which the reply message is to be published.
-	 * @param payLoad The reply-message (payload) of the MQTT publish action.
+	 * @param publishTopic the topic to which the reply message is to be published.
+	 * @param payLoad the reply-message (payload) of the MQTT publish action.
 	 */
 	private static void publishPayloadToMQTT(String publishTopic, String payLoad){
 		publishPayloadToMQTT(publishTopic, payLoad, AgentConstants.DEFAULT_MQTT_QUALITY_OF_SERVICE);
@@ -322,13 +344,16 @@ public class AgentCoreOperations {
 
 	/**
 	 * This is an overloaded method that publishes MQTT reply-messages for control signals received form the IoT-Server.
-	 * @param publishTopic The topic to which the reply message is to be published
-	 * @param payLoad The reply-message (payload) of the MQTT publish action.
-	 * @param qos The Quality-of-Service of the current publish action. Could be 0(At most once), 1(At-least once) or 2(Exactly once)
+	 * @param publishTopic the topic to which the reply message is to be published
+	 * @param payLoad the reply-message (payload) of the MQTT publish action.
+	 * @param qos the Quality-of-Service of the current publish action. Could be 0(At most once), 1(At-least once) or 2(Exactly once)
 	 */
 	private static void publishPayloadToMQTT(String publishTopic, String payLoad, int qos){
 		try {
 			agentMQTTClient.getClient().publish(publishTopic, payLoad.getBytes(StandardCharsets.UTF_8), qos, true);
+			if(log.isDebugEnabled()){
+				log.debug("Message: " + payLoad + " to MQTT topic [" + publishTopic + "] published successfully");
+			}
 		} catch (MqttException ex) {
 			String errorMsg =
 					"MQTT Client Error" + "\n\tReason:  " + ex.getReasonCode() + "\n\tMessage: " +
@@ -339,6 +364,73 @@ public class AgentCoreOperations {
 	}
 
 
+	/**
+	 * This method is used by the device to connect to any XMPP Server which is used by the WSO2 IoT-Server instance.
+	 * All device-specific control signals sent to the device's XMPP Account is received via this connection.
+	 * For control signals which expects a reply in return (eg: readTemperature), the reply message is sent back to the WSO2-IoT Server's XMPP account.
+	 * @param username the login-username of the xmpp account the device is attached to
+	 * @param password the account password of the device's xmpp account
+	 * @param resource the resource, specific to the xmpp account to which the login is made to
+	 * @param xmppServerEndPoint the IP/Domain of the XMPP Server to connect to
+	 * @throws AgentCoreOperationException when the XMPP-Server Endpoint information given in the 'deviceConfig.properties' file is invalid or when the connection/login to the XMPP Server fails due to inappropriate credentials
+	 */
+	public static void connectToXMPPServer(String username, String password, String resource, String xmppServerEndPoint) throws AgentCoreOperationException {
+		String[] xmppEndPointInfo = xmppServerEndPoint.split(":");
+		if(xmppEndPointInfo.length != 2){
+			String errorMsg = "The XMPP Endpoint (xmpp-ep) provided in the 'deviceConfig.properties' file is inappropriate. Needs to be in '<IP>:<PORT>' format.";
+			log.info(AgentConstants.LOG_APPENDER + errorMsg);
+			throw new AgentCoreOperationException(errorMsg);
+		}
+
+		String server = xmppEndPointInfo[0];
+		int port = Integer.parseInt(xmppEndPointInfo[1]);
+		final String xmppAdminJID = AgentConstants.XMPP_ADMIN_ACCOUNT_UNAME + "@" + server;
+
+		AgentXMPPClient xmppClient = new AgentXMPPClient(server, port) {
+			@Override
+			protected void processXMPPMessage(Message xmppMessage) {
+				String from = xmppMessage.getFrom();
+				String message = xmppMessage.getBody();
+				log.info(AgentConstants.LOG_APPENDER + "Received XMPP message '" + message + "' from " + from);
+
+				String[] controlSignal = message.toString().split(":");
+						// message is in "<SIGNAL_TYPE>:<SIGNAL_MODE>" format. (ex: "BULB:ON", "TEMP", "HUMID")
+
+				switch (controlSignal[0].toUpperCase()){
+					case AgentConstants.BULB_CONTROL:
+						AgentDataHolder.getInstance().getAgentOperationManager().changeBulbStatus(controlSignal[1].equals(AgentConstants.CONTROL_ON) ?  true : false);
+						log.info(AgentConstants.LOG_APPENDER + "Bulb was switched to state: '" + controlSignal[1] + "'");
+						break;
+
+					case AgentConstants.TEMPERATURE_CONTROL:
+						String currentTemperature = "" + AgentDataHolder.getInstance().getAgentOperationManager().getTemperature();
+						String replyTemperature = "The current temperature was read to be: '" + currentTemperature + "C'";
+						log.info(AgentConstants.LOG_APPENDER + replyTemperature);
+
+						sendXMPPMessage(xmppAdminJID, replyTemperature, "DEVICE-TEMPERATURE");
+						break;
+
+					case AgentConstants.HUMIDITY_CONTROL:
+						String currentHumidity = "" + AgentDataHolder.getInstance().getAgentOperationManager().getHumidity();
+						String replyHumidity = "The current humidity was read to be: '" + currentHumidity + "%'";
+						log.info(AgentConstants.LOG_APPENDER + replyHumidity);
+
+						sendXMPPMessage(xmppAdminJID, replyHumidity, "DEVICE-HUMIDITY");
+						break;
+
+					default:
+						log.warn("'" + controlSignal[0] + "' is invalid and not-supported for this device-type");
+						break;
+				}
+			}
+		};
+
+		xmppClient.connectAndLogin(username, password, resource);
+		xmppClient.setFilterOnSender(xmppAdminJID);
+	}
+
+
+
 	/*------------------------------------------------------------------------------------------*/
 	/* 		Utility methods relevant to creating and sending HTTP requests to the Iot-Server 	*/
 	/*------------------------------------------------------------------------------------------*/
@@ -346,8 +438,8 @@ public class AgentCoreOperations {
 	/**
 	 * This method is used to get the public IP of the device in which the agent is run on
 	 * Invocation of this method calls its overloaded-method with the default network-interface name from "AgentConstants" class
-	 * @return The public IP Address of the device
-	 * @throws AgentCoreOperationException Thrown for errors that occur whilst trying to get details of the given network interface
+	 * @return the public IP Address of the device
+	 * @throws AgentCoreOperationException if any errors occur whilst trying to get details of the given network interface
 	 */
 	private static String getDeviceIP() throws AgentCoreOperationException {
 		return getDeviceIP(AgentConstants.DEFAULT_NETWORK_INTERFACE);
@@ -355,9 +447,9 @@ public class AgentCoreOperations {
 
 	/**
 	 * This is an overloaded method that fetches the public IPv4 address of the given network interface
-	 * @param networkInterfaceName The network-interface of whose IPv4 address is to be retrieved
-	 * @return	The IP Address iof the device
-	 * @throws AgentCoreOperationException Thrown for errors that occur whilst trying to get details of the given network interface
+	 * @param networkInterfaceName the network-interface of whose IPv4 address is to be retrieved
+	 * @return	the IP Address iof the device
+	 * @throws AgentCoreOperationException if any errors occur whilst trying to get details of the given network interface
 	 */
 	private static String getDeviceIP(String networkInterfaceName) throws
 																   AgentCoreOperationException {
@@ -386,8 +478,8 @@ public class AgentCoreOperations {
 
 	/**
 	 * This method validates whether a specific IP Address is of IPv4 type
-	 * @param ipAddress The IP Address which needs to be validated
-	 * @return True if it si of IPv4 type and false otherwise
+	 * @param ipAddress the IP Address which needs to be validated
+	 * @return true if it is of IPv4 type and false otherwise
 	 */
 	private static boolean validateIPv4(String ipAddress) {
 		try {
@@ -420,9 +512,9 @@ public class AgentCoreOperations {
 
 	/**
 	 * This is a utility method that creates and returns a HTTP connection object
-	 * @param urlString The URL pattern to which the connection needs to be created
-	 * @return HTTP Connection object which cn be used to send HTTP requests
-	 * @throws AgentCoreOperationException Thrown when errors occur in creating the HTTP connection with the given URL string
+	 * @param urlString the URL pattern to which the connection needs to be created
+	 * @return an HTTPConnection object which cn be used to send HTTP requests
+	 * @throws AgentCoreOperationException if errors occur when creating the HTTP connection with the given URL string
 	 */
 	private static HttpURLConnection getHttpConnection(String urlString) throws
 																		 AgentCoreOperationException {
@@ -447,15 +539,15 @@ public class AgentCoreOperations {
 
 	/**
 	 * This is a utility method that reads and returns the response from a HTTP connection
-	 * @param httpConnection The connection from which a response is expected
-	 * @return The response (as a string) from the given HTTP connection
-	 * @throws AgentCoreOperationException Thrown for errors that occur whilst reading the response from the connection stream
+	 * @param httpConnection the connection from which a response is expected
+	 * @return the response (as a string) from the given HTTP connection
+	 * @throws AgentCoreOperationException if any errors occur whilst reading the response from the connection stream
 	 */
 	private static String readResponseFromHttpRequest(HttpURLConnection httpConnection)
 			throws AgentCoreOperationException {
 		BufferedReader bufferedReader = null;
 		try {
-			bufferedReader = new BufferedReader(new InputStreamReader(httpConnection.getInputStream()));
+			bufferedReader = new BufferedReader(new InputStreamReader(httpConnection.getInputStream(), StandardCharsets.UTF_8));
 		} catch (IOException exception) {
 			String errorMsg = AgentConstants.LOG_APPENDER + "There is an issue with connecting the reader to the input stream at: " + httpConnection.getURL();
 			log.error(errorMsg);

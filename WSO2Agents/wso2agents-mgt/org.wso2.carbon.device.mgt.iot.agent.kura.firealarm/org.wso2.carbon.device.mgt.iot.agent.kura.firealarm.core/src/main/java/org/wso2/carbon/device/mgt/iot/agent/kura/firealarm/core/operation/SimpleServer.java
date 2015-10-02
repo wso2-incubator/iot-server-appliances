@@ -65,9 +65,9 @@ public class SimpleServer {
                 }
             });
             server.start();
-            log.info("Server started");
+            log.info(AgentConstants.LOG_APPENDER + "Server started");
         } catch (Exception e) {
-            log.error("Unable to start server", e);
+            log.error(AgentConstants.LOG_APPENDER + "Unable to start server", e);
         }
     }
 }

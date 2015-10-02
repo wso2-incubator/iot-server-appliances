@@ -25,8 +25,6 @@ import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.exception
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.AgentOperationManager;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.SimpleServer;
 
-import java.util.Map;
-
 public class AgentDataHolder {
 
 	private static final Logger log = LoggerFactory.getLogger(AgentDataHolder.class);
@@ -41,37 +39,71 @@ public class AgentDataHolder {
 	private String pushDataAPIEndPoint;
 	private AgentConfigurations agentConfigurations;
 
-	private AgentDataHolder() {	}
+	private AgentDataHolder() {
+	}
 
 	public static AgentDataHolder getInstance() {
 		return thisInstance;
 	}
 
 	public void init() {
+		// Read IoT-Server specific configurations from the 'deviceConfig.properties' file
 		this.agentConfigurations = AgentCoreOperations.readIoTServerConfigs();
 
+		// Initialise IoT-Server URL endpoints from the configuration read from file
 		try {
 			AgentCoreOperations.initializeHTTPEndPoints();
 		} catch (AgentCoreOperationException e) {
-			log.error(AgentConstants.LOG_APPENDER + "Error encountered whilst trying to initialize IoT-Server API EndPoints for the Device");
+			log.error(AgentConstants.LOG_APPENDER +
+					          "Error encountered whilst trying to initialize IoT-Server API " +
+					          "EndPoints for the Device");
 		}
 
+		// Register this current device's IP with the IoT-Server
 		try {
-			int responseCode = AgentCoreOperations.registerDeviceIP(this.agentConfigurations.getDeviceOwner(), this.agentConfigurations.getDeviceId());
+			int responseCode = AgentCoreOperations.registerDeviceIP(
+					this.agentConfigurations.getDeviceOwner(),
+					this.agentConfigurations.getDeviceId());
 			if (responseCode != HttpStatus.OK_200) {
-				log.error(AgentConstants.LOG_APPENDER + "Device Registration with IoT Server at: " + this.iotServerEndPoint + " failed");
+				log.error(AgentConstants.LOG_APPENDER + "Device Registration with IoT Server at:" +
+						          " " + this.iotServerEndPoint + " failed");
 			}
 		} catch (AgentCoreOperationException exception) {
-			log.error(AgentConstants.LOG_APPENDER + "Error encountered whilst trying to register the Device's IP at: " + this.iotServerEndPoint);
+			log.error(AgentConstants.LOG_APPENDER +
+					          "Error encountered whilst trying to register the Device's IP at: " +
+					          this.iotServerEndPoint);
 		}
 
-		AgentCoreOperations.pushDeviceData(this.agentConfigurations.getDeviceOwner(), this.agentConfigurations.getDeviceId(), this.agentConfigurations.getDataPushInterval());
+		// Initiate the thread for continuous pushing of device data to the IoT-Server
+		AgentCoreOperations.initiateDeviceDataPush(this.agentConfigurations.getDeviceOwner(),
+		                                           this.agentConfigurations.getDeviceId(),
+		                                           this.agentConfigurations.getDataPushInterval());
 
+		// Subscribe to the platform's MQTT Queue for receiving Control Signals via MQTT
 		try {
-			AgentCoreOperations.subscribeToMQTT(this.agentConfigurations.getDeviceOwner(), this.agentConfigurations.getDeviceId());
+			AgentCoreOperations.subscribeToMQTT(this.agentConfigurations.getDeviceOwner(),
+			                                    this.agentConfigurations.getDeviceId(),
+			                                    this.agentConfigurations.getMqttBrokerEndPoint());
 		} catch (AgentCoreOperationException e) {
-			log.error(AgentConstants.LOG_APPENDER + "Subscription to MQTT Broker at: " + this.agentConfigurations.getMqttBrokerEndPoint() + " failed");
+			log.error(AgentConstants.LOG_APPENDER + "Subscription to MQTT Broker at: " +
+					          this.agentConfigurations.getMqttBrokerEndPoint() + " failed");
 		}
+
+		// Connect to the platform's XMPP Server for receiving Control Signals via XMPP
+		try {
+			AgentCoreOperations.connectToXMPPServer(this.agentConfigurations.getDeviceId(),
+			                                        this.agentConfigurations
+					                                        .getAuthenticationToken(),
+			                                        this.agentConfigurations.getDeviceOwner(),
+			                                        this.agentConfigurations
+					                                        .getXmppServerEndPoint());
+		} catch (AgentCoreOperationException e) {
+			log.error(AgentConstants.LOG_APPENDER + "Connection/Login attempt to XMPP Server at:" +
+					          " " +
+					          this.agentConfigurations.getXmppServerEndPoint() + " failed");
+		}
+
+		// Start a simple HTTP Server to receive Control Signals via HTTP
 		simpleServer = new SimpleServer();
 	}
 

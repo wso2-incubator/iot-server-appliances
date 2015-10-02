@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.mqtt;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -31,7 +49,7 @@ public abstract class AgentMQTTClient implements MqttCallback {
 	private int reConnectionInterval;
 
 	protected AgentMQTTClient(String deviceOwner, String deviceType, String mqttBrokerEndPoint,
-							  String subscribeTopic) {
+	                          String subscribeTopic) {
 		this.clientId = deviceOwner + ":" + deviceType;
 		this.subscribeTopic = subscribeTopic;
 		this.clientWillTopic = deviceType + File.separator + "disconnection";
@@ -41,7 +59,7 @@ public abstract class AgentMQTTClient implements MqttCallback {
 	}
 
 	protected AgentMQTTClient(String deviceOwner, String deviceType, String mqttBrokerEndPoint,
-							  String subscribeTopic, int reConnectionInterval) {
+	                          String subscribeTopic, int reConnectionInterval) {
 		this.clientId = deviceOwner + ":" + deviceType;
 		this.subscribeTopic = subscribeTopic;
 		this.clientWillTopic = deviceType + File.separator + "disconnection";
@@ -53,19 +71,20 @@ public abstract class AgentMQTTClient implements MqttCallback {
 	private void initSubscriber() {
 		try {
 			client = new MqttClient(this.mqttBrokerEndPoint, clientId, null);
-			log.info("MQTT subscriber was created with ClientID : " + clientId);
+			log.info(AgentConstants.LOG_APPENDER + "MQTT subscriber was created with ClientID : " +
+					         clientId);
 		} catch (MqttException ex) {
 			String errorMsg = "MQTT Client Error\n" + "\tReason:  " + ex.getReasonCode() +
 					"\n\tMessage: " + ex.getMessage() + "\n\tLocalMsg: " +
 					ex.getLocalizedMessage() + "\n\tCause: " + ex.getCause() +
 					"\n\tException: " + ex;
-			log.error(errorMsg);
+			log.error(AgentConstants.LOG_APPENDER + errorMsg);
 		}
 
 		options = new MqttConnectOptions();
 		options.setCleanSession(false);
 		options.setWill(clientWillTopic, "connection crashed".getBytes(StandardCharsets.UTF_8), 2,
-						true);
+		                true);
 		client.setCallback(this);
 	}
 
@@ -77,7 +96,8 @@ public abstract class AgentMQTTClient implements MqttCallback {
 	public void subscribe() throws AgentCoreOperationException {
 		try {
 			client.connect(options);
-			log.info("Subscriber connected to queue at: " + this.mqttBrokerEndPoint);
+			log.info(AgentConstants.LOG_APPENDER + "Subscriber connected to queue at: " +
+					         this.mqttBrokerEndPoint);
 		} catch (MqttSecurityException ex) {
 			String errorMsg = "MQTT Security Exception when connecting to queue\n" + "\tReason: " +
 					" " +
@@ -85,7 +105,7 @@ public abstract class AgentMQTTClient implements MqttCallback {
 					"\n\tLocalMsg: " + ex.getLocalizedMessage() + "\n\tCause: " +
 					ex.getCause() + "\n\tException: " + ex; //throw
 			if (log.isDebugEnabled()) {
-				log.debug(errorMsg);
+				log.debug(AgentConstants.LOG_APPENDER + errorMsg);
 			}
 			throw new AgentCoreOperationException(errorMsg, ex);
 
@@ -95,7 +115,7 @@ public abstract class AgentMQTTClient implements MqttCallback {
 					"\n\tLocalMsg: " + ex.getLocalizedMessage() + "\n\tCause: " +
 					ex.getCause() + "\n\tException: " + ex; //throw
 			if (log.isDebugEnabled()) {
-				log.debug(errorMsg);
+				log.debug(AgentConstants.LOG_APPENDER + errorMsg);
 			}
 			throw new AgentCoreOperationException(errorMsg, ex);
 		}
@@ -103,7 +123,8 @@ public abstract class AgentMQTTClient implements MqttCallback {
 		try {
 			client.subscribe(subscribeTopic, 0);
 
-			log.info("Subscriber - " + clientId + " subscribed to topic: " + subscribeTopic);
+			log.info(AgentConstants.LOG_APPENDER + "Subscriber - " + clientId +
+					         " subscribed to topic: " + subscribeTopic);
 		} catch (MqttException ex) {
 			String errorMsg = "MQTT Exception when trying to subscribe to topic: " +
 					subscribeTopic + "\n\tReason:  " + ex.getReasonCode() +
@@ -111,27 +132,31 @@ public abstract class AgentMQTTClient implements MqttCallback {
 					ex.getLocalizedMessage() + "\n\tCause: " + ex.getCause() +
 					"\n\tException: " + ex;
 			if (log.isDebugEnabled()) {
-				log.debug(errorMsg);
+				log.debug(AgentConstants.LOG_APPENDER + errorMsg);
 			}
 			throw new AgentCoreOperationException(errorMsg, ex);
 		}
 	}
 
 	public void connectionLost(Throwable throwable) {
-		log.warn("Lost Connection for client: " + this.clientId + " to " + this.mqttBrokerEndPoint);
+		log.warn(AgentConstants.LOG_APPENDER + "Lost Connection for client: " + this.clientId +
+				         " to " + this.mqttBrokerEndPoint);
 
 		Runnable reSubscriber = new Runnable() {
 			@Override
 			public void run() {
 				if (!isConnected()) {
 					if (log.isDebugEnabled()) {
-						log.debug("Subscriber reconnecting to queue........");
+						log.debug(AgentConstants.LOG_APPENDER +
+								          "Subscriber reconnecting to queue........");
 					}
 					try {
 						subscribe();
 					} catch (AgentCoreOperationException e) {
 						if (log.isDebugEnabled()) {
-							log.debug("Could not reconnect and subscribe to ControlQueue.");
+							log.debug(AgentConstants.LOG_APPENDER +
+									          "Could not reconnect and subscribe to ControlQueue" +
+									          ".");
 						}
 					}
 				} else {
@@ -145,10 +170,10 @@ public abstract class AgentMQTTClient implements MqttCallback {
 	}
 
 	public void messageArrived(final String topic, final MqttMessage mqttMessage) throws
-																				  Exception {
+	                                                                              Exception {
 		Thread subscriberThread = new Thread() {
 			public void run() {
-					postMessageArrived(topic, mqttMessage);
+				postMessageArrived(topic, mqttMessage);
 			}
 		};
 		subscriberThread.start();
@@ -159,11 +184,15 @@ public abstract class AgentMQTTClient implements MqttCallback {
 		try {
 			message = iMqttDeliveryToken.getMessage().toString();
 		} catch (MqttException e) {
-			log.error("Error occurred whilst trying to read the message from the MQTT delivery token.");
+			log.error(AgentConstants.LOG_APPENDER +
+					          "Error occurred whilst trying to read the message from the MQTT " +
+					          "delivery token" +
+					          ".");
 		}
 		String topic = iMqttDeliveryToken.getTopics()[0];
 		String client = iMqttDeliveryToken.getClient().getClientId();
-		log.info("Message - '" + message + "' of client [" + client + "] for the topic (" + topic + ") was delivered successfully.");
+		log.info(AgentConstants.LOG_APPENDER + "Message - '" + message + "' of client [" + client +
+				         "] for the topic (" + topic + ") was delivered successfully.");
 	}
 
 	/**

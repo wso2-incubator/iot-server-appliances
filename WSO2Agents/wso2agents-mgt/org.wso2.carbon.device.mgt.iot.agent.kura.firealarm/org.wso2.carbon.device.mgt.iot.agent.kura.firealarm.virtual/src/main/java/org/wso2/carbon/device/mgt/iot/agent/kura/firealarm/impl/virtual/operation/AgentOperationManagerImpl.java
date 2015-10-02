@@ -18,6 +18,7 @@ package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.impl.virtual.operati
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.constants.AgentConstants;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.AgentOperationManager;
 
 public class AgentOperationManagerImpl implements AgentOperationManager {
@@ -25,7 +26,7 @@ public class AgentOperationManagerImpl implements AgentOperationManager {
     private static final Logger log = LoggerFactory.getLogger(AgentOperationManagerImpl.class);
 
     public void changeBulbStatus(boolean status) {
-        log.info("Bulb status: " + (status ? "ON" : "OFF"));
+        log.info("Bulb status: " + (status ? AgentConstants.CONTROL_ON : AgentConstants.CONTROL_OFF));
     }
 
     public double getTemperature() {
