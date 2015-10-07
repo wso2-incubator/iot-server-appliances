@@ -137,27 +137,15 @@
 				<enabled>false</enabled>
 			</releases>
 		</repository>
-
-		<!--<repository>-->
-			<!--<id>m2-repository-smack</id>-->
-			<!--<url>http://maven.reucon.com/public</url>-->
-			<!--<releases>-->
-				<!--<enabled>true</enabled>-->
-			<!--</releases>-->
-			<!--<snapshots>-->
-				<!--<enabled>false</enabled>-->
-			<!--</snapshots>-->
-		<!--</repository>-->
-
-
-
 	</repositories>
 
 	<properties>
 		<!-- Java Version Compatibility -->
 		<wso2.maven.compiler.source>1.7</wso2.maven.compiler.source>
 		<wso2.maven.compiler.target>1.7</wso2.maven.compiler.target>
-		<smack.version>3.2.1</smack.version>
+		<smack.wso2.version>3.0.4.wso2v1</smack.wso2.version>
+		<smackx.wso2.version>3.0.4.wso2v1</smackx.wso2.version>
+		<paho.mqtt.version>0.4.0</paho.mqtt.version>
 	<!--<deployment.package.version>0.2.0</deployment.package.version>-->
 	<!--<tycho-version>0.20.0</tycho-version>-->
 	<!--<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->

@@ -37,8 +37,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public abstract class AgentMQTTClient implements MqttCallback {
-	private static final Logger log = LoggerFactory.getLogger(AgentMQTTClient.class);
+/**
+ * This class contains the Agent specific implementation for all the MQTT functionality. This
+ * includes connecting to a MQTT Broker & subscribing to the appropriate MQTT-topic, action plan
+ * upon losing connection or successfully delivering a message to the broker and processing
+ * incoming messages. Makes use of the 'Paho-MQTT' library provided by Eclipse Org.
+ * <p/>
+ * It is an abstract class with an abstract method 'postMessageArrived' allowing the user to have
+ * their own implementation of the actions to be taken upon receiving a message to the subscribed
+ * MQTT-Topic.
+ */
+public abstract class MQTTClient implements MqttCallback {
+	private static final Logger log = LoggerFactory.getLogger(MQTTClient.class);
 
 	private MqttClient client;
 	private String clientId;
@@ -48,8 +58,17 @@ public abstract class AgentMQTTClient implements MqttCallback {
 	private String mqttBrokerEndPoint;
 	private int reConnectionInterval;
 
-	protected AgentMQTTClient(String deviceOwner, String deviceType, String mqttBrokerEndPoint,
-	                          String subscribeTopic) {
+	/**
+	 * Constructor for the MQTTClient which takes in the owner, type of the device and the MQTT
+	 * Broker URL and the topic to subscribe.
+	 *
+	 * @param deviceOwner        the owner of the device.
+	 * @param deviceType         the CDMF Device-Type of the device.
+	 * @param mqttBrokerEndPoint the IP/URL of the MQTT broker endpoint.
+	 * @param subscribeTopic     the MQTT topic to which the client is to be subscribed
+	 */
+	protected MQTTClient(String deviceOwner, String deviceType, String mqttBrokerEndPoint,
+	                     String subscribeTopic) {
 		this.clientId = deviceOwner + ":" + deviceType;
 		this.subscribeTopic = subscribeTopic;
 		this.clientWillTopic = deviceType + File.separator + "disconnection";
@@ -58,8 +77,20 @@ public abstract class AgentMQTTClient implements MqttCallback {
 		this.initSubscriber();
 	}
 
-	protected AgentMQTTClient(String deviceOwner, String deviceType, String mqttBrokerEndPoint,
-	                          String subscribeTopic, int reConnectionInterval) {
+	/**
+	 * Constructor for the MQTTClient which takes in the owner, type of the device and the MQTT
+	 * Broker URL and the topic to subscribe. Additionally this constructor takes in the
+	 * reconnection-time interval between successive attempts to connect to the broker.
+	 *
+	 * @param deviceOwner          the owner of the device.
+	 * @param deviceType           the CDMF Device-Type of the device.
+	 * @param mqttBrokerEndPoint   the IP/URL of the MQTT broker endpoint.
+	 * @param subscribeTopic       the MQTT topic to which the client is to be subscribed
+	 * @param reConnectionInterval time interval in SECONDS between successive attempts to connect
+	 *                             to the broker.
+	 */
+	protected MQTTClient(String deviceOwner, String deviceType, String mqttBrokerEndPoint,
+	                     String subscribeTopic, int reConnectionInterval) {
 		this.clientId = deviceOwner + ":" + deviceType;
 		this.subscribeTopic = subscribeTopic;
 		this.clientWillTopic = deviceType + File.separator + "disconnection";
@@ -68,6 +99,13 @@ public abstract class AgentMQTTClient implements MqttCallback {
 		this.initSubscriber();
 	}
 
+	/**
+	 * Initializes the MQTT-Client.
+	 * Creates a client using the given MQTT-broker endpoint and the clientId (which is
+	 * constructed by a concatenation of [deviceOwner]:[deviceType]). Also sets the client's
+	 * options parameter with the clientWillTopic (in-case of connection failure) and other info.
+	 * Also sets the call-back this current class.
+	 */
 	private void initSubscriber() {
 		try {
 			client = new MqttClient(this.mqttBrokerEndPoint, clientId, null);
@@ -88,16 +126,31 @@ public abstract class AgentMQTTClient implements MqttCallback {
 		client.setCallback(this);
 	}
 
-
-	private boolean isConnected() {
+	/**
+	 * Checks whether the connection to the MQTT-Broker persists.
+	 *
+	 * @return true if the client is connected to the MQTT-Broker, else false.
+	 */
+	public boolean isConnected() {
 		return client.isConnected();
 	}
 
-	public void subscribe() throws AgentCoreOperationException {
+	/**
+	 * Connects to the MQTT-Broker and if successfully established connection, then tries to
+	 * subscribe to the MQTT-Topic specific to the device. (The MQTT-Topic specific to the
+	 * device is created is taken in as a constructor parameter of this class) .
+	 *
+	 * @throws AgentCoreOperationException in the event of 'Connecting to' or 'Subscribing to' the
+	 *                                     MQTT broker fails.
+	 */
+	public void connectAndSubscribe() throws AgentCoreOperationException {
 		try {
 			client.connect(options);
-			log.info(AgentConstants.LOG_APPENDER + "Subscriber connected to queue at: " +
-					         this.mqttBrokerEndPoint);
+
+			if (log.isDebugEnabled()) {
+				log.debug(AgentConstants.LOG_APPENDER + "Subscriber connected to queue at: " +
+						          this.mqttBrokerEndPoint);
+			}
 		} catch (MqttSecurityException ex) {
 			String errorMsg = "MQTT Security Exception when connecting to queue\n" + "\tReason: " +
 					" " +
@@ -138,9 +191,18 @@ public abstract class AgentMQTTClient implements MqttCallback {
 		}
 	}
 
+	/**
+	 * Callback method which is triggered once the MQTT client losers its connection to the broker.
+	 * A scheduler thread is spawned to continuously re-attempt and connect to the broker and
+	 * subscribe to the device's topic. This thread is scheduled to execute after every break
+	 * equal to that of the 'reConnectionInterval' of the MQTTClient.
+	 *
+	 * @param throwable a Throwable Object containing the details as to why the failure occurred.
+	 */
 	public void connectionLost(Throwable throwable) {
 		log.warn(AgentConstants.LOG_APPENDER + "Lost Connection for client: " + this.clientId +
-				         " to " + this.mqttBrokerEndPoint);
+				         " to " + this.mqttBrokerEndPoint + ".\nThis was due to - " +
+				         throwable.getMessage());
 
 		Runnable reSubscriber = new Runnable() {
 			@Override
@@ -151,7 +213,7 @@ public abstract class AgentMQTTClient implements MqttCallback {
 								          "Subscriber reconnecting to queue........");
 					}
 					try {
-						subscribe();
+						connectAndSubscribe();
 					} catch (AgentCoreOperationException e) {
 						if (log.isDebugEnabled()) {
 							log.debug(AgentConstants.LOG_APPENDER +
@@ -169,8 +231,15 @@ public abstract class AgentMQTTClient implements MqttCallback {
 		service.scheduleAtFixedRate(reSubscriber, 0, this.reConnectionInterval, TimeUnit.SECONDS);
 	}
 
-	public void messageArrived(final String topic, final MqttMessage mqttMessage) throws
-	                                                                              Exception {
+	/**
+	 * Callback method which is triggered upon receiving a MQTT Message from the broker. Spawns a
+	 * new thread that executes any actions to be taken with the received message.
+	 *
+	 * @param topic       the MQTT-Topic to which the received message was published to and the
+	 *                    client was subscribed to.
+	 * @param mqttMessage the actual MQTT-Message that was received from the broker.
+	 */
+	public void messageArrived(final String topic, final MqttMessage mqttMessage) {
 		Thread subscriberThread = new Thread() {
 			public void run() {
 				postMessageArrived(topic, mqttMessage);
@@ -179,6 +248,13 @@ public abstract class AgentMQTTClient implements MqttCallback {
 		subscriberThread.start();
 	}
 
+	/**
+	 * Callback method which gets triggered upon successful completion of a message delivery to
+	 * the broker.
+	 *
+	 * @param iMqttDeliveryToken the MQTT-DeliveryToken which includes the details about the
+	 *                           specific message delivery.
+	 */
 	public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
 		String message = "";
 		try {
@@ -196,14 +272,20 @@ public abstract class AgentMQTTClient implements MqttCallback {
 	}
 
 	/**
-	 * This method is used for post processing of a received message. This method will be
-	 * implemented as per the need of the subscriber object.
+	 * This is an abstract method used for post processing the received MQTT-message. This
+	 * method will be implemented as per requirement at the time of creating an object of this
+	 * class.
 	 *
-	 * @param topic   The Topic for which the message was received for.
+	 * @param topic   The topic for which the message was received for.
 	 * @param message The message received for the subscription to the above topic.
 	 */
 	protected abstract void postMessageArrived(String topic, MqttMessage message);
 
+	/**
+	 * Gets the MQTTClient object.
+	 *
+	 * @return the MQTTClient object.
+	 */
 	public MqttClient getClient() {
 		return client;
 	}

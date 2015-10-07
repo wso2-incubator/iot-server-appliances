@@ -27,6 +27,7 @@ public class AgentConstants {
 	public static final String LOG_APPENDER = "AGENT_LOG:: ";
 	public static final String PROPERTIES_FILE_PATH =
 			"." + FILE_SEPERATOR + "repository" + FILE_SEPERATOR + "conf" + FILE_SEPERATOR;
+	public static final int DEFAULT_RETRY_THREAD_INTERVAL = 5000;        // time in millis
 
 	/*	---------------------------------------------------------------------------------------
 								IoT-Server specific information
@@ -45,7 +46,7 @@ public class AgentConstants {
 	public static final String HTTP_GET = "GET";
 	public static final String APPLICATION_JSON_TYPE = "application/json";
 
-	public static final int DEVICE_SERVER_PORT = 9091;
+	public static final int DEVICE_SERVER_PORT = 9090;
 
 	/*	---------------------------------------------------------------------------------------
 								MQTT Connection specific information
@@ -89,7 +90,7 @@ public class AgentConstants {
 	public static final String DEFAULT_AUTH_METHOD = "token";
 	public static final String DEFAULT_AUTH_TOKEN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0987654321";
 	public static final String DEFAULT_REFRESH_TOKEN = "1234567890ZYXWVUTSRQPONMKLJIHGFEDCBA";
-	public static final String DEFAULT_NETWORK_INTERFACE = "wlan0";
+	public static final String DEFAULT_NETWORK_INTERFACE = "lo0";
 	public static final int DEFAULT_PUSH_INTERVAL = 15;
 
 	/*	---------------------------------------------------------------------------------------

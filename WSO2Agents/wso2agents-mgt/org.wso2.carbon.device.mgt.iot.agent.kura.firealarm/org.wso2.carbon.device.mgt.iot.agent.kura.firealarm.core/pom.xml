@@ -61,20 +61,9 @@
 						<Private-Package>
 							org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal
 						</Private-Package>
-						<!--<Import-Package>-->
-							<!--org.jivesoftware.smack.*;version="${smack.version}",-->
-							<!--org.jivesoftware.smackx.*;version:="${smack.version}",-->
-							<!--org.eclipse.jetty.*,-->
-							<!--org.eclipse.paho.client.mqttv3.*,-->
-							<!--javax.servlet.*,-->
-							<!--org.osgi.service.component,-->
-							<!--org.slf4j.*-->
-						<!--</Import-Package>-->
 						<Export-Package>
 							!org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal,
-							org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.*;version=${project.version},
-							org.jivesoftware.smack.*;version:="${smack.version}",
-							org.xmlpull.*
+							org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.*;version=${project.version}
 						</Export-Package>
 					</instructions>
 				</configuration>
@@ -93,19 +82,19 @@
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>
 			<artifactId>mqtt-client</artifactId>
-			<version>0.4.0</version>
+			<version>${paho.mqtt.version}</version>
 		</dependency>
 
 		<!--Dependancies on XMPP Client Library-->
 		<dependency>
-			<groupId>org.igniterealtime.smack</groupId>
+			<groupId>org.igniterealtime.smack.wso2</groupId>
 			<artifactId>smack</artifactId>
-			<version>${smack.version}</version>
+			<version>${smack.wso2.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.igniterealtime.smack</groupId>
+			<groupId>org.igniterealtime.smack.wso2</groupId>
 			<artifactId>smackx</artifactId>
-			<version>${smack.version}</version>
+			<version>${smackx.wso2.version}</version>
 		</dependency>
 	</dependencies>
 

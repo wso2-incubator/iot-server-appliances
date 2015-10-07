@@ -35,10 +35,10 @@ public class AgentServiceComponent {
     private static final Logger log = LoggerFactory.getLogger(AgentServiceComponent.class);
 
     protected void activate(ComponentContext componentContext) {
+        AgentManager.getInstance().init();
         log.info("===================");
         log.info("Agent Core Bundle has started!");
         log.info("===================");
-        AgentDataHolder.getInstance().init();
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -56,7 +56,7 @@ public class AgentServiceComponent {
         log.info("===================");
         log.info("Agent Operations has Bound Successfully!");
         log.info("===================");
-        AgentDataHolder.getInstance().setAgentOperationManager(agentOperationManager);
+        AgentManager.getInstance().setAgentOperationManager(agentOperationManager);
     }
 
     /**
@@ -68,6 +68,6 @@ public class AgentServiceComponent {
         log.info("===================");
         log.info("Agent Operations Un-binned!");
         log.info("===================");
-        AgentDataHolder.getInstance().setAgentOperationManager(null);
+        AgentManager.getInstance().setAgentOperationManager(null);
     }
 }
