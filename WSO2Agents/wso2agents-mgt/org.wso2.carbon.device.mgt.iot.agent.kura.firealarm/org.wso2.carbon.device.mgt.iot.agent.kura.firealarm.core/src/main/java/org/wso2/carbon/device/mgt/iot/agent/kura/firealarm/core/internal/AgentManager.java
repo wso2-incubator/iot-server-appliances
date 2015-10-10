@@ -19,11 +19,10 @@ package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.constants.AgentConstants;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.exception
 		.AgentCoreOperationException;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.AgentOperationManager;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.SimpleServer;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.http.SimpleServer;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.mqtt.MQTTClient;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.xmpp.XMPPClient;
 

@@ -14,17 +14,18 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation;
+package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.http;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.constants.AgentConstants;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal.AgentConstants;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.exception
 		.AgentCoreOperationException;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal.AgentManager;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.AgentOperationManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

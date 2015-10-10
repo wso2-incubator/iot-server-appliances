@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.constants;
+package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal;
 
 import java.io.File;
 

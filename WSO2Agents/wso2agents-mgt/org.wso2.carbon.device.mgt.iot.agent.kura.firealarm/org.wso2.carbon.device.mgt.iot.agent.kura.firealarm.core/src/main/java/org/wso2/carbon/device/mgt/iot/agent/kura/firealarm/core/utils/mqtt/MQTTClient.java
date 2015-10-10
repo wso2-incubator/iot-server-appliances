@@ -27,7 +27,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.constants.AgentConstants;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal.AgentConstants;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.exception
 		.AgentCoreOperationException;
 
