@@ -15,7 +15,7 @@
  */
 package org.wso2.carbon.devicemgt.grant;
 
-import org.apache.amber.oauth2.common.validators.AbstractValidator;
+import org.apache.oltu.oauth2.common.validators.AbstractValidator;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -27,6 +27,7 @@ public class DeviceGrantValidator extends AbstractValidator<HttpServletRequest> 
 
     public DeviceGrantValidator(){
         requiredParams.add(OauthGrantConstants.DEVICE_ID);
+        requiredParams.add(OauthGrantConstants.DEVICE_TYPE);
         requiredParams.add(OauthGrantConstants.USER_NAME);
         requiredParams.add(OauthGrantConstants.SCOPE);
     }

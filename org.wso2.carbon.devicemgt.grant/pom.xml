@@ -63,16 +63,16 @@
     </repositories>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.wso2.carbon</groupId>
-			<artifactId>org.wso2.carbon.identity.core</artifactId>
-            <version>${carbon.identity.version}</version>
-		</dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.identity.oauth</artifactId>
-            <version>${carbon.identity.version}</version>
-        </dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.wso2.carbon</groupId>-->
+			<!--<artifactId>org.wso2.carbon.identity.core</artifactId>-->
+            <!--<version>${carbon.identity.version}</version>-->
+		<!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.wso2.carbon</groupId>-->
+            <!--<artifactId>org.wso2.carbon.identity.oauth</artifactId>-->
+            <!--<version>${carbon.identity.version}</version>-->
+        <!--</dependency>-->
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.registry.core</artifactId>
@@ -138,10 +138,10 @@
 		</plugins>
 	</build>
         <properties>
-            <carbon.identity.version>4.2.6</carbon.identity.version>
-            <carbon.kernel.version>4.2.0</carbon.kernel.version>
-            <wso2carbon.version>4.2.0</wso2carbon.version>
-            <apimgt.impl.version>1.2.4</apimgt.impl.version>
+            <carbon.identity.version>4.6.0-SNAPSHOT</carbon.identity.version>
+            <carbon.kernel.version>4.4.1</carbon.kernel.version>
+            <wso2carbon.version>4.4.1</wso2carbon.version>
+            <apimgt.impl.version>4.3.0-SNAPSHOT</apimgt.impl.version>
         </properties>
 </project>
 

@@ -17,6 +17,7 @@ package org.wso2.carbon.devicemgt.grant;
 
 public class OauthGrantConstants {
     public static final String DEVICE_ID = "device_id";
+    public static final String DEVICE_TYPE = "device_type";
     public static final String USER_NAME = "username";
     public static final String SCOPE = "scope";
 }

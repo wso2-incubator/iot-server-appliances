@@ -25,6 +25,7 @@ import org.wso2.carbon.identity.oauth2.model.RequestParameter;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.AbstractAuthorizationGrantHandler;
 import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
+import org.wso2.carbon.identity.application.common.model.User;
 
 /**
  * The grant type responsible for issuing access tokens for IOT devices
@@ -56,17 +57,17 @@ public class DeviceGrant extends AbstractAuthorizationGrantHandler {
         }
         String username = null;
         String deviceId = null;
+        String deviceType = null;
         String scopeValues = null;
 
         for(RequestParameter parameter : parameters){
             if(OauthGrantConstants.DEVICE_ID.equals(parameter.getKey())){
-                if(parameter.getValue() != null && parameter.getValue().length > 0){
-                    if(parameter.getValue()[0] == "0"){
+                if(parameter.getValue() != null && parameter.getValue().length > 0) {
+                    if (parameter.getValue()[0] == "0") {
                         deviceId = null;
-                    }else{
+                    } else {
                         deviceId = parameter.getValue()[0];
                     }
-
                 }
             }else if(OauthGrantConstants.USER_NAME.equals(parameter.getKey())){
                 if(parameter.getValue() != null && parameter.getValue().length > 0){
@@ -86,17 +87,28 @@ public class DeviceGrant extends AbstractAuthorizationGrantHandler {
                     }
 
                 }
+            }else if(OauthGrantConstants.DEVICE_TYPE.equals(parameter.getKey())){
+                    if(parameter.getValue() != null && parameter.getValue().length > 0){
+                        if(parameter.getValue()[0] == "0"){
+                            deviceType = null;
+                        }else{
+                            deviceType = parameter.getValue()[0];
+                        }
+
+                    }
             }
 
         }
 
-        if(deviceId == null || username == null){
+        if(deviceId == null || deviceType == null || username == null){
             return  false;
         }
 
-        username = username + "@" + tenantDomain;
-
-        tokReqMsgCtx.setAuthorizedUser(username.concat(":").concat(deviceId));
+            User user = new User();
+            user.setTenantDomain(tenantDomain);
+            user.setUserName(username.concat(":").concat(deviceId).concat(deviceType));
+            //user.setUserStoreDomain("PRIMARY");
+        tokReqMsgCtx.setAuthorizedUser(user);
         tokReqMsgCtx.setTenantID(-1234);
 
         if(scopeValues!=null){
