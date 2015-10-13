@@ -22,14 +22,15 @@
         <servlet-name>OperationServlet</servlet-name>
         <servlet-class>org.wso2.iot.firealarm.access.OperationServlet</servlet-class>
     </servlet>
-    <servlet>
-        <servlet-name>LogoutServlet</servlet-name>
-        <servlet-class>org.wso2.iot.firealarm.access.LogoutServlet</servlet-class>
-    </servlet>
     <servlet-mapping>
         <servlet-name>OperationServlet</servlet-name>
         <url-pattern>/operation</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>org.wso2.iot.firealarm.access.LogoutServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LogoutServlet</servlet-name>
         <url-pattern>/logout</url-pattern>

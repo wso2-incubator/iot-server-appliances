@@ -413,8 +413,7 @@ public class AgentCoreOperations {
 		String subscribeTopic = String.format(AgentConstants.MQTT_SUBSCRIBE_TOPIC, deviceOwner,
 		                                      deviceID);
 
-		MQTTClient mqttClient = new MQTTClient(deviceOwner, deviceID,
-		                                       mqttBrokerEndPoint,
+		MQTTClient mqttClient = new MQTTClient(deviceOwner, deviceID, mqttBrokerEndPoint,
 		                                       subscribeTopic) {
 			@Override
 			protected void postMessageArrived(String topic, MqttMessage message) {

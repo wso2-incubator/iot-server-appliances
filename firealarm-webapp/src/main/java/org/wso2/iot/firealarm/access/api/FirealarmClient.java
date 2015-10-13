@@ -13,16 +13,19 @@ import java.util.ArrayList;
 
 public class FirealarmClient {
 
-	private String endpoint="http://192.168.57.128:8281/firealarm/1.0";
+//	private String endpoint="http://192.168.57.128:8281/firealarm/1.0";
+	private String endpoint="http://localhost:8281/virtual_firealarm/1.0";
 	private String bulbContext="/controller/bulb/";
 	private String temperatureContext="/controller/readtemperature";
+	private String humidityContext="/controller/readsonar";
 	private String deviceContext="/manager/devices/";
 
-	public String switchBulb(String accessToken,String username,String deviceId,String state){
+	public String switchBulb(String accessToken,String username,String deviceId,String state, String protocol){
 		HttpClient httpClient = new HttpClient();
 		PostMethod postMethod = new PostMethod(endpoint+bulbContext+state);
 		postMethod.addRequestHeader("owner", username);
 		postMethod.addRequestHeader("deviceId", deviceId);
+		postMethod.addRequestHeader("protocol", protocol);
 		postMethod.addRequestHeader("Authorization",
 									"Bearer " + accessToken);
 //		postMethod.addRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -43,7 +46,7 @@ public class FirealarmClient {
 	}
 
 
-	public String getTemperature(String accessToken,String username,String deviceId){
+	public String getTemperature(String accessToken,String username,String deviceId, String protocol){
 		HttpClient httpClient = new HttpClient();
 
 		GetMethod getMethod =new GetMethod(endpoint+temperatureContext);
@@ -51,8 +54,31 @@ public class FirealarmClient {
 
 		getMethod.addRequestHeader("owner", username);
 		getMethod.addRequestHeader("deviceId", deviceId);
+		getMethod.addRequestHeader("protocol", protocol);
 		getMethod.addRequestHeader("Authorization",
 									"Bearer " + accessToken);
+		//getMethod.addRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+		try {
+			httpClient.executeMethod(getMethod);
+			return getMethod.getResponseBodyAsString();
+		} catch (IOException e) {
+			return "Connection Failure,Try again later";
+		}
+	}
+
+
+	public String getHumidity(String accessToken,String username,String deviceId, String protocol){
+		HttpClient httpClient = new HttpClient();
+
+		GetMethod getMethod =new GetMethod(endpoint+humidityContext);
+
+
+		getMethod.addRequestHeader("owner", username);
+		getMethod.addRequestHeader("deviceId", deviceId);
+		getMethod.addRequestHeader("protocol", protocol);
+		getMethod.addRequestHeader("Authorization",
+		                           "Bearer " + accessToken);
 		//getMethod.addRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		try {

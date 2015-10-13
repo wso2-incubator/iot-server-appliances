@@ -30,7 +30,8 @@ public class LoginServlet extends HttpServlet {
 		}
 		String salt = UUID.randomUUID().toString();
 		String instanceId = userAgent + ipAddress + salt;
-		AccessTokenClient client = new AccessTokenClient();
+//		AccessTokenClient client = new AccessTokenClient();
+		AccessTokenClient client = AccessTokenClient.getInstance();
 		AccessTokenInfo accessTokenInfo;
 
 		try {

@@ -33,23 +33,63 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Properties;
 
 
 public class AccessTokenClient {
 
 	//TODO read from configuration file
 	private static Log log = LogFactory.getLog(AccessTokenClient.class);
-	private String tokenURL ="https://192.168.57.128:9444/oauth2/token";
+	private static AccessTokenClient accessTokenClient = new AccessTokenClient();
+	private final String propertiesFileName = "firealarmApp.properties";
+
+//	private String tokenURL ="https://192.168.57.128:9444/oauth2/token";
+	private String tokenURL ="https://localhost:9443/oauth2/token";
 	private String grantType ="password";
 	private String scope ="PRODUCTION device_";
 	private String appToken="NVp6UzIxM1RyWDhOUHY1QjN1Z0tXczJ1WW1nYTp3TG9iMkFldW1DZkNMVkpZVnROYjlDSFVYUXNh";
+
+	private AccessTokenClient() {
+		String confDirPath = System.getProperty("carbon.config.dir.path");
+		String propertiesFilePath = confDirPath + File.separator + "iot" + File.separator + "firealarmApp.properties";
+
+		Properties properties = new Properties();
+		InputStream propertiesInputStream = null;
+
+		try {
+			propertiesInputStream = new FileInputStream(propertiesFilePath);
+		} catch (FileNotFoundException e) {
+			log.error("API specific properties file could not be found at: " + propertiesFilePath);
+		}
+
+		//load a properties file from class path, inside static method
+		try {
+			properties.load(propertiesInputStream);
+		} catch (IOException e) {
+			log.error("Loading API specific properties from file at - " + propertiesFilePath + " failed...");
+		}
+
+		tokenURL = properties.getProperty("tokenURL");
+		grantType = properties.getProperty("grantType");
+		scope = properties.getProperty("scope");
+		appToken = properties.getProperty("appToken");
+	}
+
+	public static AccessTokenClient getInstance(){
+		return accessTokenClient;
+	}
+
 
 	public AccessTokenInfo getAccessToken(String username,String password ,String appInstanceId) throws AccessTokenException {
 		SSLContext ctx;
