@@ -52,21 +52,23 @@ public class AccessTokenClient {
 	//TODO read from configuration file
 	private static Log log = LogFactory.getLog(AccessTokenClient.class);
 	private static AccessTokenClient accessTokenClient = new AccessTokenClient();
-	private final String propertiesFileName = "firealarmApp.properties";
+	private static final String propertiesFileName = "firealarmApp.properties";
+	private static final String confDirPath = System.getProperty("carbon.config.dir.path");
+	private static final String propertiesFilePath = confDirPath + File.separator + "iot" + File.separator + propertiesFileName;
+
+	private static Properties properties = new Properties();;
+	private static InputStream propertiesInputStream = null;
 
 //	private String tokenURL ="https://192.168.57.128:9444/oauth2/token";
-	private String tokenURL ="https://localhost:9443/oauth2/token";
-	private String grantType ="password";
-	private String scope ="PRODUCTION device_";
-	private String appToken="NVp6UzIxM1RyWDhOUHY1QjN1Z0tXczJ1WW1nYTp3TG9iMkFldW1DZkNMVkpZVnROYjlDSFVYUXNh";
+	private static String tokenURL ="https://localhost:9443/oauth2/token";
+	private static String grantType ="password";
+	private static String scope ="PRODUCTION device_";
+	private static String appToken="NVp6UzIxM1RyWDhOUHY1QjN1Z0tXczJ1WW1nYTp3TG9iMkFldW1DZkNMVkpZVnROYjlDSFVYUXNh";
 
 	private AccessTokenClient() {
-		String confDirPath = System.getProperty("carbon.config.dir.path");
-		String propertiesFilePath = confDirPath + File.separator + "iot" + File.separator + "firealarmApp.properties";
+	}
 
-		Properties properties = new Properties();
-		InputStream propertiesInputStream = null;
-
+	public static AccessTokenClient getInstance(){
 		try {
 			propertiesInputStream = new FileInputStream(propertiesFilePath);
 		} catch (FileNotFoundException e) {
@@ -84,9 +86,6 @@ public class AccessTokenClient {
 		grantType = properties.getProperty("grantType");
 		scope = properties.getProperty("scope");
 		appToken = properties.getProperty("appToken");
-	}
-
-	public static AccessTokenClient getInstance(){
 		return accessTokenClient;
 	}
 
