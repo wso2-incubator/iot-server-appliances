@@ -153,7 +153,7 @@
 
     <script>
         function sendData(operationType, device) {
-            var e = document.getElementById("protocolList");
+            var e = document.getElementById(device);
             var protocol = e.options[e.selectedIndex].text;
 
             $.post("operation", {operation: operationType, deviceId: device, protocol: protocol})
@@ -162,10 +162,9 @@
                     });
 
         }
-    </script>
-    <script>
+
         function sendBulb(operationType, device) {
-            var e = document.getElementById("protocolList");
+            var e = document.getElementById(device);
             var protocol = e.options[e.selectedIndex].text;
 
             $.post("operation", {
@@ -238,7 +237,7 @@
                     <label></label>
                 </td>
                 <td>
-                    <select id="protocolList">
+                    <select id="<%=device.getId()%>">
                         <option value="http" selected="selected">HTTP</option>
                         <option value="mqtt">MQTT</option>
                         <option value="xmpp">XMPP</option>

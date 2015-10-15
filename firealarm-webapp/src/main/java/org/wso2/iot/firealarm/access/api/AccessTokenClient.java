@@ -86,6 +86,13 @@ public class AccessTokenClient {
 		grantType = properties.getProperty("grantType");
 		scope = properties.getProperty("scope");
 		appToken = properties.getProperty("appToken");
+
+		try {
+			propertiesInputStream.close();
+		} catch (IOException e) {
+			log.warn("Properties file reading stream could not be closed");
+		}
+
 		return accessTokenClient;
 	}
 
