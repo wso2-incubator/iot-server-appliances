@@ -91,8 +91,8 @@
     <h1><strong>Welcome.</strong> Please login.</h1>
     <form action="login" method="post">
         <fieldset>
-            <p><input type="text" name="username" id="username" required value="Username" onBlur="if(this.value=='')this.value='Username'" onFocus="if(this.value=='Username')this.value='' "></p>
-            <p><input type="password" name="password" id="password" required value="Password" onBlur="if(this.value=='')this.value='Password'" onFocus="if(this.value=='Password')this.value='' "></p>
+            <p><input type="text" name="username" id="username" required value="Please Enter Your Username" onBlur="if(this.value=='')this.value='Please Enter Your Username'" onFocus="if(this.value=='Please Enter Your Username')this.value='' "></p>
+            <p><input type="password" name="password" id="password" required value="password" onBlur="if(this.value=='')this.value='password'" onFocus="if(this.value=='password')this.value='' "></p>
 
             <p><input type="submit" value="Login"></p>
         </fieldset>

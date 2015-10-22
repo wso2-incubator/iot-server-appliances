@@ -51,7 +51,7 @@ public class AccessTokenClient {
 
 	//TODO read from configuration file
 	private static Log log = LogFactory.getLog(AccessTokenClient.class);
-	private static AccessTokenClient accessTokenClient = new AccessTokenClient();
+//	private static AccessTokenClient accessTokenClient = new AccessTokenClient();
 	private static final String propertiesFileName = "firealarmApp.properties";
 	private static final String confDirPath = System.getProperty("carbon.config.dir.path");
 	private static final String propertiesFilePath = confDirPath + File.separator + "iot" + File.separator + propertiesFileName;
@@ -65,10 +65,7 @@ public class AccessTokenClient {
 	private static String scope ="PRODUCTION device_";
 	private static String appToken="NVp6UzIxM1RyWDhOUHY1QjN1Z0tXczJ1WW1nYTp3TG9iMkFldW1DZkNMVkpZVnROYjlDSFVYUXNh";
 
-	private AccessTokenClient() {
-	}
-
-	public static AccessTokenClient getInstance(){
+	public AccessTokenClient() throws AccessTokenException {
 		try {
 			propertiesInputStream = new FileInputStream(propertiesFilePath);
 		} catch (FileNotFoundException e) {
@@ -79,7 +76,9 @@ public class AccessTokenClient {
 		try {
 			properties.load(propertiesInputStream);
 		} catch (IOException e) {
-			log.error("Loading API specific properties from file at - " + propertiesFilePath + " failed...");
+			String error = "Loading API specific properties from file at - " + propertiesFilePath + " failed...";
+			log.error(error);
+			throw new AccessTokenException(error, e);
 		}
 
 		tokenURL = properties.getProperty("tokenURL");
@@ -90,11 +89,41 @@ public class AccessTokenClient {
 		try {
 			propertiesInputStream.close();
 		} catch (IOException e) {
-			log.warn("Properties file reading stream could not be closed");
+			String error = "Stream for reading Properties file could not be closed";
+			log.warn(error);
+			throw new AccessTokenException(error, e);
 		}
 
-		return accessTokenClient;
+//		return accessTokenClient;
 	}
+
+//	public static AccessTokenClient getInstance(){
+//		try {
+//			propertiesInputStream = new FileInputStream(propertiesFilePath);
+//		} catch (FileNotFoundException e) {
+//			log.error("API specific properties file could not be found at: " + propertiesFilePath);
+//		}
+//
+//		//load a properties file from class path, inside static method
+//		try {
+//			properties.load(propertiesInputStream);
+//		} catch (IOException e) {
+//			log.error("Loading API specific properties from file at - " + propertiesFilePath + " failed...");
+//		}
+//
+//		tokenURL = properties.getProperty("tokenURL");
+//		grantType = properties.getProperty("grantType");
+//		scope = properties.getProperty("scope");
+//		appToken = properties.getProperty("appToken");
+//
+//		try {
+//			propertiesInputStream.close();
+//		} catch (IOException e) {
+//			log.warn("Stream for reading Properties file could not be closed");
+//		}
+//
+//		return accessTokenClient;
+//	}
 
 
 	public AccessTokenInfo getAccessToken(String username,String password ,String appInstanceId) throws AccessTokenException {

@@ -28,13 +28,15 @@ public class LoginServlet extends HttpServlet {
 		if (ipAddress == null) {
 			ipAddress = request.getRemoteAddr();
 		}
+
 		String salt = UUID.randomUUID().toString();
 		String instanceId = userAgent + ipAddress + salt;
-//		AccessTokenClient client = new AccessTokenClient();
-		AccessTokenClient client = AccessTokenClient.getInstance();
+		AccessTokenClient client = null;
+//		AccessTokenClient client = AccessTokenClient.getInstance();
 		AccessTokenInfo accessTokenInfo;
 
 		try {
+			client = new AccessTokenClient();
 			accessTokenInfo = client.getAccessToken(username, password, instanceId);
 			if (accessTokenInfo != null) {
 				request.getSession(true).setAttribute("token", accessTokenInfo.getAccess_token());
