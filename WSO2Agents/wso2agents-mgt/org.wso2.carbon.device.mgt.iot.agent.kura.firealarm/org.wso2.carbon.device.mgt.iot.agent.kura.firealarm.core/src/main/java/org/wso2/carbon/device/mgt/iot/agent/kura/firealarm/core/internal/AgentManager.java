@@ -16,35 +16,28 @@
 
 package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal;
 
-import org.eclipse.jetty.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.exception
-		.AgentCoreOperationException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.communication.CommunicationHandler;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.AgentOperationManager;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.http.SimpleServer;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.mqtt.MQTTClient;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.xmpp.XMPPClient;
+import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.mqtt
+		.MQTTCommunicationHandlerImpl;
 
 public class AgentManager {
 
-	private static final Logger log = LoggerFactory.getLogger(AgentManager.class);
+	private static final Log log = LogFactory.getLog(AgentManager.class);
+
 	private static AgentManager thisInstance = new AgentManager();
 
 	private AgentConfiguration agentConfigs;
 	private AgentOperationManager agentOperationManager;
+	private double temperature = 30, humidity = 30;
 
-	private SimpleServer simpleServer;
-	private MQTTClient agentMQTTClient;
-	private XMPPClient agentXMPPClient;
 	private String xmppAdminJID;
 
 	private String deviceIP;
-	private String iotServerEP;
-	private String controllerAPIEP;
 	private String ipRegistrationEP;
 	private String pushDataAPIEP;
-
 
 	private AgentManager() {
 	}
@@ -60,173 +53,22 @@ public class AgentManager {
 		// Initialise IoT-Server URL endpoints from the configuration read from file
 		AgentCoreOperations.initializeHTTPEndPoints();
 
-		// Register this current device's IP with the IoT-Server
-		try {
-			int responseCode = AgentCoreOperations.registerDeviceIP(
-					this.agentConfigs.getDeviceOwner(),
-					this.agentConfigs.getDeviceId());
+		// Update Agent manager's temperature and humidity
+		AgentCoreOperations.startGPIOReader();
 
-			if (responseCode != HttpStatus.OK_200) {
-				log.error(AgentConstants.LOG_APPENDER + "Device Registration with IoT Server at:" +
-						          " " + this.iotServerEP + " failed");
-			}
-		} catch (AgentCoreOperationException exception) {
-			log.error(AgentConstants.LOG_APPENDER +
-					          "Error encountered whilst trying to register the Device's IP at: " +
-					          this.iotServerEP);
-		}
+		String mqttTopic = String.format(AgentConstants.MQTT_SUBSCRIBE_TOPIC,
+		                                 agentConfigs.getDeviceOwner(),
+		                                 agentConfigs.getDeviceId());
 
-		// Initiate the thread for continuous pushing of device data to the IoT-Server
-		AgentCoreOperations.initiateDeviceDataPush(this.agentConfigs.getDeviceOwner(),
-		                                           this.agentConfigs.getDeviceId(),
-		                                           this.agentConfigs.getDataPushInterval());
+		CommunicationHandler mqttCommunicator = new MQTTCommunicationHandlerImpl(
+				agentConfigs.getDeviceOwner(), agentConfigs.getDeviceId(),
+				agentConfigs.getMqttBrokerEndpoint(), mqttTopic);
 
-		// Subscribe to the platform's MQTT Queue for receiving Control Signals via MQTT
-		try {
-			AgentCoreOperations.subscribeToMQTT(this.agentConfigs.getDeviceOwner(),
-			                                    this.agentConfigs.getDeviceId(),
-			                                    this.agentConfigs.getMqttBrokerEP());
-		} catch (AgentCoreOperationException e) {
-			log.error(AgentConstants.LOG_APPENDER + "Subscription to MQTT Broker at: " +
-					          this.agentConfigs.getMqttBrokerEP() + " failed");
-			retryMQTTSubscription();
-		}
-
-		// Connect to the platform's XMPP Server for receiving Control Signals via XMPP
-		try {
-			AgentCoreOperations.connectToXMPPServer(this.agentConfigs.getDeviceId(),
-			                                        this.agentConfigs.getAuthToken(),
-			                                        this.agentConfigs.getDeviceOwner(),
-			                                        this.agentConfigs.getXmppServerEP());
-		} catch (AgentCoreOperationException e) {
-			log.error(AgentConstants.LOG_APPENDER + "Connect/Login attempt to XMPP Server at: " +
-					          this.agentConfigs.getXmppServerEP() + " failed");
-			retryXMPPConnection();
-		}
-
-		// Start a simple HTTP Server to receive Control Signals via HTTP
-		try {
-			simpleServer = new SimpleServer();
-		} catch (AgentCoreOperationException e) {
-			log.error(AgentConstants.LOG_APPENDER + "Failed to start HTTP Server");
-			retryHTTPServerInit();
-		}
+		mqttCommunicator.connect();
 	}
 
 
-	private void retryMQTTSubscription() {
-		Thread retryToSubscribe = new Thread() {
-			@Override
-			public void run() {
-				while (true) {
-					if (!agentMQTTClient.isConnected()) {
-						if (log.isDebugEnabled()) {
-							log.debug(AgentConstants.LOG_APPENDER +
-									          "Subscriber re-trying to reach MQTT queue....");
-						}
 
-						try {
-							agentMQTTClient.connectAndSubscribe();
-						} catch (AgentCoreOperationException e1) {
-							if (log.isDebugEnabled()) {
-								log.debug(AgentConstants.LOG_APPENDER +
-										          "Attempt to re-connect to MQTT-Queue " +
-										          "failed");
-							}
-						}
-					} else {
-						break;
-					}
-
-					try {
-						Thread.sleep(AgentConstants.DEFAULT_RETRY_THREAD_INTERVAL);
-					} catch (InterruptedException e1) {
-						log.error("MQTT: Thread S;eep Interrupt Exception");
-					}
-				}
-			}
-		};
-
-		retryToSubscribe.setDaemon(true);
-		retryToSubscribe.start();
-	}
-
-	private void retryXMPPConnection() {
-		Thread retryToConnect = new Thread() {
-			@Override
-			public void run() {
-
-				while (true) {
-					if (!agentXMPPClient.isConnected()) {
-						if (log.isDebugEnabled()) {
-							log.debug(AgentConstants.LOG_APPENDER +
-									          "Re-trying to reach XMPP Server....");
-						}
-
-						try {
-							agentXMPPClient.connectAndLogin(agentConfigs.getDeviceId(),
-							                                agentConfigs.getAuthToken(),
-							                                agentConfigs.getDeviceOwner());
-							agentXMPPClient.setMessageFilterAndListener(xmppAdminJID);
-						} catch (AgentCoreOperationException e1) {
-							if (log.isDebugEnabled()) {
-								log.debug(AgentConstants.LOG_APPENDER +
-										          "Attempt to re-connect to XMPP-Server " +
-										          "failed");
-							}
-						}
-					} else {
-						break;
-					}
-
-					try {
-						Thread.sleep(AgentConstants.DEFAULT_RETRY_THREAD_INTERVAL);
-					} catch (InterruptedException e1) {
-						log.error("XMPP: Thread Sleep Interrupt Exception");
-					}
-				}
-			}
-		};
-
-		retryToConnect.setDaemon(true);
-		retryToConnect.start();
-	}
-
-	private void retryHTTPServerInit() {
-		Thread restartServer = new Thread() {
-			@Override
-			public void run() {
-				while (true) {
-					if (!simpleServer.getServer().isStarted()) {
-						if (log.isDebugEnabled()) {
-							log.debug(AgentConstants.LOG_APPENDER +
-									          "Re-trying to start HTTP Server....");
-						}
-
-						try {
-							simpleServer.getServer().start();
-						} catch (Exception e) {
-							if (log.isDebugEnabled()) {
-								log.debug(AgentConstants.LOG_APPENDER +
-										          "Attempt to restart HTTP-Server failed");
-							}
-						}
-					} else {
-						break;
-					}
-
-					try {
-						Thread.sleep(AgentConstants.DEFAULT_RETRY_THREAD_INTERVAL);
-					} catch (InterruptedException e1) {
-						log.error("HTTP: Thread Sleep Interrupt Exception");
-					}
-				}
-			}
-		};
-
-		restartServer.setDaemon(true);
-		restartServer.start();
-	}
 
 	/*------------------------------------------------------------------------------------------*/
 	/* 		            Getter and Setter Methods for the private variables                 	*/
@@ -236,8 +78,20 @@ public class AgentManager {
 		return agentConfigs;
 	}
 
-	public void setAgentConfigs(AgentConfiguration agentConfigs) {
-		this.agentConfigs = agentConfigs;
+	public double getTemperature() {
+		return temperature;
+	}
+
+	public void setTemperature(double temperature) {
+		this.temperature = temperature;
+	}
+
+	public double getHumidity() {
+		return humidity;
+	}
+
+	public void setHumidity(double humidity) {
+		this.humidity = humidity;
 	}
 
 	public AgentOperationManager getAgentOperationManager() {
@@ -246,28 +100,6 @@ public class AgentManager {
 
 	public void setAgentOperationManager(AgentOperationManager agentOperationManager) {
 		this.agentOperationManager = agentOperationManager;
-	}
-
-	public SimpleServer getSimpleServer() {
-		return simpleServer;
-	}
-
-	public MQTTClient getAgentMQTTClient() {
-		return agentMQTTClient;
-	}
-
-	public void setAgentMQTTClient(
-			MQTTClient mqttClient) {
-		this.agentMQTTClient = mqttClient;
-	}
-
-	public XMPPClient getAgentXMPPClient() {
-		return agentXMPPClient;
-	}
-
-	public void setAgentXMPPClient(
-			XMPPClient xmppClient) {
-		this.agentXMPPClient = xmppClient;
 	}
 
 	public String getXmppAdminJID() {
@@ -284,22 +116,6 @@ public class AgentManager {
 
 	public void setDeviceIP(String deviceIP) {
 		this.deviceIP = deviceIP;
-	}
-
-	public String getIotServerEP() {
-		return iotServerEP;
-	}
-
-	public void setIotServerEP(String iotServerEP) {
-		this.iotServerEP = iotServerEP;
-	}
-
-	public String getControllerAPIEP() {
-		return controllerAPIEP;
-	}
-
-	public void setControllerAPIEP(String controllerAPIEP) {
-		this.controllerAPIEP = controllerAPIEP;
 	}
 
 	public String getIpRegistrationEP() {

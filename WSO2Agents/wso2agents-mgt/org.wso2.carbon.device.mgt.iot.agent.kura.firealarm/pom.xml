@@ -29,6 +29,7 @@
 	<modules>
 		<module>org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core</module>
 		<module>org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.virtual</module>
+		<module>org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.real</module>
 	</modules>
 
 	<build>
@@ -146,6 +147,8 @@
 		<smack.wso2.version>3.0.4.wso2v1</smack.wso2.version>
 		<smackx.wso2.version>3.0.4.wso2v1</smackx.wso2.version>
 		<paho.mqtt.version>0.4.0</paho.mqtt.version>
+		<log4j.version>1.2</log4j.version>
+		<pi4j.version>1.0</pi4j.version>
 	<!--<deployment.package.version>0.2.0</deployment.package.version>-->
 	<!--<tycho-version>0.20.0</tycho-version>-->
 	<!--<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->

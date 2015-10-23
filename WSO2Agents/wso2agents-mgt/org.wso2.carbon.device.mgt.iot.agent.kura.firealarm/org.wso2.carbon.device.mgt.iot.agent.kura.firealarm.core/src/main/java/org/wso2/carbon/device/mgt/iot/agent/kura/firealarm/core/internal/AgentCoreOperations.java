@@ -18,34 +18,18 @@
 
 package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal;
 
-import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.jivesoftware.smack.packet.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.exception
 		.AgentCoreOperationException;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.mqtt.MQTTClient;
-import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.utils.xmpp.XMPPClient;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.NetworkInterface;
-import java.net.ProtocolException;
-import java.net.SocketException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -53,9 +37,11 @@ import java.util.concurrent.TimeUnit;
 
 public class AgentCoreOperations {
 
-	private static final Logger log = LoggerFactory.getLogger(AgentCoreOperations.class);
-	private static final AgentManager agentManager = AgentManager.getInstance();
+	private static final Log log = LogFactory.getLog(AgentCoreOperations.class);
 
+
+	private static final AgentManager agentManager = AgentManager.getInstance();
+	private static String rootPath = "";
 	/**
 	 * This method reads the agent specific configurations for the device from the
 	 * "deviceConfigs.properties" file found at /repository/conf folder.
@@ -72,21 +58,35 @@ public class AgentCoreOperations {
 		String propertiesFileName = AgentConstants.AGENT_PROPERTIES_FILE_NAME;
 
 		try {
-			propertiesInputStream = new FileInputStream(
-					AgentConstants.PROPERTIES_FILE_PATH + propertiesFileName);
+			ClassLoader loader = AgentCoreOperations.class.getClassLoader();
+			URL path = loader.getResource(propertiesFileName);
+			System.out.println(path);
+			rootPath = path.getPath().replace(
+					"wso2-firealarm-real-agent.jar!/deviceConfig.properties",
+					"").replace("jar:", "").replace("file:", "");
+
+			propertiesInputStream = new FileInputStream(rootPath + propertiesFileName);
 
 			//load a properties file from class path, inside static method
 			properties.load(propertiesInputStream);
 
 			iotServerConfigs.setDeviceOwner(properties.getProperty(
 					AgentConstants.DEVICE_OWNER_PROPERTY));
-			iotServerConfigs.setDeviceId(properties.getProperty(AgentConstants
-					                                                    .DEVICE_ID_PROPERTY));
-			iotServerConfigs.setIotServerEP(properties.getProperty(
-					AgentConstants.IOT_SERVER_EP_PROPERTY));
-			iotServerConfigs.setMqttBrokerEP(properties.getProperty(
+			iotServerConfigs.setDeviceId(properties.getProperty(
+					AgentConstants.DEVICE_ID_PROPERTY));
+			iotServerConfigs.setDeviceName(properties.getProperty(
+					AgentConstants.DEVICE_NAME_PROPERTY));
+			iotServerConfigs.setControllerContext(properties.getProperty(
+					AgentConstants.DEVICE_CONTROLLER_CONTEXT_PROPERTY));
+			iotServerConfigs.setHTTPS_ServerEndpoint(properties.getProperty(
+					AgentConstants.SERVER_HTTPS_EP_PROPERTY));
+			iotServerConfigs.setHTTP_ServerEndpoint(properties.getProperty(
+					AgentConstants.SERVER_HTTP_EP_PROPERTY));
+			iotServerConfigs.setApimGatewayEndpoint(properties.getProperty(
+					AgentConstants.APIM_GATEWAY_EP_PROPERTY));
+			iotServerConfigs.setMqttBrokerEndpoint(properties.getProperty(
 					AgentConstants.MQTT_BROKER_EP_PROPERTY));
-			iotServerConfigs.setXmppServerEP(properties.getProperty(
+			iotServerConfigs.setXmppServerEndpoint(properties.getProperty(
 					AgentConstants.XMPP_SERVER_EP_PROPERTY));
 			iotServerConfigs.setAuthMethod(properties.getProperty(
 					AgentConstants.AUTH_METHOD_PROPERTY));
@@ -94,28 +94,32 @@ public class AgentCoreOperations {
 					AgentConstants.AUTH_TOKEN_PROPERTY));
 			iotServerConfigs.setRefreshToken(properties.getProperty(
 					AgentConstants.REFRESH_TOKEN_PROPERTY));
-			iotServerConfigs.setNetworkInterface(properties.getProperty(
-					AgentConstants.NETWORK_INTERFACE_PROPERTY));
 			iotServerConfigs.setDataPushInterval(Integer.parseInt(properties.getProperty(
 					AgentConstants.PUSH_INTERVAL_PROPERTY)));
 
 			log.info(AgentConstants.LOG_APPENDER + "Device Owner: " +
 					         iotServerConfigs.getDeviceOwner());
 			log.info(AgentConstants.LOG_APPENDER + "Device ID: " + iotServerConfigs.getDeviceId());
-			log.info(AgentConstants.LOG_APPENDER + "IoT Server EndPoint: " +
-					         iotServerConfigs.getIotServerEP());
+			log.info(AgentConstants.LOG_APPENDER + "Device Name: " +
+					         iotServerConfigs.getDeviceName());
+			log.info(AgentConstants.LOG_APPENDER + "Device Controller Context: " +
+					         iotServerConfigs.getControllerContext());
+			log.info(AgentConstants.LOG_APPENDER + "IoT Server HTTPS EndPoint: " +
+					         iotServerConfigs.getHTTPS_ServerEndpoint());
+			log.info(AgentConstants.LOG_APPENDER + "IoT Server HTTP EndPoint: " +
+					         iotServerConfigs.getHTTP_ServerEndpoint());
+			log.info(AgentConstants.LOG_APPENDER + "API-Manager Gateway EndPoint: " +
+					         iotServerConfigs.getApimGatewayEndpoint());
 			log.info(AgentConstants.LOG_APPENDER + "MQTT Broker EndPoint: " +
-					         iotServerConfigs.getMqttBrokerEP());
+					         iotServerConfigs.getMqttBrokerEndpoint());
 			log.info(AgentConstants.LOG_APPENDER + "XMPP Server EndPoint: " +
-					         iotServerConfigs.getXmppServerEP());
+					         iotServerConfigs.getXmppServerEndpoint());
 			log.info(AgentConstants.LOG_APPENDER + "Authentication Method: " +
 					         iotServerConfigs.getAuthMethod());
 			log.info(AgentConstants.LOG_APPENDER + "Authentication Token: " +
 					         iotServerConfigs.getAuthToken());
 			log.info(AgentConstants.LOG_APPENDER + "Refresh Token: " +
 					         iotServerConfigs.getRefreshToken());
-			log.info(AgentConstants.LOG_APPENDER + "Network Interface: " +
-					         iotServerConfigs.getNetworkInterface());
 			log.info(AgentConstants.LOG_APPENDER + "Data Push Interval: " +
 					         iotServerConfigs.getDataPushInterval());
 
@@ -158,14 +162,17 @@ public class AgentCoreOperations {
 
 		iotServerConfigs.setDeviceOwner(AgentConstants.DEFAULT_DEVICE_OWNER);
 		iotServerConfigs.setDeviceId(AgentConstants.DEFAULT_DEVICE_ID);
-		iotServerConfigs.setIotServerEP(AgentConstants.DEFAULT_IOT_SERVER_EP);
-		iotServerConfigs.setMqttBrokerEP(AgentConstants.DEFAULT_MQTT_BROKER_EP);
-		iotServerConfigs.setXmppServerEP(AgentConstants.DEFAULT_XMPP_SERVER_EP);
+		iotServerConfigs.setDeviceName(AgentConstants.DEFAULT_DEVICE_NAME);
+		iotServerConfigs.setControllerContext(AgentConstants.DEVICE_CONTROLLER_API_EP);
+		iotServerConfigs.setHTTPS_ServerEndpoint(AgentConstants.DEFAULT_HTTPS_SERVER_EP);
+		iotServerConfigs.setHTTP_ServerEndpoint(AgentConstants.DEFAULT_HTTP_SERVER_EP);
+		iotServerConfigs.setApimGatewayEndpoint(AgentConstants.DEFAULT_APIM_GATEWAY_EP);
+		iotServerConfigs.setMqttBrokerEndpoint(AgentConstants.DEFAULT_MQTT_BROKER_EP);
+		iotServerConfigs.setXmppServerEndpoint(AgentConstants.DEFAULT_XMPP_SERVER_EP);
 		iotServerConfigs.setAuthMethod(AgentConstants.DEFAULT_AUTH_METHOD);
 		iotServerConfigs.setAuthToken(AgentConstants.DEFAULT_AUTH_TOKEN);
 		iotServerConfigs.setRefreshToken(AgentConstants.DEFAULT_REFRESH_TOKEN);
-		iotServerConfigs.setNetworkInterface(AgentConstants.DEFAULT_NETWORK_INTERFACE);
-		iotServerConfigs.setDataPushInterval(AgentConstants.DEFAULT_PUSH_INTERVAL);
+		iotServerConfigs.setDataPushInterval(AgentConstants.DEFAULT_DATA_PUBLISH_INTERVAL);
 
 		return iotServerConfigs;
 	}
@@ -180,30 +187,80 @@ public class AgentCoreOperations {
 	 *                                     from the configs file
 	 */
 	public static void initializeHTTPEndPoints() {
-		String iotServerEndpoint = AgentConstants.HTTP_PREFIX +
-				agentManager.getAgentConfigs().getIotServerEP();
-		agentManager.setIotServerEP(iotServerEndpoint);
+		String apimEndpoint = agentManager.getAgentConfigs().getHTTP_ServerEndpoint();
+		String backEndContext = agentManager.getAgentConfigs().getControllerContext();
 
-		String deviceControllerAPIEndPoint =
-				iotServerEndpoint + AgentConstants.DEVICE_CONTROLLER_API_EP;
-		agentManager.setControllerAPIEP(deviceControllerAPIEndPoint);
+		String deviceControllerAPIEndpoint = apimEndpoint + backEndContext;
 
 		String registerEndpointURL =
-				deviceControllerAPIEndPoint + AgentConstants.DEVICE_REGISTER_API_EP;
+				deviceControllerAPIEndpoint + AgentConstants.DEVICE_REGISTER_API_EP;
 		agentManager.setIpRegistrationEP(registerEndpointURL);
 
 		String pushDataEndPointURL =
-				deviceControllerAPIEndPoint + AgentConstants.DEVICE_PUSH_TEMPERATURE_API_EP;
+				deviceControllerAPIEndpoint + AgentConstants.DEVICE_PUSH_TEMPERATURE_API_EP;
 		agentManager.setPushDataAPIEP(pushDataEndPointURL);
 
-		log.info(AgentConstants.LOG_APPENDER + "IoT Server EndPoint: " + iotServerEndpoint);
 		log.info(AgentConstants.LOG_APPENDER + "IoT Server's Device Controller API Endpoint: " +
-				         deviceControllerAPIEndPoint);
+				         deviceControllerAPIEndpoint);
 		log.info(AgentConstants.LOG_APPENDER + "DeviceIP Registration EndPoint: " +
 				         registerEndpointURL);
 		log.info(AgentConstants.LOG_APPENDER + "Push-Data API EndPoint: " + pushDataEndPointURL);
 	}
 
+
+	public static void startGPIOReader(){
+		Runnable gpioReader = new Runnable() {
+			@Override
+			public void run() {
+				String returnVal = readTemperatureFromPi();
+				double temperature = Double.parseDouble(returnVal.split(":")[0].replace("C", ""));
+				double humidity = Double.parseDouble(returnVal.split(":")[1].replace("%", ""));
+
+				agentManager.setTemperature(temperature);
+				agentManager.setHumidity(humidity);
+			}
+		};
+
+		ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+		service.scheduleAtFixedRate(gpioReader, 0, agentManager.getAgentConfigs().getDataPushInterval()*100, TimeUnit.MILLISECONDS);
+	}
+
+
+	private static String readTemperatureFromPi(){
+		String temperatureScriptPath = rootPath + "readTemperatureAndHumidity.py";
+		String pythonCommand = "python " + temperatureScriptPath;
+		return executeCommand(pythonCommand);
+	}
+
+
+	public static void changeBulbStatus(boolean isOn) {
+		String bulbScriptPath = rootPath + "switchBulb.py";
+		String pythonCommand = "python " + bulbScriptPath + " -s " + (isOn ? "ON" : "OFF");
+		log.info(AgentConstants.LOG_APPENDER + "Command [" + pythonCommand + "]");
+		executeCommand(pythonCommand);
+	}
+
+	private static String executeCommand(String command) {
+		StringBuffer output = new StringBuffer();
+
+		Process p;
+		try {
+			p = Runtime.getRuntime().exec(command);
+			p.waitFor();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+			String line = "";
+			while ((line = reader.readLine()) != null) {
+				output.append(line + "\n");
+			}
+
+		} catch (Exception e) {
+			log.info(e.getMessage(), e);
+		}
+
+		return output.toString();
+
+	}
 
 	/**
 	 * This method calls the "Register-API" of the IoT Server in order to register the device's IP
@@ -217,56 +274,56 @@ public class AgentCoreOperations {
 	 * @throws AgentCoreOperationException if any errors occur when an HTTPConnection session is
 	 *                                     created
 	 */
-	public static int registerDeviceIP(String deviceOwner, String deviceID)
-			throws AgentCoreOperationException {
-		int responseCode = -1;
-
-		String deviceIPAddress = getDeviceIP(
-				agentManager.getAgentConfigs().getNetworkInterface());
-
-		agentManager.setDeviceIP(deviceIPAddress);
-		log.info(AgentConstants.LOG_APPENDER + "Device IP Address: " + deviceIPAddress);
-
-		String deviceIPRegistrationEP = agentManager.getIpRegistrationEP();
-		String registerEndpointURLString =
-				deviceIPRegistrationEP + File.separator + deviceOwner + File.separator + deviceID +
-						File.separator + deviceIPAddress;
-
-		if (log.isDebugEnabled()) {
-			log.debug(AgentConstants.LOG_APPENDER + "DeviceIP Registration EndPoint: " +
-					          registerEndpointURLString);
-		}
-
-		HttpURLConnection httpConnection = getHttpConnection(registerEndpointURLString);
-
-		try {
-			httpConnection.setRequestMethod(AgentConstants.HTTP_POST);
-			httpConnection.setRequestProperty("Authorization", "Bearer " +
-					agentManager.getAgentConfigs().getAuthToken());
-			httpConnection.setDoOutput(true);
-			responseCode = httpConnection.getResponseCode();
-
-		} catch (ProtocolException exception) {
-			String errorMsg = AgentConstants.LOG_APPENDER +
-					"Protocol specific error occurred when trying to set method to " +
-					AgentConstants.HTTP_POST + " for:" + registerEndpointURLString;
-			log.error(errorMsg);
-			throw new AgentCoreOperationException(errorMsg, exception);
-
-		} catch (IOException exception) {
-			String errorMsg = AgentConstants.LOG_APPENDER +
-					"An IO error occurred whilst trying to get the response code from: " +
-					registerEndpointURLString + " for a " + AgentConstants.HTTP_POST + " method.";
-			log.error(errorMsg);
-			throw new AgentCoreOperationException(errorMsg, exception);
-		}
-
-		log.info(AgentConstants.LOG_APPENDER + "DeviceIP - " + deviceIPAddress +
-				         ", registration with IoT Server at : " +
-				         agentManager.getIotServerEP() +
-				         " returned status " + responseCode);
-		return responseCode;
-	}
+//	public static int registerDeviceIP(String deviceOwner, String deviceID)
+//			throws AgentCoreOperationException {
+//		int responseCode = -1;
+//
+//		String deviceIPAddress = getDeviceIP(
+//				agentManager.getAgentConfigs().getNetworkInterface());
+//
+//		agentManager.setDeviceIP(deviceIPAddress);
+//		log.info(AgentConstants.LOG_APPENDER + "Device IP Address: " + deviceIPAddress);
+//
+//		String deviceIPRegistrationEP = agentManager.getIpRegistrationEP();
+//		String registerEndpointURLString =
+//				deviceIPRegistrationEP + File.separator + deviceOwner + File.separator + deviceID +
+//						File.separator + deviceIPAddress;
+//
+//		if (log.isDebugEnabled()) {
+//			log.debug(AgentConstants.LOG_APPENDER + "DeviceIP Registration EndPoint: " +
+//					          registerEndpointURLString);
+//		}
+//
+//		HttpURLConnection httpConnection = getHttpConnection(registerEndpointURLString);
+//
+//		try {
+//			httpConnection.setRequestMethod(AgentConstants.HTTP_POST);
+//			httpConnection.setRequestProperty("Authorization", "Bearer " +
+//					agentManager.getAgentConfigs().getAuthToken());
+//			httpConnection.setDoOutput(true);
+//			responseCode = httpConnection.getResponseCode();
+//
+//		} catch (ProtocolException exception) {
+//			String errorMsg = AgentConstants.LOG_APPENDER +
+//					"Protocol specific error occurred when trying to set method to " +
+//					AgentConstants.HTTP_POST + " for:" + registerEndpointURLString;
+//			log.error(errorMsg);
+//			throw new AgentCoreOperationException(errorMsg, exception);
+//
+//		} catch (IOException exception) {
+//			String errorMsg = AgentConstants.LOG_APPENDER +
+//					"An IO error occurred whilst trying to get the response code from: " +
+//					registerEndpointURLString + " for a " + AgentConstants.HTTP_POST + " method.";
+//			log.error(errorMsg);
+//			throw new AgentCoreOperationException(errorMsg, exception);
+//		}
+//
+//		log.info(AgentConstants.LOG_APPENDER + "DeviceIP - " + deviceIPAddress +
+//				         ", registration with IoT Server at : " +
+//				         agentManager.getIotServerEP() +
+//				         " returned status " + responseCode);
+//		return responseCode;
+//	}
 
 
 	/**
@@ -279,9 +336,9 @@ public class AgentCoreOperations {
 	 * @param deviceID    the deviceId that is auto-generated whilst downloadng the agent.
 	 *                    (Read from configuration file)
 	 */
-	public static void initiateDeviceDataPush(final String deviceOwner, final String deviceID) {
-		initiateDeviceDataPush(deviceOwner, deviceID, AgentConstants.DEFAULT_PUSH_INTERVAL);
-	}
+//	public static void initiateDeviceDataPush(final String deviceOwner, final String deviceID) {
+//		initiateDeviceDataPush(deviceOwner, deviceID, AgentConstants.DEFAULT_PUSH_INTERVAL);
+//	}
 
 	/**
 	 * This is an overloaded method that pushes device-data to the IoT-Server at given time
@@ -294,100 +351,100 @@ public class AgentCoreOperations {
 	 * @param interval    the time interval between every successive data-push attempts.
 	 *                    (initially set at startup and is read from the configuration file)
 	 */
-	public static void initiateDeviceDataPush(final String deviceOwner, final String deviceID,
-	                                          int interval) {
-		final String pushDataEndPointURL = agentManager.getPushDataAPIEP();
-
-		if (log.isDebugEnabled()) {
-			log.info(AgentConstants.LOG_APPENDER + "PushData EndPoint: " + pushDataEndPointURL);
-		}
-
-		Runnable pushDataThread = new Runnable() {
-			public void run() {
-				int responseCode = -1;
-				String pushDataPayload = null;
-				HttpURLConnection httpConnection = null;
-
-				try {
-					httpConnection = getHttpConnection(pushDataEndPointURL);
-					httpConnection.setRequestMethod(AgentConstants.HTTP_POST);
-					httpConnection.setRequestProperty("Authorization", "Bearer " +
-							agentManager.getAgentConfigs().getAuthToken());
-					httpConnection.setRequestProperty("Content-Type",
-					                                  AgentConstants.APPLICATION_JSON_TYPE);
-
-					pushDataPayload = String.format(AgentConstants.PUSH_DATA_PAYLOAD, deviceOwner,
-					                                deviceID,
-					                                agentManager.getDeviceIP(),
-					                                agentManager.getAgentOperationManager()
-							                                .getTemperature());
-
-					if (log.isDebugEnabled()) {
-						log.debug(AgentConstants.LOG_APPENDER + "Push Data Payload is: " +
-								          pushDataPayload);
-					}
-
-					httpConnection.setDoOutput(true);
-					DataOutputStream dataOutPutWriter = new DataOutputStream(
-							httpConnection.getOutputStream());
-					dataOutPutWriter.writeBytes(pushDataPayload);
-					dataOutPutWriter.flush();
-					dataOutPutWriter.close();
-
-					responseCode = httpConnection.getResponseCode();
-					httpConnection.disconnect();
-
-				} catch (ProtocolException exception) {
-					String errorMsg = AgentConstants.LOG_APPENDER +
-							"Protocol specific error occurred when trying to set method to " +
-							AgentConstants.HTTP_POST + " for:" + pushDataEndPointURL;
-					log.error(errorMsg);
-
-				} catch (IOException exception) {
-					String errorMsg = AgentConstants.LOG_APPENDER +
-							"An IO error occurred whilst trying to get the response code from: " +
-							pushDataEndPointURL + " for a " + AgentConstants.HTTP_POST + " " +
-							"method.";
-					log.error(errorMsg);
-
-				} catch (AgentCoreOperationException exception) {
-					log.error(AgentConstants.LOG_APPENDER +
-							          "Error encountered whilst trying to create HTTP-Connection" +
-							          " to IoT-Server EP at: " + pushDataEndPointURL);
-				}
-
-				if (responseCode == HttpStatus.CONFLICT_409 ||
-						responseCode == HttpStatus.PRECONDITION_FAILED_412) {
-					log.warn(AgentConstants.LOG_APPENDER +
-							         "DeviceIP is being Re-Registered due to Push-Data failure " +
-							         "with response code: " + responseCode);
-					try {
-						registerDeviceIP(deviceOwner, deviceID);
-					} catch (AgentCoreOperationException exception) {
-						log.error(AgentConstants.LOG_APPENDER +
-								          "Error encountered whilst trying to Re-Register the " +
-								          "Device's IP");
-					}
-				} else if (responseCode != HttpStatus.NO_CONTENT_204) {
-					if (log.isDebugEnabled()) {
-						log.error(AgentConstants.LOG_APPENDER + "Status Code: " + responseCode +
-								          " encountered whilst trying to Push-Device-Data to IoT" +
-								          " Server at: " +
-								          agentManager.getPushDataAPIEP());
-					}
-				}
-
-				if (log.isDebugEnabled()) {
-					log.debug(AgentConstants.LOG_APPENDER + "Push-Data call with payload - " +
-							          pushDataPayload + ", to IoT Server returned status " +
-							          responseCode);
-				}
-			}
-		};
-
-		ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-		service.scheduleAtFixedRate(pushDataThread, 0, interval, TimeUnit.SECONDS);
-	}
+//	public static void initiateDeviceDataPush(final String deviceOwner, final String deviceID,
+//	                                          int interval) {
+//		final String pushDataEndPointURL = agentManager.getPushDataAPIEP();
+//
+//		if (log.isDebugEnabled()) {
+//			log.info(AgentConstants.LOG_APPENDER + "PushData EndPoint: " + pushDataEndPointURL);
+//		}
+//
+//		Runnable pushDataThread = new Runnable() {
+//			public void run() {
+//				int responseCode = -1;
+//				String pushDataPayload = null;
+//				HttpURLConnection httpConnection = null;
+//
+//				try {
+//					httpConnection = getHttpConnection(pushDataEndPointURL);
+//					httpConnection.setRequestMethod(AgentConstants.HTTP_POST);
+//					httpConnection.setRequestProperty("Authorization", "Bearer " +
+//							agentManager.getAgentConfigs().getAuthToken());
+//					httpConnection.setRequestProperty("Content-Type",
+//					                                  AgentConstants.APPLICATION_JSON_TYPE);
+//
+//					pushDataPayload = String.format(AgentConstants.PUSH_DATA_PAYLOAD, deviceOwner,
+//					                                deviceID,
+//					                                agentManager.getDeviceIP(),
+//					                                agentManager.getAgentOperationManager()
+//							                                .getTemperature());
+//
+//					if (log.isDebugEnabled()) {
+//						log.debug(AgentConstants.LOG_APPENDER + "Push Data Payload is: " +
+//								          pushDataPayload);
+//					}
+//
+//					httpConnection.setDoOutput(true);
+//					DataOutputStream dataOutPutWriter = new DataOutputStream(
+//							httpConnection.getOutputStream());
+//					dataOutPutWriter.writeBytes(pushDataPayload);
+//					dataOutPutWriter.flush();
+//					dataOutPutWriter.close();
+//
+//					responseCode = httpConnection.getResponseCode();
+//					httpConnection.disconnect();
+//
+//				} catch (ProtocolException exception) {
+//					String errorMsg = AgentConstants.LOG_APPENDER +
+//							"Protocol specific error occurred when trying to set method to " +
+//							AgentConstants.HTTP_POST + " for:" + pushDataEndPointURL;
+//					log.error(errorMsg);
+//
+//				} catch (IOException exception) {
+//					String errorMsg = AgentConstants.LOG_APPENDER +
+//							"An IO error occurred whilst trying to get the response code from: " +
+//							pushDataEndPointURL + " for a " + AgentConstants.HTTP_POST + " " +
+//							"method.";
+//					log.error(errorMsg);
+//
+//				} catch (AgentCoreOperationException exception) {
+//					log.error(AgentConstants.LOG_APPENDER +
+//							          "Error encountered whilst trying to create HTTP-Connection" +
+//							          " to IoT-Server EP at: " + pushDataEndPointURL);
+//				}
+//
+//				if (responseCode == HttpStatus.CONFLICT_409 ||
+//						responseCode == HttpStatus.PRECONDITION_FAILED_412) {
+//					log.warn(AgentConstants.LOG_APPENDER +
+//							         "DeviceIP is being Re-Registered due to Push-Data failure " +
+//							         "with response code: " + responseCode);
+//					try {
+//						registerDeviceIP(deviceOwner, deviceID);
+//					} catch (AgentCoreOperationException exception) {
+//						log.error(AgentConstants.LOG_APPENDER +
+//								          "Error encountered whilst trying to Re-Register the " +
+//								          "Device's IP");
+//					}
+//				} else if (responseCode != HttpStatus.NO_CONTENT_204) {
+//					if (log.isDebugEnabled()) {
+//						log.error(AgentConstants.LOG_APPENDER + "Status Code: " + responseCode +
+//								          " encountered whilst trying to Push-Device-Data to IoT" +
+//								          " Server at: " +
+//								          agentManager.getPushDataAPIEP());
+//					}
+//				}
+//
+//				if (log.isDebugEnabled()) {
+//					log.debug(AgentConstants.LOG_APPENDER + "Push-Data call with payload - " +
+//							          pushDataPayload + ", to IoT Server returned status " +
+//							          responseCode);
+//				}
+//			}
+//		};
+//
+//		ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+//		service.scheduleAtFixedRate(pushDataThread, 0, interval, TimeUnit.SECONDS);
+//	}
 
 	/**
 	 * This method is used by the device to subscribe to any MQTT queue which is used by the WSO2
@@ -406,70 +463,70 @@ public class AgentCoreOperations {
 	 * @throws AgentCoreOperationException if any errors occur whilst trying to connect/subscribe
 	 *                                     to the MQTT Queue.
 	 */
-	public static void subscribeToMQTT(final String deviceOwner, final String deviceID,
-	                                   final String mqttBrokerEndPoint)
-			throws AgentCoreOperationException {
-
-		String subscribeTopic = String.format(AgentConstants.MQTT_SUBSCRIBE_TOPIC, deviceOwner,
-		                                      deviceID);
-
-		MQTTClient mqttClient = new MQTTClient(deviceOwner, deviceID, mqttBrokerEndPoint,
-		                                       subscribeTopic) {
-			@Override
-			protected void postMessageArrived(String topic, MqttMessage message) {
-				log.info(AgentConstants.LOG_APPENDER + "Message " + message.toString() +
-						         " was received for topic: " + topic);
-
-				String[] controlSignal = message.toString().split(":");
-				// message is in "<SIGNAL_TYPE>:<SIGNAL_MODE>" format.
-				//                           (ex: "BULB:ON", "TEMP", "HUMID")
-
-				switch (controlSignal[0].toUpperCase()) {
-					case AgentConstants.BULB_CONTROL:
-						agentManager.getAgentOperationManager().changeBulbStatus(
-								controlSignal[1].equals(AgentConstants.CONTROL_ON) ? true : false);
-						log.info(AgentConstants.LOG_APPENDER + "Bulb was switched to state: '" +
-								         controlSignal[1] + "'");
-						break;
-
-					case AgentConstants.TEMPERATURE_CONTROL:
-						String currentTemperature =
-								"" + agentManager.getAgentOperationManager().getTemperature();
-
-						String replyTemperature =
-								"Current temperature was read as: '" + currentTemperature + "C'";
-						log.info(AgentConstants.LOG_APPENDER + replyTemperature);
-
-						String tempPublishTopic = String.format(
-								AgentConstants.MQTT_TEMP_PUBLISH_TOPIC, deviceOwner, deviceID);
-						publishPayloadToMQTT(tempPublishTopic, replyTemperature);
-						break;
-
-					case AgentConstants.HUMIDITY_CONTROL:
-						String currentHumidity =
-								"" + agentManager.getAgentOperationManager().getHumidity();
-
-						String replyHumidity =
-								"Current humidity was read as: '" + currentHumidity + "%'";
-						log.info(AgentConstants.LOG_APPENDER + replyHumidity);
-
-						String humidPublishTopic = String.format(
-								AgentConstants.MQTT_HUMID_PUBLISH_TOPIC, deviceOwner, deviceID);
-						publishPayloadToMQTT(humidPublishTopic, replyHumidity);
-						break;
-
-					default:
-						log.warn(
-								"'" + controlSignal[0] + "' is invalid and not-supported for " +
-										"this device-type");
-						break;
-				}
-			}
-		};
-
-		agentManager.setAgentMQTTClient(mqttClient);
-		agentManager.getAgentMQTTClient().connectAndSubscribe();
-	}
+//	public static void subscribeToMQTT(final String deviceOwner, final String deviceID,
+//	                                   final String mqttBrokerEndPoint)
+//			throws AgentCoreOperationException {
+//
+//		String subscribeTopic = String.format(AgentConstants.MQTT_SUBSCRIBE_TOPIC, deviceOwner,
+//		                                      deviceID);
+//
+//		MQTTClient mqttClient = new MQTTClient(deviceOwner, deviceID, mqttBrokerEndPoint,
+//		                                       subscribeTopic) {
+//			@Override
+//			protected void postMessageArrived(String topic, MqttMessage message) {
+//				log.info(AgentConstants.LOG_APPENDER + "Message " + message.toString() +
+//						         " was received for topic: " + topic);
+//
+//				String[] controlSignal = message.toString().split(":");
+//				// message is in "<SIGNAL_TYPE>:<SIGNAL_MODE>" format.
+//				//                           (ex: "BULB:ON", "TEMP", "HUMID")
+//
+//				switch (controlSignal[0].toUpperCase()) {
+//					case AgentConstants.BULB_CONTROL:
+//						agentManager.getAgentOperationManager().changeBulbStatus(
+//								controlSignal[1].equals(AgentConstants.CONTROL_ON) ? true : false);
+//						log.info(AgentConstants.LOG_APPENDER + "Bulb was switched to state: '" +
+//								         controlSignal[1] + "'");
+//						break;
+//
+//					case AgentConstants.TEMPERATURE_CONTROL:
+//						String currentTemperature =
+//								"" + agentManager.getAgentOperationManager().getTemperature();
+//
+//						String replyTemperature =
+//								"Current temperature was read as: '" + currentTemperature + "C'";
+//						log.info(AgentConstants.LOG_APPENDER + replyTemperature);
+//
+//						String tempPublishTopic = String.format(
+//								AgentConstants.MQTT_TEMP_PUBLISH_TOPIC, deviceOwner, deviceID);
+//						publishPayloadToMQTT(tempPublishTopic, replyTemperature);
+//						break;
+//
+//					case AgentConstants.HUMIDITY_CONTROL:
+//						String currentHumidity =
+//								"" + agentManager.getAgentOperationManager().getHumidity();
+//
+//						String replyHumidity =
+//								"Current humidity was read as: '" + currentHumidity + "%'";
+//						log.info(AgentConstants.LOG_APPENDER + replyHumidity);
+//
+//						String humidPublishTopic = String.format(
+//								AgentConstants.MQTT_HUMID_PUBLISH_TOPIC, deviceOwner, deviceID);
+//						publishPayloadToMQTT(humidPublishTopic, replyHumidity);
+//						break;
+//
+//					default:
+//						log.warn(
+//								"'" + controlSignal[0] + "' is invalid and not-supported for " +
+//										"this device-type");
+//						break;
+//				}
+//			}
+//		};
+//
+//		agentManager.setAgentMQTTClient(mqttClient);
+//		agentManager.getAgentMQTTClient().connectAndSubscribe();
+//	}
 
 
 	/**
@@ -480,10 +537,10 @@ public class AgentCoreOperations {
 	 * @param publishTopic the topic to which the reply message is to be published.
 	 * @param payLoad      the reply-message (payload) of the MQTT publish action.
 	 */
-	private static void publishPayloadToMQTT(String publishTopic, String payLoad) {
-		publishPayloadToMQTT(publishTopic, payLoad, AgentConstants
-				.DEFAULT_MQTT_QUALITY_OF_SERVICE);
-	}
+//	private static void publishPayloadToMQTT(String publishTopic, String payLoad) {
+//		publishPayloadToMQTT(publishTopic, payLoad, AgentConstants
+//				.DEFAULT_MQTT_QUALITY_OF_SERVICE);
+//	}
 
 	/**
 	 * This is an overloaded method that publishes MQTT reply-messages for control signals
@@ -494,25 +551,25 @@ public class AgentCoreOperations {
 	 * @param qos          the Quality-of-Service of the current publish action.
 	 *                     Could be 0(At-most once), 1(At-least once) or 2(Exactly once)
 	 */
-	private static void publishPayloadToMQTT(String publishTopic, String payLoad, int qos) {
-
-		MQTTClient agentMQTTClient = agentManager.getAgentMQTTClient();
-
-		try {
-			agentMQTTClient.getClient().publish(publishTopic, payLoad.getBytes(
-					StandardCharsets.UTF_8), qos, true);
-			if (log.isDebugEnabled()) {
-				log.debug("Message: " + payLoad + " to MQTT topic [" + publishTopic +
-						          "] published successfully");
-			}
-		} catch (MqttException ex) {
-			String errorMsg =
-					"MQTT Client Error" + "\n\tReason:  " + ex.getReasonCode() + "\n\tMessage: " +
-							ex.getMessage() + "\n\tLocalMsg: " + ex.getLocalizedMessage() +
-							"\n\tCause: " + ex.getCause() + "\n\tException: " + ex;
-			log.info(AgentConstants.LOG_APPENDER + errorMsg);
-		}
-	}
+//	private static void publishPayloadToMQTT(String publishTopic, String payLoad, int qos) {
+//
+//		MQTTClient agentMQTTClient = agentManager.getAgentMQTTClient();
+//
+//		try {
+//			agentMQTTClient.getClient().publish(publishTopic, payLoad.getBytes(
+//					StandardCharsets.UTF_8), qos, true);
+//			if (log.isDebugEnabled()) {
+//				log.debug("Message: " + payLoad + " to MQTT topic [" + publishTopic +
+//						          "] published successfully");
+//			}
+//		} catch (MqttException ex) {
+//			String errorMsg =
+//					"MQTT Client Error" + "\n\tReason:  " + ex.getReasonCode() + "\n\tMessage: " +
+//							ex.getMessage() + "\n\tLocalMsg: " + ex.getLocalizedMessage() +
+//							"\n\tCause: " + ex.getCause() + "\n\tException: " + ex;
+//			log.info(AgentConstants.LOG_APPENDER + errorMsg);
+//		}
+//	}
 
 
 	/**
@@ -531,82 +588,82 @@ public class AgentCoreOperations {
 	 *                                     connection/login to the XMPP Server fails due to
 	 *                                     inappropriate credentials.
 	 */
-	public static void connectToXMPPServer(
-			final String username, final String password, final String resource,
-			String xmppServerEndPoint)
-			throws AgentCoreOperationException {
-
-		String[] xmppEndPointInfo = xmppServerEndPoint.split(":");
-
-		if (xmppEndPointInfo.length != 2) {
-			String errorMsg =
-					"The XMPP Endpoint (xmpp-ep) provided in the 'deviceConfig.properties' file " +
-							"is inappropriate. Needs to be in '<IP>:<PORT>' format.";
-			log.info(AgentConstants.LOG_APPENDER + errorMsg);
-			throw new AgentCoreOperationException(errorMsg);
-		}
-
-		String server = xmppEndPointInfo[0];
-		int port = Integer.parseInt(xmppEndPointInfo[1]);
-
-		final String xmppAdminJID = AgentConstants.XMPP_ADMIN_ACCOUNT_UNAME + "@" + server;
-		agentManager.setXmppAdminJID(xmppAdminJID);
-
-		XMPPClient xmppClient = new XMPPClient(server, port) {
-			@Override
-			protected void processXMPPMessage(Message xmppMessage) {
-				String from = xmppMessage.getFrom();
-				String message = xmppMessage.getBody();
-				log.info(AgentConstants.LOG_APPENDER + "Received XMPP message '" + message +
-						         "' from " + from);
-
-				String[] controlSignal = message.toString().split(":");
-				// message is in "<SIGNAL_TYPE>:<SIGNAL_MODE>" format.
-				// (ex: "BULB:ON", "TEMP", "HUMID")
-
-				switch (controlSignal[0].toUpperCase()) {
-					case AgentConstants.BULB_CONTROL:
-						agentManager.getAgentOperationManager().changeBulbStatus(
-								controlSignal[1].equals(AgentConstants.CONTROL_ON) ? true : false);
-						log.info(AgentConstants.LOG_APPENDER + "Bulb was switched to state: '" +
-								         controlSignal[1] + "'");
-						break;
-
-					case AgentConstants.TEMPERATURE_CONTROL:
-						String currentTemperature = "" +
-								agentManager.getAgentOperationManager()
-										.getTemperature();
-						String replyTemperature =
-								"The current temperature was read to be: '" + currentTemperature +
-										"C'";
-						log.info(AgentConstants.LOG_APPENDER + replyTemperature);
-
-						sendXMPPMessage(xmppAdminJID, replyTemperature, "DEVICE-TEMPERATURE");
-						break;
-
-					case AgentConstants.HUMIDITY_CONTROL:
-						String currentHumidity = "" +
-								agentManager.getAgentOperationManager()
-										.getHumidity();
-						String replyHumidity =
-								"The current humidity was read to be: '" + currentHumidity + "%'";
-						log.info(AgentConstants.LOG_APPENDER + replyHumidity);
-
-						sendXMPPMessage(xmppAdminJID, replyHumidity, "DEVICE-HUMIDITY");
-						break;
-
-					default:
-						log.warn("'" + controlSignal[0] +
-								         "' is invalid and not-supported for this device-type");
-						break;
-				}
-			}
-		};
-
-		agentManager.setAgentXMPPClient(xmppClient);
-		agentManager.getAgentXMPPClient().connectAndLogin(username, password, resource);
-		agentManager.getAgentXMPPClient().setMessageFilterAndListener(xmppAdminJID);
-	}
+//	public static void connectToXMPPServer(
+//			final String username, final String password, final String resource,
+//			String xmppServerEndPoint)
+//			throws AgentCoreOperationException {
+//
+//		String[] xmppEndPointInfo = xmppServerEndPoint.split(":");
+//
+//		if (xmppEndPointInfo.length != 2) {
+//			String errorMsg =
+//					"The XMPP Endpoint (xmpp-ep) provided in the 'deviceConfig.properties' file " +
+//							"is inappropriate. Needs to be in '<IP>:<PORT>' format.";
+//			log.info(AgentConstants.LOG_APPENDER + errorMsg);
+//			throw new AgentCoreOperationException(errorMsg);
+//		}
+//
+//		String server = xmppEndPointInfo[0];
+//		int port = Integer.parseInt(xmppEndPointInfo[1]);
+//
+//		final String xmppAdminJID = AgentConstants.XMPP_ADMIN_ACCOUNT_UNAME + "@" + server;
+//		agentManager.setXmppAdminJID(xmppAdminJID);
+//
+//		XMPPClient xmppClient = new XMPPClient(server, port) {
+//			@Override
+//			protected void processXMPPMessage(Message xmppMessage) {
+//				String from = xmppMessage.getFrom();
+//				String message = xmppMessage.getBody();
+//				log.info(AgentConstants.LOG_APPENDER + "Received XMPP message '" + message +
+//						         "' from " + from);
+//
+//				String[] controlSignal = message.toString().split(":");
+//				// message is in "<SIGNAL_TYPE>:<SIGNAL_MODE>" format.
+//				// (ex: "BULB:ON", "TEMP", "HUMID")
+//
+//				switch (controlSignal[0].toUpperCase()) {
+//					case AgentConstants.BULB_CONTROL:
+//						agentManager.getAgentOperationManager().changeBulbStatus(
+//								controlSignal[1].equals(AgentConstants.CONTROL_ON) ? true : false);
+//						log.info(AgentConstants.LOG_APPENDER + "Bulb was switched to state: '" +
+//								         controlSignal[1] + "'");
+//						break;
+//
+//					case AgentConstants.TEMPERATURE_CONTROL:
+//						String currentTemperature = "" +
+//								agentManager.getAgentOperationManager()
+//										.getTemperature();
+//						String replyTemperature =
+//								"The current temperature was read to be: '" + currentTemperature +
+//										"C'";
+//						log.info(AgentConstants.LOG_APPENDER + replyTemperature);
+//
+//						sendXMPPMessage(xmppAdminJID, replyTemperature, "DEVICE-TEMPERATURE");
+//						break;
+//
+//					case AgentConstants.HUMIDITY_CONTROL:
+//						String currentHumidity = "" +
+//								agentManager.getAgentOperationManager()
+//										.getHumidity();
+//						String replyHumidity =
+//								"The current humidity was read to be: '" + currentHumidity + "%'";
+//						log.info(AgentConstants.LOG_APPENDER + replyHumidity);
+//
+//						sendXMPPMessage(xmppAdminJID, replyHumidity, "DEVICE-HUMIDITY");
+//						break;
+//
+//					default:
+//						log.warn("'" + controlSignal[0] +
+//								         "' is invalid and not-supported for this device-type");
+//						break;
+//				}
+//			}
+//		};
+//
+//		agentManager.setAgentXMPPClient(xmppClient);
+//		agentManager.getAgentXMPPClient().connectAndLogin(username, password, resource);
+//		agentManager.getAgentXMPPClient().setMessageFilterAndListener(xmppAdminJID);
+//	}
 
 
 
@@ -623,9 +680,9 @@ public class AgentCoreOperations {
 	 * @throws AgentCoreOperationException if any errors occur whilst trying to get details of the
 	 *                                     given network interface
 	 */
-	private static String getDeviceIP() throws AgentCoreOperationException {
-		return getDeviceIP(AgentConstants.DEFAULT_NETWORK_INTERFACE);
-	}
+//	private static String getDeviceIP() throws AgentCoreOperationException {
+//		return getDeviceIP(AgentConstants.DEFAULT_NETWORK_INTERFACE);
+//	}
 
 	/**
 	 * This is an overloaded method that fetches the public IPv4 address of the given network
@@ -636,147 +693,31 @@ public class AgentCoreOperations {
 	 * @throws AgentCoreOperationException if any errors occur whilst trying to get details of the
 	 *                                     given network interface
 	 */
-	private static String getDeviceIP(String networkInterfaceName) throws
-	                                                               AgentCoreOperationException {
-		String ipAddress = null;
-		try {
-			Enumeration<InetAddress> interfaceIPAddresses = NetworkInterface.getByName(
-					networkInterfaceName).getInetAddresses();
-			for (; interfaceIPAddresses.hasMoreElements(); ) {
-				InetAddress ip = interfaceIPAddresses.nextElement();
-				ipAddress = ip.getHostAddress().toString();
-				if (log.isDebugEnabled()) {
-					log.debug(AgentConstants.LOG_APPENDER + "IP Address: " + ipAddress);
-				}
-
-				if (validateIPv4(ipAddress)) {
-					return ipAddress;
-				}
-			}
-		} catch (SocketException exception) {
-			String errorMsg = AgentConstants.LOG_APPENDER +
-					"Error encountered whilst trying to get IP Addresses of the network " +
-					"interface: " + networkInterfaceName +
-					".\nPlease check whether the name of the network interface used is correct";
-			log.error(errorMsg);
-			throw new AgentCoreOperationException(errorMsg, exception);
-		}
-		return ipAddress;
-	}
-
-
-	/**
-	 * This method validates whether a specific IP Address is of IPv4 type
-	 *
-	 * @param ipAddress the IP Address which needs to be validated
-	 * @return true if it is of IPv4 type and false otherwise
-	 */
-	private static boolean validateIPv4(String ipAddress) {
-		try {
-			if (ipAddress == null || ipAddress.isEmpty()) {
-				return false;
-			}
-
-			String[] parts = ipAddress.split("\\.");
-			if (parts.length != 4) {
-				return false;
-			}
-
-			for (String s : parts) {
-				int i = Integer.parseInt(s);
-				if ((i < 0) || (i > 255)) {
-					return false;
-				}
-			}
-			if (ipAddress.endsWith(".")) {
-				return false;
-			}
-
-			return true;
-		} catch (NumberFormatException nfe) {
-			log.warn(
-					AgentConstants.LOG_APPENDER + "The IP Address: " + ipAddress + " could not " +
-							"be validated against IPv4-style");
-			return false;
-		}
-	}
-
-
-	/**
-	 * This is a utility method that creates and returns a HTTP connection object.
-	 *
-	 * @param urlString the URL pattern to which the connection needs to be created
-	 * @return an HTTPConnection object which cn be used to send HTTP requests
-	 * @throws AgentCoreOperationException if errors occur when creating the HTTP connection with
-	 *                                     the given URL string
-	 */
-	private static HttpURLConnection getHttpConnection(String urlString) throws
-	                                                                     AgentCoreOperationException {
-
-		URL connectionUrl = null;
-		HttpURLConnection httpConnection = null;
-
-		try {
-			connectionUrl = new URL(urlString);
-			httpConnection = (HttpURLConnection) connectionUrl.openConnection();
-		} catch (MalformedURLException e) {
-			String errorMsg = AgentConstants.LOG_APPENDER +
-					"Error occured whilst trying to form HTTP-URL from string: " + urlString;
-			log.error(errorMsg);
-			throw new AgentCoreOperationException(errorMsg, e);
-		} catch (IOException exception) {
-			String errorMsg =
-					AgentConstants.LOG_APPENDER + "Error occured whilst trying to open a" +
-							" connection to: " + urlString;
-			log.error(errorMsg);
-			throw new AgentCoreOperationException(errorMsg, exception);
-		}
-		return httpConnection;
-	}
-
-	/**
-	 * This is a utility method that reads and returns the response from a HTTP connection
-	 *
-	 * @param httpConnection the connection from which a response is expected
-	 * @return the response (as a string) from the given HTTP connection
-	 * @throws AgentCoreOperationException if any errors occur whilst reading the response from
-	 *                                     the connection stream
-	 */
-	private static String readResponseFromHttpRequest(HttpURLConnection httpConnection)
-			throws AgentCoreOperationException {
-		BufferedReader bufferedReader = null;
-		try {
-			bufferedReader = new BufferedReader(new InputStreamReader(
-					httpConnection.getInputStream(), StandardCharsets.UTF_8));
-		} catch (IOException exception) {
-			String errorMsg = AgentConstants.LOG_APPENDER +
-					"There is an issue with connecting the reader to the input stream at: " +
-					httpConnection.getURL();
-			log.error(errorMsg);
-			throw new AgentCoreOperationException(errorMsg, exception);
-		}
-
-		String responseLine;
-		StringBuffer completeResponse = new StringBuffer();
-
-		try {
-			while ((responseLine = bufferedReader.readLine()) != null) {
-				completeResponse.append(responseLine);
-			}
-		} catch (IOException exception) {
-			String errorMsg = AgentConstants.LOG_APPENDER +
-					"Error occured whilst trying read from the connection stream at: " +
-					httpConnection.getURL();
-			log.error(errorMsg);
-			throw new AgentCoreOperationException(errorMsg, exception);
-		}
-		try {
-			bufferedReader.close();
-		} catch (IOException exception) {
-			log.error(AgentConstants.LOG_APPENDER +
-					          "Could not succesfully close the bufferedReader to the connection " +
-					          "at: " + httpConnection.getURL());
-		}
-		return completeResponse.toString();
-	}
+//	private static String getDeviceIP(String networkInterfaceName) throws
+//	                                                               AgentCoreOperationException {
+//		String ipAddress = null;
+//		try {
+//			Enumeration<InetAddress> interfaceIPAddresses = NetworkInterface.getByName(
+//					networkInterfaceName).getInetAddresses();
+//			for (; interfaceIPAddresses.hasMoreElements(); ) {
+//				InetAddress ip = interfaceIPAddresses.nextElement();
+//				ipAddress = ip.getHostAddress().toString();
+//				if (log.isDebugEnabled()) {
+//					log.debug(AgentConstants.LOG_APPENDER + "IP Address: " + ipAddress);
+//				}
+//
+//				if (validateIPv4(ipAddress)) {
+//					return ipAddress;
+//				}
+//			}
+//		} catch (SocketException exception) {
+//			String errorMsg = AgentConstants.LOG_APPENDER +
+//					"Error encountered whilst trying to get IP Addresses of the network " +
+//					"interface: " + networkInterfaceName +
+//					".\nPlease check whether the name of the network interface used is correct";
+//			log.error(errorMsg);
+//			throw new AgentCoreOperationException(errorMsg, exception);
+//		}
+//		return ipAddress;
+//	}
 }

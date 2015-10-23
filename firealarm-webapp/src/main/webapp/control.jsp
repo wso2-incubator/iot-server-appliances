@@ -228,13 +228,12 @@
                     <button onclick='sendBulb("OFF","<%=device.getId()%>");'> off</button>
                 </td>
                 <td>
-                    <button onclick='sendData("temp","<%=device.getId()%>");'>Get Temperature
-                    </button>
-                    <label></label>
+                    <button onclick='sendData("temp","<%=device.getId()%>");'>Get Temperature</button>
+                    <label id="<%=device.getId()%>+temp">30 C</label>
                 </td>
                 <td>
                     <button onclick='sendData("humid","<%=device.getId()%>");'>Get Humidity</button>
-                    <label></label>
+                    <label id="<%=device.getId()%>+humid">30 %</label>
                 </td>
                 <td>
                     <select id="<%=device.getId()%>">

@@ -16,9 +16,9 @@
 
 package org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.AgentOperationManager;
 
 /**
@@ -32,7 +32,8 @@ import org.wso2.carbon.device.mgt.iot.agent.kura.firealarm.core.operation.AgentO
  */
 
 public class AgentServiceComponent {
-    private static final Logger log = LoggerFactory.getLogger(AgentServiceComponent.class);
+    private static final Log log = LogFactory.getLog(AgentServiceComponent.class);
+
 
     protected void activate(ComponentContext componentContext) {
         AgentManager.getInstance().init();
