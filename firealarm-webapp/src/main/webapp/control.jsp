@@ -146,6 +146,14 @@
             border-width: 0px 0px 1px 1px;
         }
 
+        .sensor_label{
+            font-size: 16px;
+        }
+
+        .sensor_time{
+            font-size: 12px;
+        }
+
     </style>
 
     <script src="libraries/jquery-latest.js"></script>
@@ -178,6 +186,40 @@
                     });
 
         }
+
+        function fillZero(val){
+            if(val<9){
+                val="0"+val;
+            }
+            return val;
+        }
+
+        function formatTime(time){
+            var theyear=time.getFullYear();
+            var themonth=time.getMonth()+1;
+            var thetoday=time.getDate();
+
+            var thehour=fillZero(time.getHours());
+            var themin=fillZero(time.getMinutes());
+            var thesec=fillZero(time.getSeconds());
+
+            return (theyear+"/"+themonth+"/"+thetoday+"@"+thehour+":"+themin+":"+thesec)
+        }
+
+        function readSensorValue(device, sensorName){
+            var e = document.getElementById(device);
+
+            $.get("operation", {operation: "readSensorValue", deviceId: device, sensorName: sensorName})
+                    .done(function (data) {
+                        console.log(device+"_"+sensorName);
+                        rv = JSON.parse(data);
+                        $("#"+device+"_"+sensorName).html(rv.sensorValue);
+                        $("#"+device+"_"+sensorName+"_time").html(formatTime(new Date(rv.time)));
+                    });
+        }
+
+
+
     </script>
 
 </head>
@@ -189,7 +231,26 @@
         response.sendRedirect("index.jsp");
 
     }
+
+    DeviceManager deviceManager = new DeviceManager();
+    List<Device> devices = deviceManager.getDevice(
+            (String) request.getSession().getAttribute("token"),
+            (String) request.getSession().getAttribute("username"));
 %>
+<script type="text/javascript">
+    $(document).ready(function(){
+        <%
+           if (devices != null) {
+             for (Device device : devices) {
+         %>
+        readSensorValue("<%=device.getId()%>","temp");
+        readSensorValue("<%=device.getId()%>","humid");
+        <%
+            }//end of loop
+           }//end of if
+        %>
+    });
+</script>
 <div align="center">
     <div class="CSSTableGenerator" align="center">
         <table>
@@ -227,13 +288,17 @@
                     <button onclick='sendBulb("ON","<%=device.getId()%>");'>on</button>
                     <button onclick='sendBulb("OFF","<%=device.getId()%>");'> off</button>
                 </td>
-                <td>
-                    <button onclick='sendData("temp","<%=device.getId()%>");'>Get Temperature</button>
-                    <label id="<%=device.getId()%>+temp">30 C</label>
+                <td style="text-align: center">
+                    <div id="<%=device.getId()%>_temp"  class="sensor_label">0</div>
+                    <div id="<%=device.getId()%>_temp_time" class="sensor_time"></div>
+                    <br/>
+                    <input type="button" onclick='sendData("temp","<%=device.getId()%>");' value="Get Temperature" />
                 </td>
-                <td>
-                    <button onclick='sendData("humid","<%=device.getId()%>");'>Get Humidity</button>
-                    <label id="<%=device.getId()%>+humid">30 %</label>
+                <td style="text-align: center">
+                    <div id="<%=device.getId()%>_humid" class="sensor_label">0</div>
+                    <div id="<%=device.getId()%>_humid_time" class="sensor_time"></div>
+                    <br/>
+                    <input type="button" onclick='sendData("humid","<%=device.getId()%>");' value="Get Humidity" />
                 </td>
                 <td>
                     <select id="<%=device.getId()%>">
