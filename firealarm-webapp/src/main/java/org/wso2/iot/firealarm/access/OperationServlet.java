@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class OperationServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request,
-						  HttpServletResponse response)
+	                      HttpServletResponse response)
 			throws ServletException, IOException {
 
 		String token = (String) request.getSession(true).getAttribute("token");
@@ -36,21 +36,21 @@ public class OperationServlet extends HttpServlet {
 			FirealarmClient fc = new FirealarmClient();
 			String temperature = fc.getTemperature(token, username, deviceId, protocol);
 			if (temperature != null) {
-				//				request.setAttribute("tempReply",temperature);
-				//				request.getRequestDispatcher("control.jsp").forward(request,response);
+//				request.setAttribute("tempReply",temperature);
+//				request.getRequestDispatcher("control.jsp").forward(request,response);
 				try {
 					response.getWriter().print("Temperature is " + Double.parseDouble
 							(temperature) +
 
-													   " C");
+							                           " C");
 				} catch (NumberFormatException e) {
 
 					response.getWriter().print(temperature);
 				}
 			} else {
-				//				request.setAttribute("errMsg","Connection Failed try again later");
-				//				request.setAttribute("tempReply",null);
-				//				request.getRequestDispatcher("control.jsp").forward(request,response);
+//				request.setAttribute("errMsg","Connection Failed try again later");
+//				request.setAttribute("tempReply",null);
+//				request.getRequestDispatcher("control.jsp").forward(request,response);
 				response.getWriter().print("Connection Failure,Try again later");
 			}
 		} else if (operation.equals("humid")) {
@@ -58,20 +58,20 @@ public class OperationServlet extends HttpServlet {
 			FirealarmClient fc = new FirealarmClient();
 			String humidity = fc.getHumidity(token, username, deviceId, protocol);
 			if (humidity != null) {
-				//				request.setAttribute("tempReply",temperature);
-				//				request.getRequestDispatcher("control.jsp").forward(request,response);
+//				request.setAttribute("tempReply",temperature);
+//				request.getRequestDispatcher("control.jsp").forward(request,response);
 				try {
 					response.getWriter().print("Humidity is " + Double.parseDouble(humidity) +
 
-													   "%");
+							                           "%");
 				} catch (NumberFormatException e) {
 
 					response.getWriter().print(humidity);
 				}
 			} else {
-				//				request.setAttribute("errMsg","Connection Failed try again later");
-				//				request.setAttribute("tempReply",null);
-				//				request.getRequestDispatcher("control.jsp").forward(request,response);
+//				request.setAttribute("errMsg","Connection Failed try again later");
+//				request.setAttribute("tempReply",null);
+//				request.getRequestDispatcher("control.jsp").forward(request,response);
 				response.getWriter().print("Connection Failure,Try again later");
 			}
 		}
@@ -79,28 +79,18 @@ public class OperationServlet extends HttpServlet {
 	}
 
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request,
+	                     HttpServletResponse response)
+			throws ServletException, IOException {
 
 		String token = (String) request.getSession(true).getAttribute("token");
-		String username = (String) request.getSession(true).getAttribute("username");
-
 		request.setAttribute("errMsg", null);
 		if (token == null) {
 			request.setAttribute("errMsg", "Invalid Credential / Unauthorized Access");
 
 			request.getRequestDispatcher("index.jsp").forward(request, response);
 		}
-
-		String operation = request.getParameter("operation");
-		if (operation.equals("readSensorValue")) {
-			String deviceId = request.getParameter("deviceId");
-			String sensorName = request.getParameter("sensorName");
-			FirealarmClient fc = new FirealarmClient();
-			String resp = fc.readSensorData(token, username, deviceId, sensorName, "0");
-			response.getWriter().print(resp);
-		}
-
-
+		request.getRequestDispatcher("control.jsp").forward(request, response);
 
 	}
 }
