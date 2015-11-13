@@ -1,0 +1,19 @@
+body {
+    background: #F47A00;
+}
+
+#foobar {
+    display: none;
+}
+
+#topic{
+    border-bottom: 8px solid #000000;
+}
+
+#from_con{
+    color:#401515;
+}
+
+h2{
+    color:#FFFFFF;
+}

@@ -1,0 +1,83 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <script type="text/javascript">
+        var currentFrame = "iFrameName1";
+        var tempFrame = "iFrameName2";
+        var configJsonFile = "current_resource.json";
+        var startupHtmlFile = "loading.html";
+        var pollingInterval = 2000;
+        var transitionDelay = 2000;
+
+        function ajax(method, url, successCallback, errorCallback) {
+            var xhr;
+
+            if (window.XMLHttpRequest) { // code for IE7+, Firefox, Chrome, Opera, Safari
+                xhr = new XMLHttpRequest();
+            } else { // code for IE6, IE5
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    if (xhr.status == 200) { if(successCallback) successCallback(xhr.responseText, xhr);
+                        return xhr.responseText; }
+                    else {
+                        if(errorCallback) errorCallback(xhr);
+                        return;
+                    }
+                }
+            };
+
+            xhr.open(method, url, true);
+
+            try {
+                xhr.send();
+            } catch ( e ) {
+                if ( errorCallback ) { throw e; }
+            }
+        }
+
+        function swapFrameRoles(a, b) {
+            var t = a;
+            a = b;
+            b = t;
+        }
+
+        function swapFrames(a, b){
+            document.getElementById(a).style.display = 'none';
+            document.getElementById(b).style.display = 'block';
+            document.getElementById(a).src = "";
+            swapFrameRoles(a, b);
+        }
+
+        function urlChange(url) {
+            document.getElementById(tempFrame).src = url;
+        }
+
+        function getCurrentUrl(currentUrl) {
+            var newPath = currentUrl; //setting default
+            var successCallback = function(data){
+                var path = JSON.parse(data).path;
+                //alert(path);
+                if(path && path != "" && newPath != path) {newPath = path; urlChange(newPath);}
+            };
+            ajax("GET", configJsonFile, successCallback);
+            setTimeout(function(){getCurrentUrl(newPath)}, pollingInterval);
+        }
+
+        window.onload = function () {
+            document.getElementById(tempFrame).onload = function () {
+                setTimeout(function() {swapFrames(currentFrame, tempFrame)}, transitionDelay);
+            };
+            getCurrentUrl(startupHtmlFile);
+        };
+    </script>
+</head>
+<body>
+   <!-- <div id="content">-->
+        <iframe id="iFrameName1"  frameborder="0" src="loading.html" ></iframe>
+        <iframe id="iFrameName2"  frameborder="0" src="" style="display: none;"></iframe>
+   <!-- </div> -->
+</body>
+</html>

@@ -1,0 +1,15 @@
+* {font-family: Helvetica Neue, Arial, sans-serif; }
+
+h1, table { text-align: center; }
+
+table {border-collapse: collapse;  width: 90%; margin: 0 auto 5rem;}
+
+th, td { padding: .65rem; font-size: 1.3rem; border-style: solid; border-color: #000000 ;}
+
+tr, td { transition: .4s ease-in; }
+
+tr:first-child {background: #677DD4 }
+
+
+
+
