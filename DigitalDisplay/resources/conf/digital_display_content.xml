@@ -40,22 +40,34 @@
         Sequence for display events
       -->
       <DisplaySequence>
-        <Resource type="folder" time="10s" path="sample1" />
-        <Resource type="url" time="10s" url="http://www.wso2.com" />
-        <Resource type="folder" time="10s" path="sample2" />
+        <Resource type="folder" time="30s" path="page0" />
+        <Resource type="folder" time="30s" path="page1" />
+        <Resource type="folder" time="30s" path="page2" />
+        <Resource type="folder" time="30s" path="page3" />
+        <Resource type="folder" time="30s" path="page4" />
+        <Resource type="folder" time="30s" path="page5" />
+        <Resource type="folder" time="30s" path="page6" />
+        <Resource type="folder" time="30s" path="page7" />
+        <Resource type="folder" time="30s" path="page8" />
+        <Resource type="folder" time="30s" path="page9" />
+        <Resource type="folder" time="30s" path="page10" />
+        <Resource type="folder" time="30s" path="page11" />
+        <Resource type="folder" time="30s" path="page12" />
+        <Resource type="folder" time="30s" path="page13" />
+        <Resource type="folder" time="30s" path="page14" />
       </DisplaySequence>
 
       <!--
         Update polict for Content
       -->
-      <UpdatePolicy>
+    <!--  <UpdatePolicy>
         <PollingInterval>30s</PollingInterval>
         <Repository>
           <Name>dd-webcontent</Name>
           <Url>git@bitbucket.org:username/dd-webcontent.git</Url>
           <VCSHandler>file</VCSHandler>
         </Repository>
-      </UpdatePolicy>
+      </UpdatePolicy> -->
     </Content>
 
 </DigitalDisplay>
