@@ -20,6 +20,7 @@
 import subprocess
 import os
 import sys
+import json
 import logging
 import time
 
@@ -39,6 +40,7 @@ class BaseBrowser(object):
 
     name = "undefined"
     args = ['%s']
+    attemt=1
 
     def __init__(self, path_="", exists=False):
         self.path = path_
@@ -53,20 +55,13 @@ class BaseBrowser(object):
     def open(self, url_):
         # if possible, put browser in separate process group, so
         # keyboard interrupts don't affect browser as well as Python
-        try:
-            pargs = [self.path] + [arg.replace("%s", url_) for arg in self.args]
-            LOGGER.debug(" ".join(pargs))
-            p = subprocess.Popen(" ".join(pargs), close_fds=True, preexec_fn=BaseBrowser._get_sid(),
-                                 shell=True)
 
-        except OSError, e:
-            if e.errno == 2:
-                LOGGER.warning(
-                    "Webbrowser `" + self.name + "` at `" + self.path + "` not found...!")
-            else:
-                raise
-            sys.exit(0)
-        return p
+        LOGGER.info("open_base_browser")
+        data = {"agent":"displayagent","version":"1.0.0","path":url_}
+        with open(kernel_utils.web_content_path + os.sep + "_system" + os.sep + "current_resource.json", 'w') as outfile:
+            outfile.seek(0)
+            json.dump(data, outfile)
+            outfile.truncate()
 
 
 class MidoriBrowser(BaseBrowser):
@@ -91,6 +86,16 @@ class MidoriBrowser(BaseBrowser):
 class ChromeBrowser(BaseBrowser):
     name = "chrome"
     args = ["--app", "%s"]
+
+
+class DefaultBrowser(BaseBrowser):
+    name = "default"
+    args = ["%s"]
+
+    def __init__(self, path_="", exists=False):
+        BaseBrowser.__init__(self, path_)
+        LOGGER.warning("Webbrowser")
+        subprocess.Popen(path_ + " http://localhost:8000/_system/", shell=True)
 
 
 class WebBrowser(object):
