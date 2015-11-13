@@ -21,10 +21,10 @@
 from threading import Timer
 import logging
 import os
-import subprocess
+# import subprocess
 
 import ddbrowser
-import kernel_utils as kernel_utils
+# import kernel_utils as kernel_utils
 
 
 LOGGER = logging.getLogger('wso2server.resource_types')
@@ -41,6 +41,7 @@ def _open_browser(url_, webbrowser_, path_=""):
     rv = ddbrowser.get_browser_type(webbrowser_)
     browser_instance = rv(path_)
     return browser_instance.open(url_)
+
 
 def _kill_process(process, time_=None):
     if not time_:
@@ -72,14 +73,12 @@ class ResourceTypeBase(object):
         """
         raise NotImplementedError("`name` attribute is not implemented...!")
 
-
     def __init__(self, args):
         """
         This method is called when initiating the sequence.
         @param args: is a list of tuples with key value pairs
         """
         raise NotImplementedError("`__init__()` method is not implemented...!")
-
 
     def run(self, args):
         """
@@ -88,7 +87,6 @@ class ResourceTypeBase(object):
         @param args: is a list of tuples with key value pairs
         """
         raise NotImplementedError("`run()` method is not implemented...!")
-
 
     def stop(self, args):
         """
