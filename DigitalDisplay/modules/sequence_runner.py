@@ -26,10 +26,19 @@ Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 To use, simply 'import sequence_runner' and run sequence away!
 """
 import time
+import mechanize
+import cookielib
+import download_resources
+import json
+import logging
 import threading
+import datetime
+
 
 import modules.kernel_utils as kernel_utils
 import modules.resource_types as resource_types
+
+LOGGER = logging.getLogger('wso2server.resource_types')
 
 
 class SequenceRunnerError(Exception):
@@ -42,8 +51,17 @@ class SequenceRunner(object):
     SequenceRunner class for executing sequence of resources.
     """
     current_phase_resource = None
+    lastsave = -3700
+    attempt = 1
+    note_show_up_time = 0
 
     def __init__(self, resources_conf, web_browser):
+
+        self.mechanize_browser = mechanize.Browser()
+
+        self.cj = cookielib.LWPCookieJar()
+        self.mechanize_browser.set_cookiejar(self.cj)
+
         if resources_conf is None:
             raise SequenceRunnerError("Initialization error: resources_conf cannot be null!")
         if web_browser is None:
@@ -88,38 +106,96 @@ class SequenceRunner(object):
             sequence_queue.append(instance)
         return sequence_queue
 
-    def run_sequence(self, sequence=None, sequence_id=None):
+    def run_sequence(self):
 
-        if sequence is None:
-            # lets create a new sequence
-            sequence = self.__create_sequence(self.current_resources_conf)
-            sequence_id = 0
+        sequence = self.__create_sequence(self.current_resources_conf)
+        sequence_id = 0
 
-        # get the resource
-        resource = sequence[sequence_id]
-        SequenceRunner.current_phase_resource = resource
+        while True:
 
-        # setting arguments
-        args = {'browser': self.current_web_browser,
-                'port': self.current_web_browser.port,
-                'browser_path': self.current_web_browser.path,
-                'delay': 10}
+            # background thread
+            if time.time() - self.lastsave > 3600 and self.can_download():
+                LOGGER.info("Start Background Thread")
+                day = datetime.datetime.now()
+                download_thread = threading.Thread(target=self.download_images, args=(day,))
+                download_thread.start()
+                self.lastsave = time.time()
 
-        # invoke run on the resource
-        resource.run(args)
+            # check notification page
+            if sequence_id >= (len(sequence) - 1):
+                if self.is_notifications() and self.can_show_notifications() and self.attempt == 1:
+                    self.attempt += 1
+                else:
+                    sequence_id = 0
+                    self.remove_notifications()
 
-        # sleep for showup time
-        show_up_time = resource.time
-        time.sleep(kernel_utils.get_seconds(show_up_time))
+            # get the resource
+            resource = sequence[sequence_id]
+            SequenceRunner.current_phase_resource = resource
 
-        # invoke stop on the resource
-        resource.stop(args)
+            # setting arguments
+            args = {'browser': self.current_web_browser,
+                    'port': self.current_web_browser.port,
+                    'browser_path': self.current_web_browser.path,
+                    'delay': 10}
 
-        # increment sequence id
-        if sequence_id == (len(sequence) - 1):
-            sequence_id = 0
-        else:
+            # invoke run on the resource
+            resource.run(args)
+
+            if self.attempt>1:
+                # change the sleeping time when notification is available
+                notification_show=unicode(str(self.note_show_up_time*52)+'s')
+                time.sleep(kernel_utils.get_seconds(notification_show))
+            else:
+                # sleep for showup time
+                show_up_time = resource.time
+                time.sleep(kernel_utils.get_seconds(show_up_time))
+
+            # invoke stop on the resource
+            resource.stop(args)
+
             sequence_id += 1
 
-        # letz repeat this!
-        threading.Timer(0, self.run_sequence, [sequence, sequence_id]).start()
+    def download_images(self, day):
+        mechanize_browser = download_resources.SalesRemoteData(self.mechanize_browser)
+        mechanize_browser.download_data(day)
+
+    def remove_notifications(self):
+        if self.attempt > 1:
+            with open('../resources/www/page14/mailing.json', 'w') as inFile:
+                inFile.truncate()
+                self.attempt = 1
+
+    def is_notifications(self):
+        with open('../resources/www/page14/mailing.json', 'r') as inFile:
+            try:
+                colors = json.load(inFile)
+                self.note_show_up_time = len(colors)
+                return True
+            except ValueError:
+                return False
+
+    def can_download(self):
+        day = datetime.datetime.now()
+        if day.isoweekday() in range(1, 6) and day.hour in range(6, 18):
+            return True
+        else:
+            return False
+
+    def can_show_notifications(self):
+        day = datetime.datetime.now()
+        if day.isoweekday() in range(1, 6) and day.hour in range(10, 16):
+            return True
+        else:
+            return False
+
+    # def update_content(self):
+    #
+    #     while True:
+    #         day = datetime.datetime.now()
+    #         # background thread
+    #         if time.time() - self.lastsave > 3600 and day.isoweekday() in range(1, 6) and day.hour in range(6, 18):
+    #             LOGGER.info("Start Background Thread")
+    #             download_thread = threading.Thread(target=self.download_images, args=(day,))
+    #             download_thread.start()
+    #             self.lastsave = time.time()
