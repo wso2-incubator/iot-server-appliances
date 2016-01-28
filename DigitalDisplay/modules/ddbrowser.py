@@ -19,11 +19,9 @@
 """
 import subprocess
 import os
-import sys
 import json
 import logging
 import time
-
 import kernel_utils as kernel_utils
 
 
@@ -91,11 +89,15 @@ class ChromeBrowser(BaseBrowser):
 class DefaultBrowser(BaseBrowser):
     name = "default"
     args = ["%s"]
+    browser_process = None
 
     def __init__(self, path_="", exists=False):
         BaseBrowser.__init__(self, path_)
         LOGGER.warning("Webbrowser")
-        subprocess.Popen(path_ + " http://localhost:8000/_system/", shell=True)
+        self.browser_process = subprocess.Popen([path_,"http://localhost:8000/_system/"], preexec_fn=BaseBrowser._get_sid())
+
+    def close_browser(self):
+        self.browser_process.kill()
 
 
 class WebBrowser(object):
@@ -129,8 +131,8 @@ class WebBrowser(object):
         except IndexError:
             return BaseBrowser
 
-    def kill(self):
-        self.ddwebbrowser.kill()
+    def close(self):
+        self.ddwebbrowser.close_browser()
 
     def start(self):
         browser_class = self.get_browser(self.name)
