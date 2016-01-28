@@ -1,6 +1,6 @@
 <html>
 <head>
-    <!--<meta http-equiv="X-Frame-Options" content="ALLOW-FROM uri">-->
+
     <link rel="stylesheet" type="text/css" href="main.css">
     <script type="text/javascript">
         var currentFrame = "iFrameName1";
@@ -9,6 +9,7 @@
         var startupHtmlFile = "loading.html";
         var pollingInterval = 4000;
         var transitionDelay = 4000;
+
 
         function ajax(method, url, successCallback, errorCallback) {
             var xhr;
@@ -68,7 +69,6 @@
         }
 
         window.onload = function () {
-            //window.location.reload(1);
             document.getElementById(tempFrame).onload = function () {
                 setTimeout(function() {swapFrames(currentFrame, tempFrame)}, transitionDelay);
             };
@@ -80,6 +80,7 @@
    <!-- <div id="content">-->
         <iframe id="iFrameName1"  frameborder="0" src="loading.html" ></iframe>
         <iframe id="iFrameName2"  frameborder="0" src="" style="display: none;" ></iframe>
+
    <!-- </div> -->
 </body>
 </html>
