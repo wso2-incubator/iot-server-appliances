@@ -26,15 +26,7 @@ Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 To use, simply 'import sequence_runner' and run sequence away!
 """
 import time
-import mechanize
-import cookielib
-import download_resources
-import json
 import logging
-import threading
-import datetime
-
-
 import modules.kernel_utils as kernel_utils
 import modules.resource_types as resource_types
 
@@ -52,24 +44,23 @@ class SequenceRunner(object):
     """
     current_phase_resource = None
     lastsave = -3700
-    attempt = 1
+    attempt = 0
     note_show_up_time = 0
+    note_showing = False
+    first_hour_attempt = True
+    second_hour_attempt = True
+    sequence = None
+    _instance = None
+    current_resources_conf = None
+    current_web_browser = None
+    resource_types = None
+    current_video_player = None
 
-    def __init__(self, resources_conf, web_browser):
-
-        self.mechanize_browser = mechanize.Browser()
-
-        self.cj = cookielib.LWPCookieJar()
-        self.mechanize_browser.set_cookiejar(self.cj)
-
-        if resources_conf is None:
-            raise SequenceRunnerError("Initialization error: resources_conf cannot be null!")
-        if web_browser is None:
-            raise SequenceRunnerError("Initialization error: web_browser cannot be null!")
-        self.current_resources_conf = resources_conf
-        self.current_web_browser = web_browser
-        # get all subclasses implementing ResourceTypeBase
-        self.resource_types = resource_types.get_all_resource_types()
+    # for implement singleton pattern
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(SequenceRunner, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
 
     def __get_resource_type(self, type_):
         """
@@ -82,6 +73,32 @@ class SequenceRunner(object):
         except IndexError:
             raise NotImplementedError("Unknown ResourceType found: `" + type_ + "`")
         return resource_type
+
+    def set_all_conf(self, resource_conf, web_browser, video_player):
+        self.set_current_resources_conf(resource_conf)
+        self.set_web_browser(web_browser)
+        self.set_current_video_player(video_player)
+        self.set_resource_types()
+        self.set_sequence()
+
+    def set_current_video_player(self, video_player):
+        self.current_video_player = video_player
+
+    def set_current_resources_conf(self, resources_conf):
+        if resources_conf is None:
+            raise SequenceRunnerError("Initialization error: resources_conf cannot be null!")
+        self.current_resources_conf = resources_conf
+
+    def set_web_browser(self, web_browser):
+        if web_browser is None:
+            raise SequenceRunnerError("Initialization error: web_browser cannot be null!")
+        self.current_web_browser = web_browser
+
+    def set_resource_types(self):
+        self.resource_types = resource_types.get_all_resource_types()
+
+    def set_sequence(self):
+        self.sequence = self.__create_sequence(self.current_resources_conf)
 
     def __create_sequence(self, resources_conf):
         """
@@ -108,94 +125,37 @@ class SequenceRunner(object):
 
     def run_sequence(self):
 
-        sequence = self.__create_sequence(self.current_resources_conf)
         sequence_id = 0
 
         while True:
 
-            # background thread
-            if time.time() - self.lastsave > 3600 and self.can_download():
-                LOGGER.info("Start Background Thread")
-                day = datetime.datetime.now()
-                download_thread = threading.Thread(target=self.download_images, args=(day,))
-                download_thread.start()
-                self.lastsave = time.time()
+            try:
 
-            # check notification page
-            if sequence_id >= (len(sequence) - 1):
-                if self.is_notifications() and self.can_show_notifications() and self.attempt == 1:
-                    self.attempt += 1
-                else:
+                # check notification page
+                if sequence_id > (len(self.sequence) - 1):
                     sequence_id = 0
-                    self.remove_notifications()
 
-            # get the resource
-            resource = sequence[sequence_id]
-            SequenceRunner.current_phase_resource = resource
+                # get the resource
+                resource = self.sequence[sequence_id]
+                SequenceRunner.current_phase_resource = resource
 
-            # setting arguments
-            args = {'browser': self.current_web_browser,
-                    'port': self.current_web_browser.port,
-                    'browser_path': self.current_web_browser.path,
-                    'delay': 10}
+                # setting arguments
+                args = {'browser': self.current_web_browser,
+                        'port': self.current_web_browser.port,
+                        'browser_path': self.current_web_browser.path,
+                        'player_conf': self.current_video_player,
+                        'delay': 10}
 
-            # invoke run on the resource
-            resource.run(args)
+                # invoke run on the resource
+                resource.run(args)
 
-            if self.attempt>1:
-                # change the sleeping time when notification is available
-                notification_show=unicode(str(self.note_show_up_time*52)+'s')
-                time.sleep(kernel_utils.get_seconds(notification_show))
-            else:
-                # sleep for showup time
                 show_up_time = resource.time
                 time.sleep(kernel_utils.get_seconds(show_up_time))
+                sequence_id += 1
 
-            # invoke stop on the resource
-            resource.stop(args)
+                resource.stop(args)
 
-            sequence_id += 1
-
-    def download_images(self, day):
-        mechanize_browser = download_resources.SalesRemoteData(self.mechanize_browser)
-        mechanize_browser.download_data(day)
-
-    def remove_notifications(self):
-        if self.attempt > 1:
-            with open('../resources/www/page14/mailing.json', 'w') as inFile:
-                inFile.truncate()
-                self.attempt = 1
-
-    def is_notifications(self):
-        with open('../resources/www/page14/mailing.json', 'r') as inFile:
-            try:
-                colors = json.load(inFile)
-                self.note_show_up_time = len(colors)
-                return True
-            except ValueError:
-                return False
-
-    def can_download(self):
-        day = datetime.datetime.now()
-        if day.isoweekday() in range(1, 6) and day.hour in range(6, 18):
-            return True
-        else:
-            return False
-
-    def can_show_notifications(self):
-        day = datetime.datetime.now()
-        if day.isoweekday() in range(1, 6) and day.hour in range(10, 16):
-            return True
-        else:
-            return False
-
-    # def update_content(self):
-    #
-    #     while True:
-    #         day = datetime.datetime.now()
-    #         # background thread
-    #         if time.time() - self.lastsave > 3600 and day.isoweekday() in range(1, 6) and day.hour in range(6, 18):
-    #             LOGGER.info("Start Background Thread")
-    #             download_thread = threading.Thread(target=self.download_images, args=(day,))
-    #             download_thread.start()
-    #             self.lastsave = time.time()
+            except Exception as e:
+                LOGGER.warning(e)
+                sequence_id += 1
+                continue
