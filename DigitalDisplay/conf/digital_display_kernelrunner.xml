@@ -38,92 +38,28 @@
       <!--
        Webbrowser
       -->
-      <!--WebBrowser>
-        <Name>default</Name>
-        <Path>open</Path>
-        <Port>8000</Port>
-      </WebBrowser-->
 
       <WebBrowser>
-        <Name>midori</Name>
-        <Path>midori</Path>
+        <Name>default</Name>
+        <Path>epiphany</Path>
         <Port>8000</Port>
       </WebBrowser>
-      
-      <!--
-        Update polict for KernelRunner
-      -->
-      <UpdatePolicy>
-        <PollingInterval>5s</PollingInterval>
-        <Repository>
-          <Name>dd-kernel-test</Name>
-          <Url>git@bitbucket.org:username/dd-kernel-test.git</Url>
-          <VCSHandler>git</VCSHandler>
-        </Repository>
-      </UpdatePolicy>
 
-      <!--
-      Version Control System Handlers for Repositories
-      -->
-      <VCSHandlers>
-        <!--
-        Git Handler for repositories
-        -->
-        <Handler name="git">
-          <!--
-          Commands that will be executed in shell.
-          -->
-          <Commands>
-            <!-- command for creating repository -->
-            <Init>git clone $url</Init>
-            <!-- command for update / pull -->
-            <Update>git pull origin master</Update>
-            <!-- command for local revision -->
-            <LocalRevision>git rev-parse HEAD</LocalRevision>
-            <!-- command for remote revision -->
-            <RemoteRevision>git ls-remote $url | head -1 | sed "s/HEAD//"</RemoteRevision>
-          </Commands>
-        </Handler>
+      <!--<WebBrowser>-->
+        <!--<Name>default</Name>-->
+        <!--<Path>google-chrome</Path>-->
+        <!--<Port>8000</Port>-->
+      <!--</WebBrowser>-->
 
-        <!--
-        SVN Handler for repositories 
-        -->
-        <Handler name="svn">  
-          <!--
-          Commands that will be executed in shell.
-          -->
-          <Commands>
-            <!-- command for creating repository -->
-            <Init>svn checkout $url</Init>
-            <!-- command for update / pull -->
-            <Update>svn up</Update>
-            <!-- command for local revision -->
-            <LocalRevision>svn info | grep "Revision" | awk '{print $2}'</LocalRevision>
-            <!-- command for remote revision -->
-            <RemoteRevision>svn info $url| grep "Revision" | awk '{print $2}'</RemoteRevision>
-          </Commands>
-        </Handler>
+      <Player>
+        <Name>omxplayer</Name>
+        <Path>omxplayer</Path>
+      </Player>
 
-        <!--
-        File Handler for repositories
-        -->
-        <Handler name="file">
-          <!--
-          Commands that will be executed in shell.
-          -->
-          <Commands>
-            <!-- command for creating repository -->
-            <Init></Init>
-            <!-- command for update / pull -->
-            <Update>wget -N -r $url</Update>
-            <!-- command for local revision -->
-            <LocalRevision>echo 'true'</LocalRevision>
-            <!-- command for remote revision -->
-            <RemoteRevision>echo 'true'</RemoteRevision>
-          </Commands>
-        </Handler>
-
-      </VCSHandlers>
+      <!--<Player>-->
+        <!--<Name>vlc</Name>-->
+        <!--<Path>vlc</Path>-->
+      <!--</Player>-->
 
     </KernelRunner>
 

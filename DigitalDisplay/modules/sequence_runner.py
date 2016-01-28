@@ -26,10 +26,11 @@ Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 To use, simply 'import sequence_runner' and run sequence away!
 """
 import time
-import threading
-
+import logging
 import modules.kernel_utils as kernel_utils
 import modules.resource_types as resource_types
+
+LOGGER = logging.getLogger('wso2server.resource_types')
 
 
 class SequenceRunnerError(Exception):
@@ -42,16 +43,24 @@ class SequenceRunner(object):
     SequenceRunner class for executing sequence of resources.
     """
     current_phase_resource = None
+    lastsave = -3700
+    attempt = 0
+    note_show_up_time = 0
+    note_showing = False
+    first_hour_attempt = True
+    second_hour_attempt = True
+    sequence = None
+    _instance = None
+    current_resources_conf = None
+    current_web_browser = None
+    resource_types = None
+    current_video_player = None
 
-    def __init__(self, resources_conf, web_browser):
-        if resources_conf is None:
-            raise SequenceRunnerError("Initialization error: resources_conf cannot be null!")
-        if web_browser is None:
-            raise SequenceRunnerError("Initialization error: web_browser cannot be null!")
-        self.current_resources_conf = resources_conf
-        self.current_web_browser = web_browser
-        # get all subclasses implementing ResourceTypeBase
-        self.resource_types = resource_types.get_all_resource_types()
+    # for implement singleton pattern
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(SequenceRunner, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
 
     def __get_resource_type(self, type_):
         """
@@ -64,6 +73,32 @@ class SequenceRunner(object):
         except IndexError:
             raise NotImplementedError("Unknown ResourceType found: `" + type_ + "`")
         return resource_type
+
+    def set_all_conf(self, resource_conf, web_browser, video_player):
+        self.set_current_resources_conf(resource_conf)
+        self.set_web_browser(web_browser)
+        self.set_current_video_player(video_player)
+        self.set_resource_types()
+        self.set_sequence()
+
+    def set_current_video_player(self, video_player):
+        self.current_video_player = video_player
+
+    def set_current_resources_conf(self, resources_conf):
+        if resources_conf is None:
+            raise SequenceRunnerError("Initialization error: resources_conf cannot be null!")
+        self.current_resources_conf = resources_conf
+
+    def set_web_browser(self, web_browser):
+        if web_browser is None:
+            raise SequenceRunnerError("Initialization error: web_browser cannot be null!")
+        self.current_web_browser = web_browser
+
+    def set_resource_types(self):
+        self.resource_types = resource_types.get_all_resource_types()
+
+    def set_sequence(self):
+        self.sequence = self.__create_sequence(self.current_resources_conf)
 
     def __create_sequence(self, resources_conf):
         """
@@ -88,38 +123,39 @@ class SequenceRunner(object):
             sequence_queue.append(instance)
         return sequence_queue
 
-    def run_sequence(self, sequence=None, sequence_id=None):
+    def run_sequence(self):
 
-        if sequence is None:
-            # lets create a new sequence
-            sequence = self.__create_sequence(self.current_resources_conf)
-            sequence_id = 0
+        sequence_id = 0
 
-        # get the resource
-        resource = sequence[sequence_id]
-        SequenceRunner.current_phase_resource = resource
+        while True:
 
-        # setting arguments
-        args = {'browser': self.current_web_browser,
-                'port': self.current_web_browser.port,
-                'browser_path': self.current_web_browser.path,
-                'delay': 10}
+            try:
 
-        # invoke run on the resource
-        resource.run(args)
+                # check notification page
+                if sequence_id > (len(self.sequence) - 1):
+                    sequence_id = 0
 
-        # sleep for showup time
-        show_up_time = resource.time
-        time.sleep(kernel_utils.get_seconds(show_up_time))
+                # get the resource
+                resource = self.sequence[sequence_id]
+                SequenceRunner.current_phase_resource = resource
 
-        # invoke stop on the resource
-        resource.stop(args)
+                # setting arguments
+                args = {'browser': self.current_web_browser,
+                        'port': self.current_web_browser.port,
+                        'browser_path': self.current_web_browser.path,
+                        'player_conf': self.current_video_player,
+                        'delay': 10}
 
-        # increment sequence id
-        if sequence_id == (len(sequence) - 1):
-            sequence_id = 0
-        else:
-            sequence_id += 1
+                # invoke run on the resource
+                resource.run(args)
 
-        # letz repeat this!
-        threading.Timer(0, self.run_sequence, [sequence, sequence_id]).start()
+                show_up_time = resource.time
+                time.sleep(kernel_utils.get_seconds(show_up_time))
+                sequence_id += 1
+
+                resource.stop(args)
+
+            except Exception as e:
+                LOGGER.warning(e)
+                sequence_id += 1
+                continue
