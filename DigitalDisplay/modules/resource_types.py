@@ -21,10 +21,8 @@
 from threading import Timer
 import logging
 import os
-# import subprocess
-
 import ddbrowser
-# import kernel_utils as kernel_utils
+import player as player
 
 
 LOGGER = logging.getLogger('wso2server.resource_types')
@@ -122,30 +120,6 @@ class ResourceTypeFolder(ResourceTypeBase):
         LOGGER.debug("folder: stop()")
 
 
-class ResourceTypePage(ResourceTypeBase):
-    """
-    Implementation class for `Page` resource type.
-    """
-    name = 'page'
-
-    def __init__(self, args):
-        for arg in args:
-            if arg[0] == "@time":
-                self.time = arg[1]
-            elif arg[0] == "@path":
-                self.path = arg[1]
-
-    def run(self, args):
-        LOGGER.debug("page: run()")
-        webbrowser_ = args['browser']
-        LOGGER.debug("opening: " + self.path)
-        webbrowser_.open(self.path)
-
-    def stop(self, args):
-        LOGGER.debug("page: stop()")
-        # _kill_process(self.browser, int(args['delay']))
-
-
 class ResourceTypeUrl(ResourceTypeBase):
     """
     Implementation class for `URL` resource type.
@@ -156,7 +130,7 @@ class ResourceTypeUrl(ResourceTypeBase):
         for arg in args:
             if arg[0] == "@time":
                 self.time = arg[1]
-            elif arg[0] == "@url":
+            elif arg[0] == "@path":
                 self.url = arg[1]
 
     def run(self, args):
@@ -169,6 +143,32 @@ class ResourceTypeUrl(ResourceTypeBase):
     def stop(self, args):
         LOGGER.debug("url: stop()")
         # _kill_process(self.browser, int(args['delay']))
+
+"""
+Implementation class for `Video` resource type.
+"""
+
+class ResourceTypeVideo(ResourceTypeBase):
+
+    name = 'video'
+    player = None
+
+    def __init__(self, args):
+        for arg in args:
+            if arg[0] == "@time":
+                self.time = arg[1]
+            elif arg[0] == "@path":
+                self.path = arg[1]
+
+    def run(self, args):
+        LOGGER.debug("video: run()")
+        player_conf = args['player_conf']
+        LOGGER.debug("opening: " + self.path)
+        self.player = player.start(player_conf, self.path)
+
+    def stop(self, args):
+        LOGGER.debug("video: stop()")
+        self.player.kill()
 
 
 class ResourceTypeIFrame(ResourceTypeBase):
