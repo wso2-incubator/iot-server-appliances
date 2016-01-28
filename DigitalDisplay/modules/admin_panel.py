@@ -260,6 +260,7 @@ class DisplayAdmin:
                 return True
             else:
                 return False
+
         except Exception as e:
             LOGGER.warning("Exception"+str(e))
             return False
