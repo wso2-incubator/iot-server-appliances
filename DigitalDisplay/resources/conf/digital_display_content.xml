@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-
 <!--
   ~ Copyright 2005-2015 WSO2, Inc. (http://wso2.com)
   ~
@@ -14,8 +12,7 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-
+-->
 <!--
     This is the main digital display configuration file
 -->
@@ -40,34 +37,16 @@
         Sequence for display events
       -->
       <DisplaySequence>
-        <Resource type="folder" time="30s" path="page0" />
-        <Resource type="folder" time="30s" path="page1" />
-        <Resource type="folder" time="30s" path="page2" />
-        <Resource type="folder" time="30s" path="page3" />
-        <Resource type="folder" time="30s" path="page4" />
-        <Resource type="folder" time="30s" path="page5" />
-        <Resource type="folder" time="30s" path="page6" />
-        <Resource type="folder" time="30s" path="page7" />
-        <Resource type="folder" time="30s" path="page8" />
-        <Resource type="folder" time="30s" path="page9" />
-        <Resource type="folder" time="30s" path="page10" />
-        <Resource type="folder" time="30s" path="page11" />
-        <Resource type="folder" time="30s" path="page12" />
-        <Resource type="folder" time="30s" path="page13" />
-        <Resource type="folder" time="30s" path="page14" />
+        <Resource type="folder" time="15s" path="page0" name="Staff Description Slide 1"/>
+        <Resource type="folder" time="15s" path="page1" name="Staff Description Slide 2"/>
+        <Resource type="folder" time="15s" path="page2" name="Staff Description Slide 3"/>
+        <Resource type="folder" time="15s" path="page3" name="Staff Description Slide 4"/>
+        <Resource type="url" time="15s" path="http://iot.eclipse.org/" name="Eclipse Site"/>
+        <!--<Resource type="url" time="15s" path="http://wso2.com/"/>-->
+        <!--<Resource type="url" time="1m 23s" path="https://www.youtube.com/embed/-1Cgax65ctY?autoplay=true"/>-->
+        <!--<Resource type="video" time="2m 26s" path="../resources/www/Videos/IOT.mp4"/>-->
       </DisplaySequence>
 
-      <!--
-        Update polict for Content
-      -->
-    <!--  <UpdatePolicy>
-        <PollingInterval>30s</PollingInterval>
-        <Repository>
-          <Name>dd-webcontent</Name>
-          <Url>git@bitbucket.org:username/dd-webcontent.git</Url>
-          <VCSHandler>file</VCSHandler>
-        </Repository>
-      </UpdatePolicy> -->
     </Content>
 
 </DigitalDisplay>
